@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@/components/ui/sonner";
 import { Building2, ArrowLeft, Lock, PlusCircle, UploadCloud, Image as ImageIcon, X, Loader2, Home } from "lucide-react";
-import { criarEmpresa, buscarCategorias, uploadImagens, supabase } from "@/lib/supabase";
+import { criarEmpresa, buscarCategorias, uploadImagens, buscarEmpresas, buscarEmpresaPorId, supabase } from "@/lib/supabase";
 import { BAIRROS_GUAIRA } from "@/data/bairros";
 import categoriasData from "@/data/categorias-empresas.json";
 
@@ -220,16 +220,16 @@ const SuaEmpresa = () => {
       const cnpjLimpo = data.cnpj.replace(/\D/g, '');
       const celularLimpo = data.celular.replace(/\D/g, '');
 
-      const { data: empresa, error } = await supabase
-        .from('empresas')
-        .select('*')
-        .eq('responsavel_telefone', data.celular)
-        .single();
+      const empresasEncontradas = await buscarEmpresas({
+        responsavel_telefone: data.celular
+      });
 
-      if (error || !empresa) {
+      const empresa = empresasEncontradas[0];
+
+      if (!empresa) {
         toast("Login falhou", {
-          description: "CNPJ ou celular incorretos",
-          duration: 2000
+          description: "Nenhuma empresa encontrada com este celular",
+          duration: 3000
         });
         return;
       }

@@ -1,10 +1,11 @@
 import clientPromise from './_lib/mongodb.js';
+import { ObjectId } from 'mongodb';
 
 export default async function handler(req: any, res: any) {
     // CORS references
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,POST');
     res.setHeader(
         'Access-Control-Allow-Headers',
         'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
@@ -16,25 +17,73 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
-        console.log('🔵 Tentando conectar ao MongoDB...');
         const client = await clientPromise;
-        console.log('✅ Conectado ao MongoDB');
-
         const db = client.db("empresas");
-        console.log('📂 Database selecionado: empresas');
 
-        const { categoria, bairro, busca, destaque, limit, slug } = req.query;
-        console.log('🔍 Parâmetros recebidos:', { categoria, bairro, busca, destaque, limit, slug });
+        // --- MÉTODOS DE CRIAÇÃO (POST) ---
+        if (req.method === 'POST') {
+            const empresa = req.body;
 
-        const query: any = { status: 'aprovado' }; // Apenas aprovados por padrão
+            // Garantir campos básicos
+            const novaEmpresa = {
+                ...empresa,
+                slug: empresa.slug || empresa.nome?.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, ''),
+                visualizacoes: 0,
+                status: empresa.status || 'pendente',
+                created_at: new Date(),
+                updated_at: new Date()
+            };
+
+            const result = await db.collection("empresas").insertOne(novaEmpresa);
+            return res.status(201).json({
+                ...novaEmpresa,
+                id: result.insertedId.toString(),
+                _id: result.insertedId
+            });
+        }
+
+        // --- MÉTODOS DE ATUALIZAÇÃO ---
+        if (req.method === 'PATCH') {
+            const { id } = req.query;
+            if (!id) return res.status(400).json({ message: "ID é obrigatório para atualização" });
+
+            const updateData = req.body;
+            delete updateData.id;
+            delete updateData._id;
+
+            const result = await db.collection("empresas").updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { ...updateData, updated_at: new Date() } }
+            );
+
+            if (result.matchedCount === 0) {
+                return res.status(404).json({ message: "Empresa não encontrada" });
+            }
+
+            return res.status(200).json({ message: "Atualizado com sucesso" });
+        }
+
+        // --- MÉTODOS DE BUSCA (GET) ---
+        const { categoria, bairro, busca, destaque, limit, slug, responsavel_telefone, id } = req.query;
+
+        // Busca por ID (Prioridade Máxima)
+        if (id) {
+            const empresa = await db.collection("empresas").findOne({ _id: new ObjectId(id) });
+            if (!empresa) return res.status(404).json({ message: "Empresa não encontrada" });
+            return res.status(200).json({ ...empresa, id: empresa._id.toString(), _id: undefined });
+        }
+
+        let query: any = { status: 'aprovado' }; // Apenas aprovados por padrão
+
+        if (responsavel_telefone) {
+            query = { responsavel_telefone };
+        }
 
         if (slug) {
             query.slug = slug;
             const empresa = await db.collection("empresas").findOne(query);
-            if (!empresa) {
-                return res.status(404).json({ message: "Empresa não encontrada" });
-            }
-            return res.status(200).json(empresa);
+            if (!empresa) return res.status(404).json({ message: "Empresa não encontrada" });
+            return res.status(200).json({ ...empresa, id: empresa._id.toString(), _id: undefined });
         }
 
         if (categoria) {

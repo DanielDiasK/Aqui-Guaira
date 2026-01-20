@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { 
-  Building2, 
-  LogOut, 
-  Eye, 
-  Edit, 
-  Save, 
-  X, 
+import {
+  Building2,
+  LogOut,
+  Eye,
+  Edit,
+  Save,
+  X,
   Upload,
   CheckCircle2,
   Clock,
@@ -27,7 +27,14 @@ import {
   Globe,
   Loader2
 } from "lucide-react";
-import { supabase, uploadImagem, buscarCategorias, type Empresa } from "@/lib/supabase";
+import {
+  supabase,
+  uploadImagem,
+  buscarCategorias,
+  buscarEmpresaPorId,
+  atualizarEmpresa,
+  type Empresa
+} from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
 import categoriasData from "@/data/categorias-empresas.json";
 
@@ -64,7 +71,7 @@ const Dashboard = () => {
 
   const verificarAutenticacao = async () => {
     const auth = localStorage.getItem('empresa_auth');
-    
+
     if (!auth) {
       toast("Acesso negado", { description: "Faça login primeiro" });
       navigate('/sua-empresa');
@@ -73,14 +80,10 @@ const Dashboard = () => {
 
     try {
       const { empresaId } = JSON.parse(auth);
-      
-      const { data, error } = await supabase
-        .from('empresas')
-        .select('*')
-        .eq('id', empresaId)
-        .single();
 
-      if (error || !data) {
+      const data = await buscarEmpresaPorId(empresaId);
+
+      if (!data) {
         throw new Error('Empresa não encontrada');
       }
 
@@ -88,20 +91,14 @@ const Dashboard = () => {
       setNome(data.nome);
       setDescricao(data.descricao);
       setSubcategoriasSelecionadas(data.subcategorias || []);
-      
-      // Debug: verificar subcategorias carregadas
-      console.log('📦 Subcategorias carregadas do banco:', data.subcategorias);
-      
-      // Buscar nome da categoria
+
+      // No MongoDB já temos o nome da categoria no categoria_nome se for EmpresaCompleta,
+      // mas aqui estamos usando Empresa. Vamos tentar mapear pelo categoria_id
       if (data.categoria_id) {
-        const { data: catData } = await supabase
-          .from('categorias')
-          .select('nome')
-          .eq('id', data.categoria_id)
-          .single();
-        setCategoria(catData?.nome || "");
+        const cat = categoriasData.categorias.find(c => c.id === data.categoria_id);
+        setCategoria(cat?.nome || "");
       }
-      
+
       setTelefone(data.telefone || "");
       setWhatsapp(data.whatsapp || "");
       setEmail(data.email || "");
@@ -130,42 +127,32 @@ const Dashboard = () => {
 
     setSalvando(true);
     try {
-      // Buscar ID da categoria se mudou
+      // Mapear nome da categoria de volta para ID
       let categoriaId = empresa.categoria_id;
-      if (categoria && categoria !== empresa.categoria_id) {
-        const { data: catData } = await supabase
-          .from('categorias')
-          .select('id')
-          .eq('nome', categoria)
-          .single();
-        categoriaId = catData?.id;
+      if (categoria) {
+        const cat = categoriasData.categorias.find(c => c.nome === categoria);
+        if (cat) categoriaId = cat.id;
       }
 
-      const { error } = await supabase
-        .from('empresas')
-        .update({
-          nome,
-          descricao,
-          categoria_id: categoriaId,
-          subcategorias: subcategoriasSelecionadas,
-          telefone,
-          whatsapp,
-          email,
-          site: site || null,
-          instagram: instagram || null,
-          facebook: facebook || null,
-          link_google_maps: linkGoogleMaps || null,
-        })
-        .eq('id', empresa.id);
+      const sucesso = await atualizarEmpresa(empresa.id, {
+        nome,
+        descricao,
+        categoria_id: categoriaId,
+        subcategorias: subcategoriasSelecionadas,
+        telefone,
+        whatsapp,
+        email,
+        site: site || null,
+        instagram: instagram || null,
+        facebook: facebook || null,
+        link_google_maps: linkGoogleMaps || null,
+      });
 
-      // Debug: verificar o que está sendo salvo
-      console.log('💾 Salvando subcategorias:', subcategoriasSelecionadas);
-
-      if (error) throw error;
+      if (!sucesso) throw new Error('Falha ao salvar');
 
       toast("Dados atualizados!", { description: "Alterações salvas com sucesso", duration: 2000 });
       setEditando(false);
-      
+
       // Recarregar dados
       verificarAutenticacao();
     } catch (error) {
@@ -181,20 +168,17 @@ const Dashboard = () => {
 
     try {
       toast("Fazendo upload do banner...", { duration: 1000 });
-      
+
       const url = await uploadImagem('empresas-images', file, `banner-${empresa.id}`);
-      
+
       if (!url) throw new Error('Falha no upload');
 
       // Substituir o banner (sempre será a primeira posição)
       const novasImagens = [url];
 
-      const { error } = await supabase
-        .from('empresas')
-        .update({ imagens: novasImagens })
-        .eq('id', empresa.id);
+      const sucesso = await atualizarEmpresa(empresa.id, { imagens: novasImagens });
 
-      if (error) throw error;
+      if (!sucesso) throw new Error('Falha ao salvar url da imagem');
 
       toast.success("Banner atualizado!");
       setEmpresa({ ...empresa, imagens: novasImagens });
@@ -205,35 +189,23 @@ const Dashboard = () => {
   };
 
   const handleUploadLogo = async (file: File) => {
-    console.log('📸 handleUploadLogo chamado', { file, empresa });
-    
-    if (!empresa) {
-      console.error('❌ Empresa não encontrada');
-      return;
-    }
+    if (!empresa) return;
 
     try {
-      console.log('⬆️ Iniciando upload da logo...');
       toast("Fazendo upload da logo...", { duration: 1000 });
-      
+
       const url = await uploadImagem('empresas-images', file, `logo-${empresa.id}`);
-      console.log('✅ URL retornada:', url);
-      
+
       if (!url) throw new Error('Falha no upload');
 
-      console.log('💾 Atualizando database...');
-      const { error } = await supabase
-        .from('empresas')
-        .update({ logo: url })
-        .eq('id', empresa.id);
+      const sucesso = await atualizarEmpresa(empresa.id, { logo: url });
 
-      if (error) throw error;
+      if (!sucesso) throw new Error('Falha ao salvar url da logo');
 
-      console.log('✅ Logo salva com sucesso!');
       toast.success("Logo atualizada com sucesso!");
       setEmpresa({ ...empresa, logo: url });
     } catch (error) {
-      console.error('❌ Erro no upload da logo:', error);
+      console.error('Erro no upload da logo:', error);
       toast.error("Erro ao enviar logo");
     }
   };
@@ -369,7 +341,7 @@ const Dashboard = () => {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Nome da Empresa</Label>
                   {editando ? (
-                    <Input 
+                    <Input
                       value={nome}
                       onChange={(e) => setNome(e.target.value)}
                       placeholder="Nome da empresa"
@@ -383,7 +355,7 @@ const Dashboard = () => {
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">Descrição</Label>
                   {editando ? (
-                    <Textarea 
+                    <Textarea
                       value={descricao}
                       onChange={(e) => setDescricao(e.target.value)}
                       rows={5}
@@ -429,7 +401,7 @@ const Dashboard = () => {
                           ?.subcategorias.map((sub) => {
                             const isSelected = subcategoriasSelecionadas.includes(sub);
                             const canAdd = subcategoriasSelecionadas.length < 3;
-                            
+
                             return (
                               <div
                                 key={sub}
@@ -440,13 +412,12 @@ const Dashboard = () => {
                                     setSubcategoriasSelecionadas([...subcategoriasSelecionadas, sub]);
                                   }
                                 }}
-                                className={`p-3 rounded-md border-2 cursor-pointer transition-all text-sm ${
-                                  isSelected 
-                                    ? 'border-primary bg-primary/10 text-primary font-medium' 
-                                    : canAdd 
-                                      ? 'border-border hover:border-primary/50 hover:bg-accent/50' 
+                                className={`p-3 rounded-md border-2 cursor-pointer transition-all text-sm ${isSelected
+                                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                                    : canAdd
+                                      ? 'border-border hover:border-primary/50 hover:bg-accent/50'
                                       : 'border-border/50 opacity-50 cursor-not-allowed'
-                                }`}
+                                  }`}
                               >
                                 {sub}
                                 {isSelected && <span className="ml-2 text-primary">✓</span>}
@@ -461,8 +432,8 @@ const Dashboard = () => {
                         {subcategoriasSelecionadas.map(sub => (
                           <Badge key={sub} variant="default" className="gap-1">
                             {sub}
-                            <X 
-                              className="h-3 w-3 cursor-pointer" 
+                            <X
+                              className="h-3 w-3 cursor-pointer"
                               onClick={() => setSubcategoriasSelecionadas(subcategoriasSelecionadas.filter(s => s !== sub))}
                             />
                           </Badge>
@@ -582,8 +553,8 @@ const Dashboard = () => {
                 {empresa.logo ? (
                   <div className="flex flex-col sm:flex-row items-center gap-6">
                     <div className="relative group">
-                      <img 
-                        src={empresa.logo} 
+                      <img
+                        src={empresa.logo}
                         alt="Logo da empresa"
                         className="w-32 h-32 object-cover rounded-lg border-2 border-primary/20"
                       />
@@ -605,8 +576,8 @@ const Dashboard = () => {
                         className="hidden"
                         id="upload-logo"
                       />
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => document.getElementById('upload-logo')?.click()}
                       >
@@ -633,8 +604,8 @@ const Dashboard = () => {
                       className="hidden"
                       id="upload-logo"
                     />
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => document.getElementById('upload-logo')?.click()}
                     >
                       Selecionar Logo
@@ -660,8 +631,8 @@ const Dashboard = () => {
                         <Badge variant="secondary">Ativo</Badge>
                       </div>
                       <div className="relative group rounded-xl overflow-hidden border-2 border-primary/20">
-                        <img 
-                          src={empresa.imagens[0]} 
+                        <img
+                          src={empresa.imagens[0]}
                           alt="Banner da empresa"
                           className="w-full h-64 object-cover"
                         />
@@ -712,7 +683,7 @@ const Dashboard = () => {
                       className="hidden"
                       id="upload-imagem"
                     />
-                    <Button 
+                    <Button
                       variant="default"
                       size="lg"
                       onClick={() => document.getElementById('upload-imagem')?.click()}

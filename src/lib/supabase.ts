@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import empresasFallback from '@/data/empresas-fallback.json';
+import categoriasData from '@/data/categorias-empresas.json';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://hihfnlbcantamcxpisef.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpaGZubGJjYW50YW1jeHBpc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyODIyMDMsImV4cCI6MjA3Nzg1ODIwM30._OevqLM5fIfxj_DCYapS30PoZIaEh63Iuq46Q6jdIz0'
@@ -256,6 +257,7 @@ export async function buscarEmpresas(filtros?: {
   longitude?: number
   raioKm?: number
   destaque?: boolean
+  responsavel_telefone?: string
   limit?: number
 }) {
   try {
@@ -264,6 +266,7 @@ export async function buscarEmpresas(filtros?: {
     if (filtros?.bairro) params.append('bairro', filtros.bairro);
     if (filtros?.busca) params.append('busca', filtros.busca);
     if (filtros?.destaque) params.append('destaque', 'true');
+    if (filtros?.responsavel_telefone) params.append('responsavel_telefone', filtros.responsavel_telefone);
     if (filtros?.limit) params.append('limit', filtros.limit.toString());
 
     // Chamada para nossa API (MongoDB)
@@ -329,20 +332,28 @@ export async function buscarEmpresaPorSlug(slug: string) {
   }
 }
 
+export async function buscarEmpresaPorId(id: string) {
+  try {
+    const res = await fetch(`/api/empresas?id=${id}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar empresa por id:', error);
+    return null;
+  }
+}
+
 /**
- * Buscar empresas por uma lista de IDs (view empresas_completas)
+ * Buscar empresas por uma lista de IDs (fallback local se necessário)
  */
 export async function buscarEmpresasPorIds(ids: string[]) {
   if (!ids || ids.length === 0) return []
 
-  // Fallback / Local logic
   try {
-    const found = (empresasFallback as any[]).filter(e => ids.includes(e.id));
-    return found.map(e => ({
-      ...e,
-      subcategorias: e.subcategorias || [],
-      categoria_nome: e.categoria_nome || 'Geral'
-    })) as unknown as EmpresaCompleta[];
+    // Tenta buscar as empresas uma a uma ou cria um endpoint bulk futuro
+    const promises = ids.map(id => buscarEmpresaPorId(id));
+    const results = await Promise.all(promises);
+    return results.filter(Boolean) as EmpresaCompleta[];
   } catch (err) {
     console.error('Erro ao buscar empresas por ids:', err)
     return []
@@ -350,9 +361,35 @@ export async function buscarEmpresasPorIds(ids: string[]) {
 }
 
 export async function criarEmpresa(empresa: Partial<Empresa>) {
-  // TODO: Implementar criação no MongoDB
-  console.warn('Criação de empresa ainda não migrada para MongoDB. Dados:', empresa);
-  return null;
+  try {
+    const res = await fetch('/api/empresas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(empresa)
+    });
+
+    if (!res.ok) throw new Error('Falha ao criar empresa');
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao criar empresa (MongoDB):', error);
+    return null;
+  }
+}
+
+export async function atualizarEmpresa(id: string, dados: Partial<Empresa>) {
+  try {
+    const res = await fetch(`/api/empresas?id=${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
+
+    if (!res.ok) throw new Error('Falha ao atualizar empresa');
+    return true;
+  } catch (error) {
+    console.error('Erro ao atualizar empresa:', error);
+    return false;
+  }
 }
 
 export async function incrementarVisualizacoesEmpresa(id: string) {
@@ -473,17 +510,21 @@ export async function buscarLocalPorSlug(slug: string) {
 // ============================================
 
 export async function buscarCategorias() {
-  const { data, error } = await supabase
-    .from('categorias')
-    .select('*')
-    .order('ordem')
-
-  if (error) {
-    console.error('Erro ao buscar categorias:', error)
-    return []
+  try {
+    // Usar dados locais para categorias (mais rápido e resiliente)
+    return categoriasData.categorias.map((c, index) => ({
+      id: c.id,
+      nome: c.nome,
+      icone: c.icone,
+      cor: c.cor,
+      ordem: index,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })) as Categoria[];
+  } catch (error) {
+    console.error('Erro ao buscar categorias locais:', error);
+    return [];
   }
-
-  return data || []
 }
 
 // ============================================
