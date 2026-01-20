@@ -39,7 +39,8 @@ import {
   Menu,
   ChevronRight,
   ExternalLink,
-  Plus
+  Plus,
+  X
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -58,6 +59,8 @@ interface Estatisticas {
 interface Empresa {
   id: string;
   nome: string;
+  razaoSocial?: string;
+  cnpj?: string;
   descricao?: string;
   categoria_id: string;
   categorias?: { nome: string };
@@ -67,6 +70,7 @@ interface Empresa {
   data_cadastro: string;
   motivo_bloqueio?: string;
   telefone?: string;
+  celular?: string;
   whatsapp?: string;
   email?: string;
   site?: string;
@@ -75,7 +79,10 @@ interface Empresa {
   endereco?: string;
   bairro?: string;
   cidade?: string;
+  cep?: string;
   logo?: string;
+  banner?: string;
+  link_google_maps?: string;
   imagens?: string[];
 }
 
@@ -714,93 +721,157 @@ export default function Admin() {
 
       {/* Detalhes Modal (Premium Style) */}
       <Dialog open={showDetalhesDialog} onOpenChange={setShowDetalhesDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 bg-white dark:bg-zinc-950">
           {empresaSelecionada && (
             <div className="flex flex-col">
-              <div className="h-48 bg-gradient-to-br from-primary via-primary/80 to-indigo-600 relative overflow-hidden">
-                <div className="absolute inset-0 opacity-20 pointer-events-none">
-                  <Building2 className="w-96 h-96 -right-20 -bottom-20 absolute" />
+              {/* Banner Section */}
+              <div className="h-64 relative overflow-hidden group">
+                {empresaSelecionada.banner ? (
+                  <img src={empresaSelecionada.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary via-primary/80 to-indigo-600" />
+                )}
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+
+                <div className="absolute top-6 right-6 flex gap-2">
+                  <Button variant="ghost" className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-full h-10 w-10 p-0" onClick={() => setShowDetalhesDialog(false)}>
+                    <X className="w-6 h-6" />
+                  </Button>
                 </div>
-                <Button variant="ghost" className="absolute top-6 right-6 text-white hover:bg-white/20 rounded-full h-10 w-10 p-0" onClick={() => setShowDetalhesDialog(false)}>
-                  <X className="w-6 h-6" />
-                </Button>
+
+                <div className="absolute bottom-6 left-10 flex items-center gap-2">
+                  <Badge className="bg-white/20 text-white backdrop-blur-md border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">Id: {empresaSelecionada.id.slice(-6)}</Badge>
+                  <Badge className="bg-primary text-white border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">
+                    Desde {new Date(empresaSelecionada.data_cadastro).getFullYear()}
+                  </Badge>
+                </div>
               </div>
-              <div className="px-10 pb-10 -mt-16 text-center md:text-left flex flex-col md:flex-row gap-8">
-                <div className="w-32 h-32 rounded-[32px] bg-white dark:bg-zinc-900 p-2 shadow-2xl mx-auto md:mx-0 shrink-0 transform hover:scale-105 transition-transform duration-500">
-                  <div className="w-full h-full rounded-[24px] bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border border-zinc-100 dark:border-zinc-700">
-                    {empresaSelecionada.logo ? <img src={empresaSelecionada.logo} className="w-full h-full object-cover" /> : <Building2 className="w-12 h-12 text-zinc-300" />}
+
+              {/* Profile Info Section */}
+              <div className="px-10 pb-10 -mt-20 relative z-10 flex flex-col md:flex-row gap-8 items-end">
+                <div className="w-40 h-40 rounded-[40px] bg-white dark:bg-zinc-900 p-2 shadow-2xl mx-auto md:mx-0 shrink-0 transform hover:rotate-3 transition-transform duration-500 border border-zinc-100 dark:border-zinc-800">
+                  <div className="w-full h-full rounded-[32px] bg-zinc-50 dark:bg-zinc-800 flex items-center justify-center overflow-hidden">
+                    {empresaSelecionada.logo ? (
+                      <img src={empresaSelecionada.logo} className="w-full h-full object-cover" />
+                    ) : (
+                      <Building2 className="w-16 h-16 text-zinc-300" />
+                    )}
                   </div>
                 </div>
-                <div className="flex-1 pt-16">
-                  <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">{empresaSelecionada.nome}</h2>
-                  <p className="text-zinc-500 font-bold uppercase tracking-[0.2em] text-[10px] mt-1">{categorias.find(c => c.id === empresaSelecionada.categoria_id)?.nome || 'Empresa Local'}</p>
-                  <div className="flex flex-wrap gap-2 mt-4 justify-center md:justify-start">
+                <div className="flex-1 pb-4 text-center md:text-left">
+                  <h2 className="text-4xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight leading-none mb-2">{empresaSelecionada.nome}</h2>
+                  <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                    <p className="text-zinc-500 font-bold uppercase tracking-[0.2em] text-[10px]">
+                      {categorias.find(c => c.id === empresaSelecionada.categoria_id)?.nome || 'Empreendedor Local'}
+                    </p>
+                    <span className="w-1 h-1 bg-zinc-300 rounded-full" />
                     <StatusBadge status={empresaSelecionada.status} ativa={empresaSelecionada.ativa} />
-                    {empresaSelecionada.destaque && <Badge className="bg-amber-400 text-amber-950 font-black border-none">PREMIUM ⭐</Badge>}
+                    {empresaSelecionada.destaque && <Badge className="bg-amber-400 text-amber-950 font-black border-none animate-pulse">PREMIUM ⭐</Badge>}
                   </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 px-10 pb-10">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Sobre a Empresa</label>
-                    <div className="p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 min-h-[100px]">
-                      {empresaSelecionada.descricao || "Nenhuma descrição fornecida."}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Contato Direto</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <ContactItem icon={Phone} label="Telefone" value={empresaSelecionada.telefone} />
-                      <ContactItem icon={Phone} label="WhatsApp" value={empresaSelecionada.whatsapp} isSuccess />
-                      <ContactItem icon={Mail} label="Email" value={empresaSelecionada.email} />
-                      <ContactItem icon={Instagram} label="Instagram" value={empresaSelecionada.instagram} isPrimary />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Endereço & Localização</label>
-                    <div className="p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-3xl space-y-3">
-                      <div className="flex items-start gap-3">
-                        <MapPin className="w-5 h-5 text-primary shrink-0" />
-                        <div>
-                          <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{empresaSelecionada.endereco || 'Endereço não cadastrado'}</p>
-                          <p className="text-xs text-zinc-500 uppercase tracking-tight">{empresaSelecionada.bairro} • Guaíra - SP</p>
-                        </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 px-10 pb-12">
+                {/* Main Info Column */}
+                <div className="lg:col-span-2 space-y-8">
+                  {/* Identity Card */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Informações de Registro</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-5 bg-zinc-50 dark:bg-zinc-800/50 rounded-3xl border border-zinc-100 dark:border-zinc-800">
+                        <p className="text-[9px] uppercase font-black text-zinc-400 mb-1">CNPJ / Documento</p>
+                        <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{empresaSelecionada.cnpj || 'Não informado'}</p>
                       </div>
-                      {empresaSelecionada.site && (
-                        <div className="pt-2">
-                          <a href={empresaSelecionada.site} target="_blank" className="text-xs text-primary font-bold flex items-center gap-1 hover:underline">
-                            <ExternalLink className="w-3 h-3" /> Acessar site oficial
-                          </a>
-                        </div>
+                      <div className="p-5 bg-zinc-50 dark:bg-zinc-800/50 rounded-3xl border border-zinc-100 dark:border-zinc-800">
+                        <p className="text-[9px] uppercase font-black text-zinc-400 mb-1">Razão Social</p>
+                        <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{empresaSelecionada.razaoSocial || empresaSelecionada.nome}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bio Section */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Descrição do Negócio</label>
+                    <div className="p-8 bg-zinc-50 dark:bg-zinc-800/50 rounded-[32px] text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 border border-zinc-100 dark:border-zinc-800 relative">
+                      <span className="absolute top-4 left-6 text-6xl text-primary/5 font-serif">“</span>
+                      <p className="relative z-10">{empresaSelecionada.descricao || "Esta empresa ainda não cadastrou uma descrição detalhada sobre seus serviços ou história."}</p>
+                    </div>
+                  </div>
+
+                  {/* Location Summary */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Localização</label>
+                    <div className="p-8 bg-white dark:bg-zinc-900 rounded-[32px] border-2 border-zinc-100 dark:border-zinc-800 flex flex-col md:flex-row items-center gap-6">
+                      <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <MapPin className="w-8 h-8 text-primary" />
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100 leading-tight">{empresaSelecionada.endereco || 'Apenas atendimento remoto'}</p>
+                        <p className="text-sm text-zinc-500 font-medium">{empresaSelecionada.bairro} • Guaíra - SP {empresaSelecionada.cep ? `• CEP ${empresaSelecionada.cep}` : ''}</p>
+                      </div>
+                      {empresaSelecionada.link_google_maps && (
+                        <Button className="rounded-2xl gap-2 font-bold group shadow-lg shadow-primary/20" onClick={() => window.open(empresaSelecionada.link_google_maps, '_blank')}>
+                          Ver no Maps <ExternalLink className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                        </Button>
                       )}
                     </div>
                   </div>
-                  <div className="bg-zinc-900 rounded-3xl p-8 text-white shadow-xl shadow-zinc-900/10">
-                    <p className="text-xs font-bold uppercase opacity-50 mb-4 tracking-widest">Painel Administrativo</p>
-                    <p className="text-sm opacity-80 mb-6">Controle as permissões e visibilidade desta empresa no portal oficial da cidade.</p>
-                    <div className="flex flex-col gap-3">
-                      <Button className="w-full rounded-2xl bg-white text-zinc-900 hover:bg-zinc-200 font-bold" onClick={async () => {
+                </div>
+
+                {/* Sidebar Info Column */}
+                <div className="space-y-8">
+                  {/* Contacts */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Canais de Contato</label>
+                    <div className="grid grid-cols-1 gap-3">
+                      <ContactItem icon={Phone} label="WhatsApp Business" value={empresaSelecionada.whatsapp} isSuccess />
+                      <ContactItem icon={Phone} label="Celular / Tel" value={empresaSelecionada.celular || empresaSelecionada.telefone} />
+                      <ContactItem icon={Mail} label="E-mail" value={empresaSelecionada.email} />
+                      <ContactItem icon={Globe} label="Website" value={empresaSelecionada.site} isPrimary />
+                    </div>
+                  </div>
+
+                  {/* Social Media */}
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest pl-1">Redes Sociais</label>
+                    <div className="flex gap-4">
+                      {empresaSelecionada.instagram && (
+                        <button className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white shadow-lg transform hover:-translate-y-1 transition-transform" onClick={() => window.open(`https://instagram.com/${empresaSelecionada.instagram}`, '_blank')}>
+                          <Instagram className="w-6 h-6" />
+                        </button>
+                      )}
+                      {empresaSelecionada.facebook && (
+                        <button className="w-12 h-12 rounded-2xl bg-[#1877F2] flex items-center justify-center text-white shadow-lg transform hover:-translate-y-1 transition-transform" onClick={() => window.open(empresaSelecionada.facebook, '_blank')}>
+                          <Facebook className="w-6 h-6" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Admin Actions Box */}
+                  <div className="p-8 bg-zinc-900 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-10 -mt-10" />
+                    <p className="text-[10px] font-bold uppercase opacity-50 mb-6 tracking-[0.3em] flex items-center gap-2">
+                      <Shield className="w-3 h-3" /> Gestão de Status
+                    </p>
+                    <div className="flex flex-col gap-3 relative z-10">
+                      <Button className="w-full h-12 rounded-2xl bg-white text-zinc-900 hover:bg-zinc-200 font-black uppercase tracking-widest text-[10px]" onClick={async () => {
                         const novoDestaque = !empresaSelecionada.destaque;
                         const res = await fetch(`/api/empresas?id=${empresaSelecionada.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ destaque: novoDestaque }) });
-                        if (res.ok) { toast.success(novoDestaque ? "Empresa destacada!" : "Destaque removido"); await carregarDados(); setShowDetalhesDialog(false); }
+                        if (res.ok) { toast.success(novoDestaque ? "Destaque ativado!" : "Destaque removido"); await carregarDados(); }
                       }}>
-                        {empresaSelecionada.destaque ? "Remover de Destaque" : "⭐ Ativar Destaque Premium"}
+                        {empresaSelecionada.destaque ? "Remover Destaque" : "⭐ Ativar Destaque"}
                       </Button>
                       {empresaSelecionada.ativa ? (
-                        <Button variant="destructive" className="w-full rounded-2xl font-bold bg-rose-600/20 text-rose-500 hover:bg-rose-600 hover:text-white" onClick={() => { setShowDetalhesDialog(false); setShowBloqueioDialog(true); }}>
-                          Bloquear Empresa
+                        <Button className="w-full h-12 rounded-2xl border-2 border-white/20 bg-white/5 text-white hover:bg-rose-500 hover:border-rose-500 font-black uppercase tracking-widest text-[10px] transition-all" onClick={() => { setShowDetalhesDialog(false); setShowBloqueioDialog(true); }}>
+                          Bloquear
                         </Button>
                       ) : (
-                        <Button className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 font-bold" onClick={async () => {
-                          const res = await fetch(`/api/empresas?id=${empresaSelecionada.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ativa: true, motivo_bloqueio: null }) });
-                          if (res.ok) { toast.success("Empresa desbloqueada!"); await carregarDados(); setShowDetalhesDialog(false); }
+                        <Button className="w-full h-12 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px]" onClick={async () => {
+                          const res = await fetch(`/api/empresas?id=${empresaSelecionada.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ativa: true, motivo_bloqueio: null, status: 'aprovado' }) });
+                          if (res.ok) { toast.success("Empresa Reativada!"); await carregarDados(); setShowDetalhesDialog(false); }
                         }}>
-                          Ativar Empresa
+                          Reativar Agora
                         </Button>
                       )}
                     </div>
