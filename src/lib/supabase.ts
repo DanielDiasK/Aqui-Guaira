@@ -620,59 +620,27 @@ export async function criarOuLogarUsuario(
     throw new Error('Senha é obrigatória')
   }
 
-  const senhaHash = await hashSenha(senha)
+  const endpoint = `/api/auth?action=${isRegistro ? 'register' : 'login'}`;
 
-  if (isRegistro) {
-    // REGISTRO: Criar novo usuário
-    if (!nome) {
-      throw new Error('Nome é obrigatório para registro')
-    }
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, senha, nome })
+    });
 
-    // Verificar se email já existe
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single()
+    const data = await response.json();
 
-    if (existingUser) {
-      throw new Error('Este email já está cadastrado')
-    }
-
-    // Criar novo usuário
-    const { data: newUser, error } = await supabase
-      .from('users')
-      .insert([{ email, nome, senha_hash: senhaHash }])
-      .select('id, email, nome, avatar_url, created_at, updated_at')
-      .single()
-
-    if (error) {
-      console.error('Erro ao criar usuário:', error)
-      throw new Error('Erro ao criar conta')
+    if (!response.ok) {
+      throw new Error(data.message || 'Erro na autenticação');
     }
 
     // Salvar no localStorage
-    localStorage.setItem('aqui_guaira_user', JSON.stringify(newUser))
-    return newUser
-  } else {
-    // LOGIN: Verificar credenciais
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .eq('senha_hash', senhaHash)
-      .single()
-
-    if (error || !user) {
-      return null // Credenciais inválidas
-    }
-
-    // Remover senha_hash antes de salvar no localStorage
-    const { senha_hash, ...userSemSenha } = user
-
-    // Salvar no localStorage
-    localStorage.setItem('aqui_guaira_user', JSON.stringify(userSemSenha))
-    return userSemSenha as User
+    localStorage.setItem('aqui_guaira_user', JSON.stringify(data))
+    return data as User;
+  } catch (error: any) {
+    console.error('Erro ao autenticar (MongoDB):', error);
+    throw error;
   }
 }
 
