@@ -1,5 +1,5 @@
 
-import clientPromise from './_lib/mongodb';
+import clientPromise from './_lib/mongodb.js';
 
 export default async function handler(req: any, res: any) {
     try {

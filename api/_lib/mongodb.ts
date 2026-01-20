@@ -1,7 +1,7 @@
 
 import { MongoClient } from 'mongodb';
 
-const uri = "mongodb+srv://danieldias_db_user:xgZF8XY7HU8lQI3D@aqui-guaira.xw7piti.mongodb.net/?appName=Aqui-Guaira";
+const uri = "mongodb+srv://danieldias_db_user:xgZF8XY7HU8lQI3D@aqui-guaira.xw7piti.mongodb.net/aqui-guaira?retryWrites=true&w=majority&appName=Aqui-Guaira";
 const options = {};
 
 let client: MongoClient;
@@ -10,6 +10,8 @@ let clientPromise: Promise<MongoClient>;
 if (!process.env.MONGODB_URI && !uri) {
     throw new Error('Please add your Mongo URI to .env.local');
 }
+
+const finalUri = process.env.MONGODB_URI || uri;
 
 if (process.env.NODE_ENV === 'development') {
     // In development mode, use a global variable so that the value
@@ -20,14 +22,14 @@ if (process.env.NODE_ENV === 'development') {
 
     if (!globalWithMongo._mongoClientPromise) {
         console.log('🔄 Criando nova conexão MongoDB (development)...');
-        client = new MongoClient(uri, options);
+        client = new MongoClient(finalUri, options);
         globalWithMongo._mongoClientPromise = client.connect();
     }
     clientPromise = globalWithMongo._mongoClientPromise;
 } else {
     // In production mode, it's best to not use a global variable.
     console.log('🔄 Criando nova conexão MongoDB (production)...');
-    client = new MongoClient(uri, options);
+    client = new MongoClient(finalUri, options);
     clientPromise = client.connect()
         .then(client => {
             console.log('✅ MongoDB conectado com sucesso!');
