@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import empresasFallback from '@/data/empresas-fallback.json';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://hihfnlbcantamcxpisef.supabase.co'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhpaGZubGJjYW50YW1jeHBpc2VmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIyODIyMDMsImV4cCI6MjA3Nzg1ODIwM30._OevqLM5fIfxj_DCYapS30PoZIaEh63Iuq46Q6jdIz0'
@@ -194,9 +195,9 @@ export function calcularDistancia(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2)
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
@@ -254,66 +255,78 @@ export async function buscarEmpresas(filtros?: {
   latitude?: number
   longitude?: number
   raioKm?: number
+  destaque?: boolean
+  limit?: number
 }) {
-  let query = supabase
-    .from('empresas_completas')
-    .select('*')
-    .order('nome')
+  try {
+    const params = new URLSearchParams();
+    if (filtros?.categoria) params.append('categoria', filtros.categoria);
+    if (filtros?.bairro) params.append('bairro', filtros.bairro);
+    if (filtros?.busca) params.append('busca', filtros.busca);
+    if (filtros?.destaque) params.append('destaque', 'true');
+    if (filtros?.limit) params.append('limit', filtros.limit.toString());
 
-  if (filtros?.categoria) {
-    query = query.eq('categoria_nome', filtros.categoria)
+    // Chamada para nossa API (MongoDB)
+    const res = await fetch(`/api/empresas?${params.toString()}`);
+
+    if (!res.ok) {
+      throw new Error(`Falha na API: ${res.status} ${res.statusText}`);
+    }
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error('A resposta da API não é JSON valido. Certifique-se de estar rodando com "vercel dev" para acessar o MongoDB localmente.');
+    }
+
+    let data: EmpresaCompleta[] = await res.json();
+
+    // Se tiver localização, calcular distâncias e filtrar por raio
+    if (filtros?.latitude && filtros?.longitude && data) {
+      const empresasComDistancia = data.map((emp) => ({
+        ...emp,
+        distancia: calcularDistancia(
+          filtros.latitude!,
+          filtros.longitude!,
+          emp.latitude,
+          emp.longitude
+        ),
+      }));
+
+      const filtradas = filtros.raioKm
+        ? empresasComDistancia.filter((emp) => emp.distancia <= filtros.raioKm!)
+        : empresasComDistancia;
+
+      return filtradas.sort((a, b) => a.distancia - b.distancia);
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Erro ao buscar empresas (MongoDB):', error);
+    // Retornar array vazio em caso de erro, ao invés de fallback
+    return [];
   }
-
-  if (filtros?.bairro) {
-    query = query.eq('bairro', filtros.bairro)
-  }
-
-  if (filtros?.busca) {
-    query = query.ilike('nome', `%${filtros.busca}%`)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-    console.error('Erro ao buscar empresas:', error)
-    return []
-  }
-
-  // Se tiver localização, calcular distâncias e filtrar por raio
-  if (filtros?.latitude && filtros?.longitude && data) {
-    const empresasComDistancia = data.map((emp) => ({
-      ...emp,
-      distancia: calcularDistancia(
-        filtros.latitude!,
-        filtros.longitude!,
-        emp.latitude,
-        emp.longitude
-      ),
-    }))
-
-    const filtradas = filtros.raioKm
-      ? empresasComDistancia.filter((emp) => emp.distancia <= filtros.raioKm!)
-      : empresasComDistancia
-
-    return filtradas.sort((a, b) => a.distancia - b.distancia)
-  }
-
-  return data || []
 }
 
 export async function buscarEmpresaPorSlug(slug: string) {
-  const { data, error } = await supabase
-    .from('empresas_completas')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  try {
+    const res = await fetch(`/api/empresas?slug=${slug}`);
 
-  if (error) {
-    console.error('Erro ao buscar empresa:', error)
-    return null
+    if (!res.ok) {
+      if (res.status === 404) return null;
+      throw new Error('Falha na API: ' + res.status);
+    }
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error('A resposta da API não é JSON valido.');
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao buscar empresa (MongoDB):', error);
+    return null;
   }
-
-  return data
 }
 
 /**
@@ -321,39 +334,30 @@ export async function buscarEmpresaPorSlug(slug: string) {
  */
 export async function buscarEmpresasPorIds(ids: string[]) {
   if (!ids || ids.length === 0) return []
-  const { data, error } = await supabase
-    .from('empresas_completas')
-    .select('*')
-    .in('id', ids)
-    .order('nome')
 
-  if (error) {
-    console.error('Erro ao buscar empresas por ids:', error)
+  // Fallback / Local logic
+  try {
+    const found = (empresasFallback as any[]).filter(e => ids.includes(e.id));
+    return found.map(e => ({
+      ...e,
+      subcategorias: e.subcategorias || [],
+      categoria_nome: e.categoria_nome || 'Geral'
+    })) as unknown as EmpresaCompleta[];
+  } catch (err) {
+    console.error('Erro ao buscar empresas por ids:', err)
     return []
   }
-  return data || []
 }
 
 export async function criarEmpresa(empresa: Partial<Empresa>) {
-  const { data, error } = await supabase
-    .from('empresas')
-    .insert([empresa])
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Erro ao criar empresa:', error)
-    throw error // Lança o erro para ser capturado no catch
-  }
-
-  return data
+  // TODO: Implementar criação no MongoDB
+  console.warn('Criação de empresa ainda não migrada para MongoDB. Dados:', empresa);
+  return null;
 }
 
 export async function incrementarVisualizacoesEmpresa(id: string) {
-  await supabase.rpc('incrementar_visualizacoes', {
-    tabela: 'empresas',
-    item_id: id,
-  })
+  // TODO: Implementar incremento no MongoDB via API
+  console.log('Incrementar visualização (mock):', id);
 }
 
 // ============================================
@@ -607,8 +611,8 @@ async function hashSenha(senha: string): Promise<string> {
  * @param isRegistro - Se true, cria nova conta; se false, faz login
  */
 export async function criarOuLogarUsuario(
-  email: string, 
-  nome?: string, 
+  email: string,
+  nome?: string,
   senha?: string,
   isRegistro: boolean = false
 ): Promise<User | null> {
@@ -665,7 +669,7 @@ export async function criarOuLogarUsuario(
 
     // Remover senha_hash antes de salvar no localStorage
     const { senha_hash, ...userSemSenha } = user
-    
+
     // Salvar no localStorage
     localStorage.setItem('aqui_guaira_user', JSON.stringify(userSemSenha))
     return userSemSenha as User
@@ -722,9 +726,9 @@ export async function atualizarUsuario(userId: string, dados: Partial<User>) {
  */
 export async function buscarFavoritosUsuario(tipo?: 'empresa' | 'local' | 'post') {
   const user = getUsuarioLogado()
-  
+
   console.log('🔍 Buscando favoritos:', { tipo, user: user?.email })
-  
+
   let query = supabase.from('favoritos').select('*')
 
   if (user) {

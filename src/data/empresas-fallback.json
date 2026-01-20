@@ -1,0 +1,147 @@
+[
+    {
+        "id": "678e5f8b9d3b1a2b3c4d5e6f",
+        "cnpj": "12.345.678/0001-90",
+        "nome": "Restaurante Sabor Mineiro",
+        "slug": "restaurante-sabor-mineiro",
+        "descricao": "O melhor da comida mineira em Guaíra. Oferecemos self-service variado todos os dias e pratos à la carte à noite. Ambiente familiar e aconchegante.",
+        "categoria_id": "alimentacao-bebidas",
+        "categoria_nome": "Alimentação e Bebidas",
+        "subcategorias": [
+            "Restaurantes (à la carte, self-service, por quilo)",
+            "Marmitarias"
+        ],
+        "endereco": "Avenida 21, 1050",
+        "bairro": "Centro",
+        "cidade": "Guaíra",
+        "estado": "SP",
+        "cep": "14590-538",
+        "latitude": -20.3223,
+        "longitude": -48.3115,
+        "telefone": "(17) 3331-1234",
+        "whatsapp": "(17) 99123-4567",
+        "email": "contato@sabormineiro.com.br",
+        "instagram": "@sabormineiroguaira",
+        "facebook": "restaurantesabormineiro",
+        "status": "aprovado",
+        "verificado": true,
+        "destaque": true,
+        "visualizacoes": 342,
+        "imagens": [
+            "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
+            "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800"
+        ],
+        "logo": "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=200",
+        "responsavel_nome": "José da Silva",
+        "responsavel_email": "adm@sabormineiro.com.br",
+        "responsavel_telefone": "(17) 99123-4567",
+        "horarios": [
+            {
+                "dia": "Segunda-feira",
+                "abertura": "11:00",
+                "fechamento": "14:30"
+            },
+            {
+                "dia": "Terça a Sábado",
+                "abertura": "11:00",
+                "fechamento": "22:00"
+            }
+        ],
+        "created_at": "2024-01-15T10:00:00Z",
+        "updated_at": "2024-01-15T10:00:00Z"
+    },
+    {
+        "id": "678e5f8b9d3b1a2b3c4d5e70",
+        "cnpj": "98.765.432/0001-10",
+        "nome": "Supermercado Guaíra",
+        "slug": "supermercado-guaira",
+        "descricao": "Seu supermercado completo no coração da cidade. Carnes frescas, padaria própria e as melhores ofertas de hortifruti.",
+        "categoria_id": "varejo-alimentar",
+        "categoria_nome": "Varejo Alimentar",
+        "subcategorias": [
+            "Supermercados / Atacarejo",
+            "Açougues / Casa de carnes",
+            "Hortifruti / Sacolão"
+        ],
+        "endereco": "Rua 10, 800",
+        "bairro": "Centro",
+        "cidade": "Guaíra",
+        "estado": "SP",
+        "cep": "14590-538",
+        "latitude": -20.3200,
+        "longitude": -48.3100,
+        "telefone": "(17) 3332-5000",
+        "whatsapp": "(17) 99888-5000",
+        "email": "sac@superguaira.com.br",
+        "site": "https://www.superguaira.com.br",
+        "instagram": "@supermercadoguaira",
+        "status": "aprovado",
+        "verificado": true,
+        "destaque": false,
+        "visualizacoes": 890,
+        "imagens": [
+            "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800",
+            "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800"
+        ],
+        "logo": "https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?w=200",
+        "responsavel_nome": "Maria Oliveira",
+        "responsavel_email": "maria@superguaira.com.br",
+        "responsavel_telefone": "(17) 99888-5000",
+        "horarios": [
+            {
+                "dia": "Todos os dias",
+                "abertura": "08:00",
+                "fechamento": "21:00"
+            }
+        ],
+        "created_at": "2024-01-10T08:30:00Z",
+        "updated_at": "2024-01-10T08:30:00Z"
+    },
+    {
+        "id": "678e5f8b9d3b1a2b3c4d5e71",
+        "cnpj": "11.222.333/0001-44",
+        "nome": "Farmácia Saúde Total",
+        "slug": "farmacia-saude-total",
+        "descricao": "Medicamentos, perfumaria e dermocosméticos com o melhor preço. Aceitamos convênios e fazemos entregas.",
+        "categoria_id": "saude-bem-estar",
+        "categoria_nome": "Saúde e Bem-estar",
+        "subcategorias": [
+            "Farmácias / Drogarias",
+            "Perfumarias / Cosméticos"
+        ],
+        "endereco": "Avenida 23, 400",
+        "bairro": "Centro",
+        "cidade": "Guaíra",
+        "estado": "SP",
+        "cep": "14590-538",
+        "latitude": -20.3180,
+        "longitude": -48.3150,
+        "telefone": "(17) 3330-1111",
+        "whatsapp": "(17) 99777-2222",
+        "status": "aprovado",
+        "verificado": false,
+        "destaque": false,
+        "visualizacoes": 120,
+        "imagens": [
+            "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=800"
+        ],
+        "logo": "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=200",
+        "responsavel_nome": "Carlos Santos",
+        "responsavel_email": "farmacia@saudetotal.com.br",
+        "responsavel_telefone": "(17) 99777-2222",
+        "horarios": [
+            {
+                "dia": "Segunda a Sábado",
+                "abertura": "07:00",
+                "fechamento": "23:00"
+            },
+            {
+                "dia": "Domingo",
+                "abertura": "08:00",
+                "fechamento": "12:00"
+            }
+        ],
+        "created_at": "2024-01-18T09:00:00Z",
+        "updated_at": "2024-01-18T09:00:00Z"
+    }
+]

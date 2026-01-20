@@ -41,3 +41,4 @@ public/mockServiceWorker.js
 supabase/.temp
 supabase/.branches
 supabase/config.toml
+.vercel

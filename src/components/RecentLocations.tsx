@@ -2,7 +2,7 @@ import { Clock, MapPin, Loader2, Building2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { buscarEmpresas } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 
 interface Empresa {
@@ -11,9 +11,7 @@ interface Empresa {
   bairro: string;
   visualizacoes: number;
   updated_at: string;
-  categorias?: {
-    nome: string;
-  };
+  categoria_nome?: string;
 }
 
 const RecentLocations = () => {
@@ -24,22 +22,21 @@ const RecentLocations = () => {
   useEffect(() => {
     const carregarLocaisRecentes = async () => {
       try {
-        const { data, error } = await supabase
-          .from('empresas')
-          .select(`
-            id,
-            nome,
-            bairro,
-            visualizacoes,
-            updated_at,
-            categorias:categoria_id(nome)
-          `)
-          .eq('status', 'aprovado')
-          .order('updated_at', { ascending: false })
-          .limit(3);
+        // Casting to any to pass 'limit' if strictly typed, or just rely on default.
+        // Ideally we should update the helper type definition.
+        const data = await buscarEmpresas({ limit: 3 } as any);
 
-        if (error) throw error;
-        setLocations(data || []);
+        // Map to local interface
+        const mapped = (data || []).map((e: any) => ({
+          id: e.id,
+          nome: e.nome,
+          bairro: e.bairro || 'Bairro não informado',
+          visualizacoes: e.visualizacoes || 0,
+          updated_at: e.updated_at || new Date().toISOString(),
+          categoria_nome: e.categoria_nome
+        }));
+
+        setLocations(mapped);
       } catch (error) {
         console.error('Erro ao carregar locais recentes:', error);
       } finally {
@@ -93,18 +90,18 @@ const RecentLocations = () => {
           </div>
         ) : (
           locations.map((location) => (
-          <div
+            <div
               key={location.id}
               className="flex items-start justify-between p-4 rounded-lg border border-border cursor-pointer hover:bg-accent transition-colors"
               onClick={() => handleClickLocal(location.id)}
-          >
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
                   <h4 className="font-semibold">{location.nome}</h4>
-                  {location.categorias?.nome && (
-                <Badge className="bg-primary text-primary-foreground">
-                      {location.categorias.nome}
-                </Badge>
+                  {location.categoria_nome && (
+                    <Badge className="bg-primary text-primary-foreground">
+                      {location.categoria_nome}
+                    </Badge>
                   )}
                 </div>
                 <div className="flex items-center gap-1 text-sm text-muted-foreground mb-1">

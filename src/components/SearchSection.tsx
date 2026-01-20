@@ -14,12 +14,12 @@
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 */
 
-import { Search, Heart, Building2, MapPin, Star, ChevronDown, Filter, X, Check, Phone } from "lucide-react";
+import { Search, Heart, Building2, MapPin, Star, ChevronDown, Filter, X, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
-import { supabase, type EmpresaCompleta, getUsuarioLogado } from "@/lib/supabase";
+import { buscarEmpresas, type EmpresaCompleta, getUsuarioLogado } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import { LoginDialog } from "@/components/LoginDialog";
 import categoriasData from '@/data/categorias-empresas.json';
@@ -38,6 +38,7 @@ interface Categoria {
   nome: string;
   icone: string;
   cor: string;
+  subcategorias: string[];
 }
 
 const SearchSection = () => {
@@ -46,8 +47,6 @@ const SearchSection = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [loadingCategorias, setLoadingCategorias] = useState(false);
   const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null);
   const [empresasDestaque, setEmpresasDestaque] = useState<EmpresaCompleta[]>([]);
   const [carouselIndex, setCarouselIndex] = useState<{ [key: string]: number }>({});
@@ -55,67 +54,18 @@ const SearchSection = () => {
   const navigate = useNavigate();
   const user = getUsuarioLogado();
 
-  // Carregar categorias que têm empresas
+  // Carregar empresas destaque
   useEffect(() => {
-    const carregarCategorias = async () => {
-      setLoadingCategorias(true);
-      try {
-        // Buscar todas as empresas aprovadas para pegar categorias únicas
-        const { data: empresasData, error } = await supabase
-          .from('empresas')
-          .select(`
-            categoria_id,
-            categorias:categoria_id(id, nome, icone, cor)
-          `)
-          .eq('status', 'aprovado');
-
-        if (error) throw error;
-
-        // Extrair categorias únicas
-        const categoriasUnicas = new Map<string, Categoria>();
-        empresasData?.forEach(empresa => {
-          if (empresa.categorias && empresa.categoria_id) {
-            const cat = empresa.categorias as any;
-            if (!categoriasUnicas.has(cat.id)) {
-              categoriasUnicas.set(cat.id, {
-                id: cat.id,
-                nome: cat.nome,
-                icone: cat.icone,
-                cor: cat.cor
-              });
-            }
-          }
-        });
-
-        // Converter para array e ordenar por nome
-        const categoriasArray = Array.from(categoriasUnicas.values())
-          .sort((a, b) => a.nome.localeCompare(b.nome));
-
-        setCategorias(categoriasArray);
-      } catch (error) {
-        console.error('Erro ao carregar categorias:', error);
-      } finally {
-        setLoadingCategorias(false);
-      }
-    };
-
     const carregarEmpresasDestaque = async () => {
       try {
-        const { data, error } = await supabase
-          .from("empresas_completas")
-          .select("*")
-          .eq("destaque", true)
-          .order("visualizacoes", { ascending: false })
-          .limit(3);
-        if (error) throw error;
+        const data = await buscarEmpresas({ destaque: true });
         console.log('⭐ Empresas em destaque carregadas:', data);
-        setEmpresasDestaque(data || []);
+        setEmpresasDestaque(data ? data.slice(0, 3) : []);
       } catch (error) {
         console.error("Erro ao carregar empresas em destaque:", error);
       }
     };
 
-    carregarCategorias();
     carregarEmpresasDestaque();
   }, []);
 
@@ -160,35 +110,14 @@ const SearchSection = () => {
 
       setLoading(true);
       try {
-        // Usar empresas_completas que já inclui subcategorias e categoria_nome
-        const { data, error } = await supabase
-          .from("empresas_completas")
-          .select("*")
-          .or(`nome.ilike.%${searchTerm}%,descricao.ilike.%${searchTerm}%,bairro.ilike.%${searchTerm}%,categoria_nome.ilike.%${searchTerm}%`)
-          .order("destaque", { ascending: false })
-          .order("visualizacoes", { ascending: false })
-          .limit(20); // Aumentado para 20 pois agora busca em mais campos
-
-        if (error) throw error;
-
-        // Filtrar também por subcategorias no lado do cliente (pois PostgreSQL não suporta ILIKE em arrays diretamente)
-        let resultados = data || [];
-        const searchLower = searchTerm.toLowerCase();
-
-        resultados = resultados.filter(empresa => {
-          // Já passou pelos filtros do .or() acima
-          const matchBasico = true;
-
-          // Verificar subcategorias
-          const matchSubcategorias = empresa.subcategorias?.some((sub: string) =>
-            sub.toLowerCase().includes(searchLower)
-          );
-
-          return matchBasico || matchSubcategorias;
+        // Busca na API MongoDB via helper function
+        const data = await buscarEmpresas({
+          busca: searchTerm,
+          categoria: categoriaFiltro || undefined
         });
 
         // Limitar a 8 resultados finais
-        setSearchResults(resultados.slice(0, 8));
+        setSearchResults(data.slice(0, 8));
         setShowDropdown(true);
       } catch (error) {
         console.error("Erro ao buscar empresas:", error);
@@ -219,10 +148,6 @@ const SearchSection = () => {
     navigate('/meus-locais');
   };
 
-  const handleSelecionarCategoria = (categoriaId: string) => {
-    navigate(`/empresas?categoria=${categoriaId}`);
-  };
-
   const renderCarouselContent = (empresa: EmpresaCompleta) => {
     const slideIndex = carouselIndex[empresa.id] || 0;
 
@@ -245,12 +170,11 @@ const SearchSection = () => {
         ) : null;
 
       case 1:
-        // Slide 2: Ponto de coleta Mercado Livre (se aplicável)
+        // Slide 2: Ponto de coleta Mercado Livre
         return (
-          <div className="mb-2 animate-fade-in flex items-center justify-center">
-            <p className="text-lg text-gray-900 font-black drop-shadow-lg text-center leading-tight">
-              📦 Ponto de coleta<br />
-              <span className="text-2xl font-black drop-shadow-xl" style={{ color: '#FFE600', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>Mercado Livre</span>
+          <div className="mb-2 animate-fade-in">
+            <p className="text-sm text-gray-900 font-semibold drop-shadow-md">
+              📍 {empresa.endereco || `${empresa.bairro}, Guaíra-SP`}
             </p>
           </div>
         );
@@ -364,7 +288,6 @@ const SearchSection = () => {
                       variant="ghost"
                       size="sm"
                       className={`h-8 px-2 hover:bg-primary/10 ${categoriaFiltro ? 'text-primary' : 'text-muted-foreground'}`}
-                      disabled={loadingCategorias}
                     >
                       <Filter className="h-4 w-4" />
                     </Button>
@@ -381,28 +304,19 @@ const SearchSection = () => {
                           Limpar filtro
                         </DropdownMenuItem>
                       )}
-                      {loadingCategorias ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          Carregando...
-                        </div>
-                      ) : categorias.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          Nenhuma categoria disponível
-                        </div>
-                      ) : (
-                        categorias.map((categoria) => (
-                          <DropdownMenuItem
-                            key={categoria.id}
-                            onClick={() => setCategoriaFiltro(categoria.id)}
-                            className={`cursor-pointer ${categoriaFiltro === categoria.id ? 'bg-primary/10' : ''}`}
-                          >
-                            <span className="font-medium">{categoria.nome}</span>
-                            {categoriaFiltro === categoria.id && (
-                              <Check className="h-4 w-4 ml-auto text-primary" />
-                            )}
-                          </DropdownMenuItem>
-                        ))
-                      )}
+                      {categoriasData.categorias.map((categoria) => (
+                        <DropdownMenuItem
+                          key={categoria.id}
+                          onClick={() => setCategoriaFiltro(categoria.id)}
+                          className={`cursor-pointer ${categoriaFiltro === categoria.id ? 'bg-primary/10' : ''}`}
+                        >
+                          <span className="font-medium mr-2">{categoria.icone}</span>
+                          <span className="font-medium">{categoria.nome}</span>
+                          {categoriaFiltro === categoria.id && (
+                            <Check className="h-4 w-4 ml-auto text-primary" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -416,7 +330,7 @@ const SearchSection = () => {
                       className="flex items-center gap-1 pr-0.5 py-0.5 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
                     >
                       <span className="text-xs font-semibold pl-1.5">
-                        {categorias.find(c => c.id === categoriaFiltro)?.nome}
+                        {categoriasData.categorias.find(c => c.id === categoriaFiltro)?.nome}
                       </span>
                       <button
                         onClick={(e) => {

@@ -2,8 +2,9 @@ import { Building2, HelpCircle, Loader2, Star, Eye } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { buscarEmpresas } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
+import categoriasData from '@/data/categorias-empresas.json';
 
 interface Empresa {
   id: string;
@@ -11,11 +12,12 @@ interface Empresa {
   logo: string | null;
   destaque: boolean;
   visualizacoes: number;
-  categorias?: {
+  categoria_id?: string;
+  categoria_info?: {
     nome: string;
     icone: string;
     cor: string;
-  };
+  }
 }
 
 const CategoriesSection = () => {
@@ -26,23 +28,27 @@ const CategoriesSection = () => {
   useEffect(() => {
     const carregarEmpresas = async () => {
       try {
-        const { data, error } = await supabase
-          .from('empresas')
-          .select(`
-            id,
-            nome,
-            logo,
-            destaque,
-            visualizacoes,
-            categorias:categoria_id(nome, icone, cor)
-          `)
-          .eq('status', 'aprovado')
-          .order('destaque', { ascending: false })
-          .order('visualizacoes', { ascending: false })
-          .limit(4);
+        const data = await buscarEmpresas({ destaque: true });
 
-        if (error) throw error;
-        setEmpresas(data || []);
+        // Map and hydrate category info locally since API might not return it joined
+        const mapped = (data || []).slice(0, 4).map((e: any) => {
+          const catInfo = categoriasData.categorias.find(c => c.id === e.categoria_id);
+          return {
+            id: e.id,
+            nome: e.nome,
+            logo: e.logo || null,
+            destaque: e.destaque || false,
+            visualizacoes: e.visualizacoes || 0,
+            categoria_id: e.categoria_id,
+            categoria_info: catInfo ? {
+              nome: catInfo.nome,
+              icone: catInfo.icone,
+              cor: catInfo.cor
+            } : undefined
+          };
+        });
+
+        setEmpresas(mapped);
       } catch (error) {
         console.error('Erro ao carregar empresas:', error);
       } finally {
@@ -74,15 +80,15 @@ const CategoriesSection = () => {
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : empresas.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <HelpCircle className="h-12 w-12 text-muted-foreground mb-4" />
-          <h4 className="font-semibold text-foreground mb-2">
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <HelpCircle className="h-12 w-12 text-muted-foreground mb-4" />
+            <h4 className="font-semibold text-foreground mb-2">
               Nenhuma empresa cadastrada ainda
-          </h4>
-          <p className="text-sm text-muted-foreground max-w-md">
+            </h4>
+            <p className="text-sm text-muted-foreground max-w-md">
               Empresas aprovadas aparecerão aqui
-          </p>
-        </div>
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {empresas.map((empresa) => (
@@ -94,15 +100,15 @@ const CategoriesSection = () => {
                 {/* Logo da Empresa */}
                 <div className="relative h-28 bg-gradient-to-br from-primary/5 to-primary/10 flex items-center justify-center overflow-hidden">
                   {empresa.logo ? (
-                    <img 
-                      src={empresa.logo} 
+                    <img
+                      src={empresa.logo}
                       alt={empresa.nome}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
                     <Building2 className="h-12 w-12 text-muted-foreground/40" />
                   )}
-                  
+
                   {/* Badge de Destaque */}
                   {empresa.destaque && (
                     <div className="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
@@ -117,24 +123,24 @@ const CategoriesSection = () => {
                   <h4 className="font-bold text-sm line-clamp-1 group-hover:text-primary transition-colors mb-2">
                     {empresa.nome}
                   </h4>
-                  
+
                   {/* Categoria */}
                   <div className="flex items-center justify-between">
-                    {empresa.categorias && (
-                      <Badge 
-                        variant="secondary" 
+                    {empresa.categoria_info && (
+                      <Badge
+                        variant="secondary"
                         className="text-xs font-semibold px-3 py-1 rounded-full"
-                        style={{ 
-                          backgroundColor: `${empresa.categorias.cor}20`,
-                          color: empresa.categorias.cor,
-                          borderColor: empresa.categorias.cor,
+                        style={{
+                          backgroundColor: `${empresa.categoria_info.cor}20`,
+                          color: empresa.categoria_info.cor,
+                          borderColor: empresa.categoria_info.cor,
                           borderWidth: '1px'
                         }}
                       >
-                        {empresa.categorias.nome}
+                        {empresa.categoria_info.nome}
                       </Badge>
                     )}
-                    
+
                     {/* Visualizações */}
                     {empresa.visualizacoes > 0 && (
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
