@@ -1,0 +1,344 @@
+{
+  "categorias": [
+    {
+      "id": "alimentacao-bebidas",
+      "nome": "Alimentação e Bebidas",
+      "icone": "🍽️",
+      "cor": "from-orange-500 to-red-500",
+      "subcategorias": [
+        "Restaurantes (à la carte, self-service, por quilo)",
+        "Lanchonetes / Hamburguerias",
+        "Pizzarias",
+        "Pastelarias",
+        "Açaí / Sorveterias / Gelaterias",
+        "Cafeterias / Padarias / Confeitarias",
+        "Marmitarias",
+        "Churrascarias / Espetarias",
+        "Comida japonesa / árabe / italiana / temática",
+        "Food trucks",
+        "Adegas / Distribuidoras de bebidas",
+        "Produtos naturais / Empórios",
+        "Delivery (cozinhas/dark kitchen)"
+      ]
+    },
+    {
+      "id": "varejo-alimentar",
+      "nome": "Varejo Alimentar (Mercados)",
+      "icone": "🛒",
+      "cor": "from-green-500 to-emerald-500",
+      "subcategorias": [
+        "Supermercados / Atacarejo",
+        "Mercadinhos / Mercearias",
+        "Hortifruti / Sacolão",
+        "Açougues / Casa de carnes",
+        "Peixarias",
+        "Empórios / Armazéns",
+        "Conveniências",
+        "Lojas de doces / atacado de doces"
+      ]
+    },
+    {
+      "id": "saude-bem-estar",
+      "nome": "Saúde e Bem-Estar",
+      "icone": "⚕️",
+      "cor": "from-blue-500 to-cyan-500",
+      "subcategorias": [
+        "Farmácias / Drogarias",
+        "Clínicas médicas (geral e especialidades)",
+        "Odontologia (clínicas, dentistas)",
+        "Laboratórios de análises clínicas",
+        "Fisioterapia / RPG / Pilates clínico",
+        "Psicologia / Psiquiatria / Terapias",
+        "Fonoaudiologia / Nutrição",
+        "Clínicas de imagem (raio-x, ultrassom etc.)",
+        "Óticas",
+        "Aparelhos auditivos",
+        "Home care / Cuidados domiciliares",
+        "Produtos hospitalares / Ortopedia"
+      ]
+    },
+    {
+      "id": "beleza-estetica",
+      "nome": "Beleza, Estética e Cuidados Pessoais",
+      "icone": "💅",
+      "cor": "from-pink-500 to-rose-500",
+      "subcategorias": [
+        "Salões de beleza",
+        "Barbearias",
+        "Manicure / Pedicure / Nail designer",
+        "Depilação",
+        "Estética facial/corporal",
+        "Massoterapia",
+        "Bronzeamento / Spa",
+        "Maquiagem / Sobrancelhas / Cílios",
+        "Perfumarias / Cosméticos",
+        "Produtos para cabelo (profissional)"
+      ]
+    },
+    {
+      "id": "moda-acessorios",
+      "nome": "Moda e Acessórios",
+      "icone": "👗",
+      "cor": "from-purple-500 to-pink-500",
+      "subcategorias": [
+        "Lojas de roupas (masc/fem/infantil)",
+        "Moda íntima / Lingerie",
+        "Calçados",
+        "Bolsas / Mochilas",
+        "Acessórios (bijuterias/semijoias)",
+        "Joalherias / Relojoarias",
+        "Moda fitness",
+        "Moda plus size",
+        "Uniformes / EPI",
+        "Brechós"
+      ]
+    },
+    {
+      "id": "casa-construcao",
+      "nome": "Casa, Construção e Decoração",
+      "icone": "🏠",
+      "cor": "from-amber-500 to-orange-500",
+      "subcategorias": [
+        "Materiais de construção",
+        "Lojas de tintas",
+        "Ferragens",
+        "Madeireiras",
+        "Vidraçarias / Esquadrias",
+        "Marmorarias",
+        "Elétrica / Hidráulica (lojas)",
+        "Iluminação",
+        "Pisos e revestimentos",
+        "Móveis planejados / Marcenaria",
+        "Móveis e decoração",
+        "Colchões / Cama-mesa-banho",
+        "Jardinagem / Paisagismo (loja e serviço)",
+        "Piscinas e acessórios",
+        "Serralherias"
+      ]
+    },
+    {
+      "id": "servicos-residenciais",
+      "nome": "Serviços Residenciais e Manutenção",
+      "icone": "🔧",
+      "cor": "from-gray-600 to-gray-700",
+      "subcategorias": [
+        "Encanador / Hidráulica",
+        "Eletricista",
+        "Pedreiro / Reforma",
+        "Pintor",
+        "Gesso / Drywall",
+        "Calhas / Telhados",
+        "Dedetização / Controle de pragas",
+        "Limpeza pós-obra / Diaristas",
+        "Segurança residencial (alarmes/câmeras)",
+        "Chaveiro",
+        "Assistência técnica (geladeira, máquina de lavar, ar-condicionado)",
+        "Instalação de ar-condicionado / refrigeração"
+      ]
+    },
+    {
+      "id": "automotivo",
+      "nome": "Automotivo, Transporte e Peças",
+      "icone": "🚗",
+      "cor": "from-slate-600 to-slate-700",
+      "subcategorias": [
+        "Oficinas mecânicas",
+        "Autoelétrica",
+        "Funilaria e pintura",
+        "Borracharias",
+        "Troca de óleo / Lubrificantes",
+        "Autopeças",
+        "Pneus / Rodas",
+        "Som automotivo / Acessórios",
+        "Lava-rápido / Estética automotiva",
+        "Guincho / Reboque",
+        "Motos (oficina e peças)",
+        "Despachante / Documentação",
+        "Locadoras de veículos",
+        "Transporte escolar",
+        "Táxi / Moto táxi / Motoristas particulares"
+      ]
+    },
+    {
+      "id": "tecnologia",
+      "nome": "Tecnologia, Eletrônicos e Celulares",
+      "icone": "💻",
+      "cor": "from-indigo-500 to-blue-500",
+      "subcategorias": [
+        "Lojas de celulares / Acessórios",
+        "Assistência técnica (celulares, notebooks, TVs)",
+        "Informática (computadores, periféricos)",
+        "Provedores de internet",
+        "Impressão / Suprimentos (cartuchos, papel)",
+        "Sistemas e software (B2B)",
+        "Energia solar / Automação residencial"
+      ]
+    },
+    {
+      "id": "educacao",
+      "nome": "Educação e Cursos",
+      "icone": "📚",
+      "cor": "from-teal-500 to-green-500",
+      "subcategorias": [
+        "Escolas particulares / reforço escolar",
+        "Cursos profissionalizantes",
+        "Idiomas",
+        "Informática / Programação",
+        "Autoescolas",
+        "Música / Artes",
+        "Dança",
+        "Preparatórios (ENEM/concursos)",
+        "Aulas particulares"
+      ]
+    },
+    {
+      "id": "esportes-lazer",
+      "nome": "Esportes, Fitness e Lazer",
+      "icone": "⚽",
+      "cor": "from-lime-500 to-green-600",
+      "subcategorias": [
+        "Academias",
+        "Box de Cross/funcional",
+        "Estúdios de Pilates / Yoga",
+        "Escolinhas esportivas",
+        "Clubes / Associações",
+        "Quadras e arenas (fut7, beach tennis etc.)",
+        "Lojas de artigos esportivos",
+        "Pesca / caça esportiva"
+      ]
+    },
+    {
+      "id": "hotelaria-eventos",
+      "nome": "Hotelaria, Turismo e Eventos",
+      "icone": "🎉",
+      "cor": "from-fuchsia-500 to-pink-500",
+      "subcategorias": [
+        "Hotéis / Pousadas",
+        "Agências de viagem",
+        "Aluguel de chácaras / sítios para eventos",
+        "Salões de festa",
+        "Cerimonial / Assessoria",
+        "Buffet / Catering",
+        "Decoração de eventos",
+        "Fotografia / Filmagem",
+        "DJ / Som / Iluminação",
+        "Convites / Lembrancinhas"
+      ]
+    },
+    {
+      "id": "pets-agro",
+      "nome": "Pets e Agro",
+      "icone": "🐾",
+      "cor": "from-yellow-600 to-amber-600",
+      "subcategorias": [
+        "Pet shops",
+        "Clínicas veterinárias / Plantão vet",
+        "Banho e tosa",
+        "Ração / acessórios",
+        "Agropecuárias / Casa do fazendeiro",
+        "Rações e suplementos animais",
+        "Ferramentas e insumos agrícolas",
+        "Sementes / adubos / defensivos"
+      ]
+    },
+    {
+      "id": "servicos-profissionais",
+      "nome": "Serviços Profissionais e B2B",
+      "icone": "💼",
+      "cor": "from-blue-600 to-indigo-600",
+      "subcategorias": [
+        "Contabilidade",
+        "Advocacia",
+        "Consultorias (gestão, marketing, TI)",
+        "Imobiliárias / Corretagem",
+        "Seguros / Corretoras",
+        "Recursos humanos",
+        "Engenharia / Arquitetura",
+        "Topografia",
+        "Gráficas / Comunicação visual",
+        "Marketing digital / Agência"
+      ]
+    },
+    {
+      "id": "financas",
+      "nome": "Finanças e Atendimento ao Público",
+      "icone": "💰",
+      "cor": "from-emerald-600 to-teal-600",
+      "subcategorias": [
+        "Bancos / Cooperativas de crédito",
+        "Lotéricas",
+        "Correspondentes bancários",
+        "Câmbio",
+        "Crédito e cobrança / fintechs locais"
+      ]
+    },
+    {
+      "id": "comunicacao-midia",
+      "nome": "Comunicação, Mídia e Produção",
+      "icone": "📺",
+      "cor": "from-red-600 to-pink-600",
+      "subcategorias": [
+        "Rádios / Jornais locais",
+        "Produtoras de vídeo",
+        "Estúdios de design",
+        "Serigrafia / Sublimação",
+        "Brindes personalizados",
+        "Letreiros / Fachadas"
+      ]
+    },
+    {
+      "id": "utilidades",
+      "nome": "Utilidades e Serviços do Dia a Dia",
+      "icone": "🔑",
+      "cor": "from-cyan-600 to-blue-600",
+      "subcategorias": [
+        "Correios / Transportadoras",
+        "Papelarias / Livrarias",
+        "Fotocópias / Encadernação",
+        "Lavanderias",
+        "Costureiras / Ajustes",
+        "Sapateiros",
+        "Floriculturas",
+        "Artesanato / lembranças"
+      ]
+    },
+    {
+      "id": "atacado",
+      "nome": "Comércio de Atacado e Distribuição",
+      "icone": "📦",
+      "cor": "from-orange-600 to-red-600",
+      "subcategorias": [
+        "Distribuidoras (alimentos, bebidas, limpeza)",
+        "Atacadistas",
+        "Representações comerciais",
+        "Depósitos e centros de distribuição"
+      ]
+    },
+    {
+      "id": "industria",
+      "nome": "Indústria Local e Produção",
+      "icone": "🏭",
+      "cor": "from-gray-700 to-slate-800",
+      "subcategorias": [
+        "Fábricas (confecção, alimentos, metalúrgica etc.)",
+        "Marcenaria industrial",
+        "Serralheria industrial",
+        "Produção de alimentos (padaria industrial, doces etc.)"
+      ]
+    },
+    {
+      "id": "servicos-publicos",
+      "nome": "Serviços Públicos e Comunitários",
+      "icone": "🏛️",
+      "cor": "from-sky-600 to-blue-700",
+      "subcategorias": [
+        "Prefeitura / secretarias",
+        "Unidades de saúde (postos/UBS)",
+        "Escolas públicas",
+        "Conselhos/associações",
+        "Defesa civil / utilidade pública",
+        "Coleta de lixo / ecopontos"
+      ]
+    }
+  ]
+}

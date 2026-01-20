@@ -1,0 +1,906 @@
+{
+  "cidade": "Guaíra-SP",
+  "timezone": "America/Sao_Paulo",
+  "atualizado_em": "2026-01-11",
+  "regras_gerais": {
+    "coleta_lixo_domestico": {
+      "tipo": "regra_unica_cidade",
+      "dias_semana": ["segunda", "quarta", "sexta"],
+      "inicio_coleta": "07:00",
+      "observacao": "Regra geral de coleta residencial; pode haver ajustes por rota/feriados."
+    },
+    "poda_arvores": {
+      "tipo": "regra_sazonal",
+      "recolhimento_prefeitura_meses": ["maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro"],
+      "fora_do_periodo": "dezembro a abril: podador/contratante deve retirar e destinar por conta própria (salvo exceções/autorizações)."
+    },
+    "coleta_entulho_construcao": {
+      "tipo": "nao_ofertado_pela_coleta_publica",
+      "orientacao": "Entulho de obra/demolição: contratar caçamba/transportador autorizado."
+    },
+    "descarte_limpeza_quintal_galhos_folhas_volumosos": {
+      "tipo": "calendario_por_grupos_de_bairros",
+      "como_preencher": "Defina o campo 'grupo_coleta' de cada bairro e informe 'janelas' (semanas/datas) conforme o Calendário Oficial de Descarte do município."
+    }
+  },
+  "categorias_servicos_essenciais_padrao": [
+    "saude_ubs_esf",
+    "farmacia",
+    "mercado_hortifruti",
+    "padaria",
+    "agua_gas",
+    "banco_loterica_caixa24h",
+    "correios",
+    "escola_creche",
+    "cras_assistencia_social",
+    "seguranca_publica",
+    "transporte_pontos_onibus",
+    "servicos_urbanos_iluminacao_tapa_buraco"
+  ],
+  "bairros": [
+    {
+      "slug": "aniceto-carlos-nogueira",
+      "nome_exibicao": "Aniceto Carlos Nogueira",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "associacao-nipo-brasileira",
+      "nome_exibicao": "Associação Nipo-Brasileira",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "campos-eliseos",
+      "nome_exibicao": "Campos Elíseos",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "centro",
+      "nome_exibicao": "Centro",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "conjunto-habitacional-abdala-elias",
+      "nome_exibicao": "Conjunto Habitacional Abdala Elias",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "conjunto-habitacional-gabriel-garcia-de-carvalho",
+      "nome_exibicao": "Conjunto Habitacional Gabriel Garcia de Carvalho",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "conjunto-habitacional-geralda-geltrudes-da-silva",
+      "nome_exibicao": "Conjunto Habitacional Geralda Geltrudes da Silva",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "conjunto-habitacional-padre-mario-lano",
+      "nome_exibicao": "Conjunto Habitacional Padre Mário Lano",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "conjunto-residencial-antonio-garcia",
+      "nome_exibicao": "Conjunto Residencial Antônio Garcia",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-barros",
+      "nome_exibicao": "Desmembramento Barros",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-chacara-bela-vista",
+      "nome_exibicao": "Desmembramento Chácara Bela Vista",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-chacara-delfim",
+      "nome_exibicao": "Desmembramento Chácara Delfim",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-chacara-nossa-senhora",
+      "nome_exibicao": "Desmembramento Chácara Nossa Senhora",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-chacara-santa-quiteria",
+      "nome_exibicao": "Desmembramento Chácara Santa Quitéria",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-fazenda-antas",
+      "nome_exibicao": "Desmembramento Fazenda Antas",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-fazenda-sao-judas-tadeu",
+      "nome_exibicao": "Desmembramento Fazenda São Judas Tadeu",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-katsumi-miura",
+      "nome_exibicao": "Desmembramento Katsumi Miura",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-reis-e-marques",
+      "nome_exibicao": "Desmembramento Reis e Marques",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-recreio-santa-isabel",
+      "nome_exibicao": "Desmembramento Recreio Santa Isabel",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-rialga",
+      "nome_exibicao": "Desmembramento Rialga",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-santa-elydia",
+      "nome_exibicao": "Desmembramento Santa Elýdia",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-santo-antonio",
+      "nome_exibicao": "Desmembramento Santo Antônio",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "desmembramento-sao-francisco",
+      "nome_exibicao": "Desmembramento São Francisco",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "distrito-industrial-i",
+      "nome_exibicao": "Distrito Industrial I",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "distrito-industrial-luiz-carlos-nogueira",
+      "nome_exibicao": "Distrito Industrial Luiz Carlos Nogueira",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "doutor-fabio-talarico",
+      "nome_exibicao": "Doutor Fábio Talarico",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "etelvina-santana-da-silva",
+      "nome_exibicao": "Etelvina Santana da Silva",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "estancia-morada-nova",
+      "nome_exibicao": "Estância Morada Nova",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "industrial",
+      "nome_exibicao": "Industrial",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-alegria",
+      "nome_exibicao": "Jardim Alegria",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-california",
+      "nome_exibicao": "Jardim Califórnia",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-das-acacias",
+      "nome_exibicao": "Jardim das Acácias",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-eldorado",
+      "nome_exibicao": "Jardim Eldorado",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-eliza",
+      "nome_exibicao": "Jardim Eliza",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-ligia",
+      "nome_exibicao": "Jardim Lígia",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-ligia-ii",
+      "nome_exibicao": "Jardim Lígia II",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-palmares",
+      "nome_exibicao": "Jardim Palmares",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-paulista",
+      "nome_exibicao": "Jardim Paulista",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-sao-francisco-i",
+      "nome_exibicao": "Jardim São Francisco I",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "jardim-solaris",
+      "nome_exibicao": "Jardim Solaris",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "joao-vaccaro",
+      "nome_exibicao": "João Vaccaro",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "joaquim-pereira-lelis",
+      "nome_exibicao": "Joaquim Pereira Lelis",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "loteamento-sao-jose",
+      "nome_exibicao": "Loteamento São José",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "maraca",
+      "nome_exibicao": "Maracá",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "morada-do-sol",
+      "nome_exibicao": "Morada do Sol",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "paranoa",
+      "nome_exibicao": "Paranoá",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "portal-do-lago",
+      "nome_exibicao": "Portal do Lago",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "recreio-sao-bernardo",
+      "nome_exibicao": "Recreio São Bernardo",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-antonio-manoel-da-silva",
+      "nome_exibicao": "Residencial Antônio Manoel da Silva",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-cidade-jardim",
+      "nome_exibicao": "Residencial Cidade Jardim",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-dona-ira",
+      "nome_exibicao": "Residencial Dona Ira",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-dr-orlando-garcia-junqueira",
+      "nome_exibicao": "Residencial Dr. Orlando Garcia Junqueira",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-julieta",
+      "nome_exibicao": "Residencial Julieta",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-maria-luiza",
+      "nome_exibicao": "Residencial Maria Luiza",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-nadia",
+      "nome_exibicao": "Residencial Nádia",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-nadia-iv",
+      "nome_exibicao": "Residencial Nádia IV",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-nautico-e-pesca-rio-pardo",
+      "nome_exibicao": "Residencial Náutico e Pesca Rio Pardo",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-nobre-ville",
+      "nome_exibicao": "Residencial Nobre Ville",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-nova-guaira",
+      "nome_exibicao": "Residencial Nova Guaíra",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-portinari",
+      "nome_exibicao": "Residencial Portinari",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-r-guimaraes",
+      "nome_exibicao": "Residencial R. Guimarães",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-reynaldo-stein",
+      "nome_exibicao": "Residencial Reynaldo Stein",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-santa-terezinha",
+      "nome_exibicao": "Residencial Santa Terezinha",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-tais",
+      "nome_exibicao": "Residencial Taís",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-thobias-landim",
+      "nome_exibicao": "Residencial Thobias Landim",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "residencial-zenaide",
+      "nome_exibicao": "Residencial Zenaide",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "santa-helena",
+      "nome_exibicao": "Santa Helena",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "terra-do-sol",
+      "nome_exibicao": "Terra do Sol",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "vila-miguel-fabiano",
+      "nome_exibicao": "Vila Miguel Fabiano",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "vila-nossa-senhora-aparecida",
+      "nome_exibicao": "Vila Nossa Senhora Aparecida",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "vila-sao-bom-jesus-lapa",
+      "nome_exibicao": "Vila São Bom Jesus Lapa",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    },
+    {
+      "slug": "vivendas-do-bom-jardim",
+      "nome_exibicao": "Vivendas do Bom Jardim",
+      "grupo_coleta": null,
+      "servicos_essenciais": {},
+      "agenda": {
+        "lixo_domestico": { "herda_regra_geral": true },
+        "poda_arvores": { "herda_regra_geral": true },
+        "entulho_construcao": { "herda_regra_geral": true },
+        "limpeza_quintal_galhos_folhas_volumosos": { "tipo": "por_grupo", "janelas": [] }
+      }
+    }
+  ]
+}

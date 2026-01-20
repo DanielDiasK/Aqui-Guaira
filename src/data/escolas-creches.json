@@ -1,0 +1,289 @@
+{
+  "cidade": "Guaíra",
+  "uf": "SP",
+  "atualizado_em": "2026-01-11",
+  "unidades_ativas": {
+    "governamental": {
+      "municipal": [
+        {
+          "nome": "EMEF Padre Mário Lano",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Avenida 31",
+            "numero": "1860",
+            "bairro": "COHAB I"
+          },
+          "contatos": { "telefone": ["(17) 3331-7093"], "whatsapp": [] }
+        },
+        {
+          "nome": "EMEF Francisco Gomes de Souza",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Rua 16",
+            "numero": "395",
+            "bairro": "Centro"
+          },
+          "contatos": { "telefone": ["(17) 3331-2928", "(17) 3332-5163"], "whatsapp": [] }
+        },
+        {
+          "nome": "EMEF Profª Vicencina Aparecida Vaccaro Morsoleto",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Avenida Marginal do Lago",
+            "numero": "1000",
+            "bairro": "Parque Maracá"
+          },
+          "contatos": { "telefone": ["(17) 3331-2565", "(17) 3331-6172"], "whatsapp": [] }
+        },
+        {
+          "nome": "EMEF Profª Vera Lucia Vitali",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Avenida 1A",
+            "numero": "2000",
+            "bairro": "José Pugliese",
+            "complemento": "com a Rua 16B"
+          },
+          "contatos": { "telefone": ["(17) 3331-1890", "(17) 3332-5147"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEI Dirce Barros Lelis",
+          "tipo": "creche",
+          "endereco": {
+            "logradouro": "Avenida 21",
+            "numero": "2030",
+            "bairro": "João Vaccaro",
+            "complemento": "com a 48"
+          },
+          "contatos": { "telefone": ["(17) 3331-7999"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEI Josefina Rawagnani Caligaris",
+          "tipo": "creche",
+          "endereco": {
+            "logradouro": "Rua 22",
+            "numero": "1005",
+            "bairro": "Centro",
+            "complemento": "com a 21 e 23"
+          },
+          "contatos": { "telefone": ["(17) 3331-5294"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEI Olga Abdala Jabbour",
+          "tipo": "creche",
+          "endereco": {
+            "logradouro": "Rua 06",
+            "numero": "1400",
+            "bairro": "Jardim Eldorado",
+            "complemento": "com a Av. 31"
+          },
+          "contatos": { "telefone": ["(17) 3331-5436"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEI Waldemar Chubaci",
+          "tipo": "creche",
+          "endereco": {
+            "logradouro": "Avenida 3",
+            "numero": "s/n",
+            "bairro": "Aniceto Carlos Nogueira",
+            "complemento": "com a Rua A"
+          },
+          "contatos": { "telefone": ["(17) 3331-1102"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEI Nilce Fugió Akashi",
+          "tipo": "creche",
+          "endereco": {
+            "logradouro": "Rua 16B",
+            "numero": "1248",
+            "bairro": "Joaquim Pereira Lelis"
+          },
+          "contatos": { "telefone": ["(17) 3331-9777"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEI Zilda de Oliveira",
+          "tipo": "creche",
+          "endereco": {
+            "logradouro": "Rua 44",
+            "numero": "590",
+            "bairro": "Jardim Eliza"
+          },
+          "contatos": { "telefone": ["(17) 3332-5136"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEMEI Profª Áurea Mendes",
+          "tipo": "cemei",
+          "endereco": {
+            "logradouro": "Avenida 25",
+            "numero": "240",
+            "bairro": "Bom Jesus",
+            "complemento": "com a 6"
+          },
+          "contatos": { "telefone": ["(17) 3331-6835"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEMEI Profª Eunisse Esperancini Moreira",
+          "tipo": "cemei",
+          "endereco": {
+            "logradouro": "Rua 5",
+            "numero": "1320",
+            "bairro": "Aniceto",
+            "complemento": "com a Rua A"
+          },
+          "contatos": { "telefone": ["(17) 3332-0685"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEMEI Profª Nerylde Gomes da Silva Garcia",
+          "tipo": "cemei",
+          "endereco": {
+            "logradouro": "Rua 34",
+            "numero": "152",
+            "bairro": "Vila Aparecida",
+            "complemento": "com as Avenidas 23 e 25"
+          },
+          "contatos": { "telefone": ["(17) 3332-0571"], "whatsapp": [] }
+        },
+        {
+          "nome": "CEMEI Profª Moacir Garcia do Prado",
+          "tipo": "cemei",
+          "endereco": {
+            "logradouro": "Rua 12",
+            "numero": "55",
+            "bairro": "Centro",
+            "complemento": "com a Avenida 1"
+          },
+          "contatos": { "telefone": ["(17) 3331-5790"], "whatsapp": [] }
+        }
+      ],
+      "estadual": [
+        {
+          "nome": "EE Profª Dalva Lellis Garcia Prado",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Avenida 25",
+            "numero": "1595",
+            "bairro": "Vila Nossa Senhora Aparecida"
+          },
+          "contatos": { "telefone": ["(17) 3331-7092"], "whatsapp": [] }
+        },
+        {
+          "nome": "EE Enoch Garcia Leal",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Avenida 7",
+            "numero": "1040",
+            "bairro": "Centro"
+          },
+          "contatos": { "telefone": ["(17) 3331-2108"], "whatsapp": [] }
+        },
+        {
+          "nome": "EE Zezinho Portugal",
+          "tipo": "escola",
+          "endereco": {
+            "logradouro": "Avenida 21",
+            "numero": "389",
+            "bairro": "Centro"
+          },
+          "contatos": { "telefone": ["(17) 3331-2473"], "whatsapp": [] }
+        }
+      ],
+      "estadual_tecnica": [
+        {
+          "nome": "Etec de Guaíra",
+          "tipo": "escola_tecnica",
+          "endereco": {
+            "logradouro": "Avenida 33",
+            "numero": "105",
+            "bairro": "Jardim Alegria (também citado como Bom Jesus)"
+          },
+          "contatos": {
+            "telefone": ["(17) 3017-1766", "(17) 3331-3598"],
+            "whatsapp": ["(17) 99977-6302"]
+          }
+        }
+      ]
+    },
+    "particular": [
+      {
+        "nome": "Irum Curumim Escola de Educação Básica / Educação Profissional",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Avenida Acácia Guairense",
+          "numero": "1200",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-4551"], "whatsapp": [] }
+      },
+      {
+        "nome": "APAE de Guaíra",
+        "tipo": "instituicao",
+        "endereco": {
+          "logradouro": "Rua Alexandre Muraishi",
+          "numero": "00250",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-2760"], "whatsapp": ["(17) 99975-2760"] }
+      },
+      {
+        "nome": "Santa Luz Centro Educação",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Rua 6",
+          "numero": "285",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-5200"], "whatsapp": ["(17) 99106-3480"] }
+      },
+      {
+        "nome": "Ana Lelis Santana Centro Educacional - Unidade I",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Rua 12",
+          "numero": "954",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-1339", "(17) 3331-1933"], "whatsapp": [] }
+      },
+      {
+        "nome": "Ana Lelis Santana Centro Educacional - Unidade II",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Avenida 11",
+          "numero": "870",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-1339", "(17) 3331-1933"], "whatsapp": [] }
+      },
+      {
+        "nome": "Ana Lelis Santana Centro Educacional - Unidade III",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Rua 4",
+          "numero": "581",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-1339", "(17) 3331-1933"], "whatsapp": [] }
+      },
+      {
+        "nome": "Centro Educacional Ana Lelis Santana - Unidade IV",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Rua 20",
+          "numero": "943",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3322-1763"], "whatsapp": [] }
+      },
+      {
+        "nome": "Colégio Aquarela Guaíra",
+        "tipo": "escola",
+        "endereco": {
+          "logradouro": "Avenida 9",
+          "numero": "901",
+          "bairro": "Centro"
+        },
+        "contatos": { "telefone": ["(17) 3331-5435"], "whatsapp": [] }
+      }
+    ]
+  }
+}
