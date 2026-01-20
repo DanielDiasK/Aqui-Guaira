@@ -393,8 +393,13 @@ export async function atualizarEmpresa(id: string, dados: Partial<Empresa>) {
 }
 
 export async function incrementarVisualizacoesEmpresa(id: string) {
-  // TODO: Implementar incremento no MongoDB via API
-  console.log('Incrementar visualização (mock):', id);
+  try {
+    await fetch(`/api/empresas?id=${id}&action=increment_views`, {
+      method: 'PATCH'
+    });
+  } catch (error) {
+    console.error('Erro ao incrementar visualização:', error);
+  }
 }
 
 // ============================================
@@ -402,17 +407,14 @@ export async function incrementarVisualizacoesEmpresa(id: string) {
 // ============================================
 
 export async function buscarPosts(limite = 50) {
-  const { data, error } = await supabase
-    .from('posts_aprovados')
-    .select('*')
-    .limit(limite)
-
-  if (error) {
-    console.error('Erro ao buscar posts:', error)
-    return []
+  try {
+    const res = await fetch(`/api/posts?limite=${limite}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar posts (MongoDB):', error);
+    return [];
   }
-
-  return data || []
 }
 
 export async function criarPost(post: {
@@ -422,34 +424,29 @@ export async function criarPost(post: {
   conteudo: string
   imagens?: string[]
 }) {
-  const { data, error } = await supabase
-    .from('posts')
-    .insert([{ ...post, status: 'pendente' }])
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Erro ao criar post:', error)
-    return null
+  try {
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(post)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao criar post (MongoDB):', error);
+    return null;
   }
-
-  return data
 }
 
 export async function buscarComentarios(postId: string) {
-  const { data, error } = await supabase
-    .from('comentarios')
-    .select('*')
-    .eq('post_id', postId)
-    .eq('status', 'aprovado')
-    .order('created_at', { ascending: true })
-
-  if (error) {
-    console.error('Erro ao buscar comentários:', error)
-    return []
+  try {
+    const res = await fetch(`/api/posts?action=comentarios&postId=${postId}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar comentários (MongoDB):', error);
+    return [];
   }
-
-  return data || []
 }
 
 export async function criarComentario(comentario: {
@@ -457,18 +454,18 @@ export async function criarComentario(comentario: {
   autor_nome: string
   conteudo: string
 }) {
-  const { data, error } = await supabase
-    .from('comentarios')
-    .insert([{ ...comentario, status: 'aprovado' }])
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Erro ao criar comentário:', error)
-    return null
+  try {
+    const res = await fetch('/api/posts?action=comentario', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(comentario)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao criar comentário (MongoDB):', error);
+    return null;
   }
-
-  return data
 }
 
 // ============================================
@@ -476,33 +473,25 @@ export async function criarComentario(comentario: {
 // ============================================
 
 export async function buscarLocaisTuristicos() {
-  const { data, error } = await supabase
-    .from('locais_turisticos')
-    .select('*')
-    .eq('status', 'ativo')
-    .order('nome')
-
-  if (error) {
-    console.error('Erro ao buscar locais:', error)
-    return []
+  try {
+    const res = await fetch('/api/locais');
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar locais (MongoDB):', error);
+    return [];
   }
-
-  return data || []
 }
 
 export async function buscarLocalPorSlug(slug: string) {
-  const { data, error } = await supabase
-    .from('locais_turisticos')
-    .select('*')
-    .eq('slug', slug)
-    .single()
-
-  if (error) {
-    console.error('Erro ao buscar local:', error)
-    return null
+  try {
+    const res = await fetch(`/api/locais?slug=${slug}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar local (MongoDB):', error);
+    return null;
   }
-
-  return data
 }
 
 // ============================================
@@ -534,63 +523,54 @@ export async function buscarCategorias() {
 export async function buscarFavoritos(
   tipo?: 'empresa' | 'local' | 'post'
 ) {
-  const userId = getUserIdentifier()
-  let query = supabase
-    .from('favoritos')
-    .select('*')
-    .eq('user_identifier', userId)
+  try {
+    const userId = getUserIdentifier();
+    const params = new URLSearchParams();
+    params.append('user_identifier', userId);
+    if (tipo) params.append('tipo', tipo);
 
-  if (tipo) {
-    query = query.eq('tipo', tipo)
+    const res = await fetch(`/api/favoritos?${params.toString()}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar favoritos (MongoDB):', error);
+    return [];
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    console.error('Erro ao buscar favoritos:', error)
-    return []
-  }
-
-  return data || []
 }
 
 export async function adicionarFavorito(
   tipo: 'empresa' | 'local' | 'post',
   itemId: string
 ) {
-  const userId = getUserIdentifier()
-  const { data, error } = await supabase
-    .from('favoritos')
-    .insert([{ tipo, item_id: itemId, user_identifier: userId }])
-    .select()
-    .single()
-
-  if (error) {
-    console.error('Erro ao adicionar favorito:', error)
-    return null
+  try {
+    const userId = getUserIdentifier();
+    const res = await fetch('/api/favoritos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipo, item_id: itemId, user_identifier: userId })
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao adicionar favorito (MongoDB):', error);
+    return null;
   }
-
-  return data
 }
 
 export async function removerFavorito(
   tipo: 'empresa' | 'local' | 'post',
   itemId: string
 ) {
-  const userId = getUserIdentifier()
-  const { error } = await supabase
-    .from('favoritos')
-    .delete()
-    .eq('user_identifier', userId)
-    .eq('tipo', tipo)
-    .eq('item_id', itemId)
-
-  if (error) {
-    console.error('Erro ao remover favorito:', error)
-    return false
+  try {
+    const userId = getUserIdentifier();
+    const res = await fetch(`/api/favoritos?user_identifier=${userId}&tipo=${tipo}&item_id=${itemId}`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Erro ao remover favorito (MongoDB):', error);
+    return false;
   }
-
-  return true
 }
 
 // ============================================
@@ -601,31 +581,50 @@ export async function adicionarAoHistorico(
   tipo: 'empresa' | 'local',
   itemId: string
 ) {
-  const userId = getUserIdentifier()
-  await supabase.from('historico_localizacao').insert([
-    {
-      user_identifier: userId,
+  try {
+    const userId = getUserIdentifier();
+    const user = getUsuarioLogado();
+
+    const item: any = {
       tipo,
       item_id: itemId,
-    },
-  ])
+      user_identifier: userId
+    };
+
+    if (user) {
+      item.user_id = user.id;
+    }
+
+    await fetch('/api/historico', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item)
+    });
+  } catch (error) {
+    console.error('Erro ao adicionar ao histórico (MongoDB):', error);
+  }
 }
 
 export async function buscarHistorico(limite = 20) {
-  const userId = getUserIdentifier()
-  const { data, error } = await supabase
-    .from('historico_localizacao')
-    .select('*')
-    .eq('user_identifier', userId)
-    .order('visualizado_em', { ascending: false })
-    .limit(limite)
+  try {
+    const userId = getUserIdentifier();
+    const user = getUsuarioLogado();
 
-  if (error) {
-    console.error('Erro ao buscar histórico:', error)
-    return []
+    const params = new URLSearchParams();
+    if (user) {
+      params.append('user_id', user.id);
+    } else {
+      params.append('user_identifier', userId);
+    }
+    params.append('limite', limite.toString());
+
+    const res = await fetch(`/api/historico?${params.toString()}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar histórico (MongoDB):', error);
+    return [];
   }
-
-  return data || []
 }
 
 // ============================================
@@ -709,21 +708,26 @@ export function logout() {
  * Atualizar perfil do usuário
  */
 export async function atualizarUsuario(userId: string, dados: Partial<User>) {
-  const { data, error } = await supabase
-    .from('users')
-    .update(dados)
-    .eq('id', userId)
-    .select()
-    .single()
+  try {
+    const res = await fetch(`/api/auth?id=${userId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
 
-  if (error) {
-    console.error('Erro ao atualizar usuário:', error)
-    throw error
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Falha ao atualizar usuário');
+    }
+
+    const updatedUser = await res.json();
+    // Atualizar localStorage
+    localStorage.setItem('aqui_guaira_user', JSON.stringify(updatedUser));
+    return updatedUser;
+  } catch (error) {
+    console.error('Erro ao atualizar usuário (MongoDB):', error);
+    throw error;
   }
-
-  // Atualizar localStorage
-  localStorage.setItem('aqui_guaira_user', JSON.stringify(data))
-  return data
 }
 
 // ============================================
@@ -734,38 +738,25 @@ export async function atualizarUsuario(userId: string, dados: Partial<User>) {
  * Buscar favoritos (prioriza user_id se logado, senão usa user_identifier)
  */
 export async function buscarFavoritosUsuario(tipo?: 'empresa' | 'local' | 'post') {
-  const user = getUsuarioLogado()
+  try {
+    const user = getUsuarioLogado();
+    const userId = getUserIdentifier();
 
-  console.log('🔍 Buscando favoritos:', { tipo, user: user?.email })
+    const params = new URLSearchParams();
+    if (user) {
+      params.append('user_id', user.id);
+    } else {
+      params.append('user_identifier', userId);
+    }
+    if (tipo) params.append('tipo', tipo);
 
-  let query = supabase.from('favoritos').select('*')
-
-  if (user) {
-    // Se logado, buscar por user_id
-    console.log('✅ Buscando favoritos do usuário logado:', user.id)
-    query = query.eq('user_id', user.id)
-  } else {
-    // Se não logado, buscar por user_identifier
-    const userId = getUserIdentifier()
-    console.log('⚠️ Buscando favoritos por user_identifier:', userId)
-    query = query.eq('user_identifier', userId)
+    const res = await fetch(`/api/favoritos?${params.toString()}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar favoritos de usuário (MongoDB):', error);
+    return [];
   }
-
-  if (tipo) {
-    query = query.eq('tipo', tipo)
-  }
-
-  query = query.order('created_at', { ascending: false })
-
-  const { data, error } = await query
-
-  if (error) {
-    console.error('❌ Erro ao buscar favoritos:', error)
-    return []
-  }
-
-  console.log(`✅ ${data?.length || 0} favoritos encontrados`)
-  return data || []
 }
 
 /**
@@ -775,42 +766,35 @@ export async function adicionarFavoritoUsuario(
   tipo: 'empresa' | 'local' | 'post',
   itemId: string
 ) {
-  const user = getUsuarioLogado()
-  const userId = getUserIdentifier()
+  try {
+    const user = getUsuarioLogado();
+    const userId = getUserIdentifier();
 
-  console.log('🔍 Adicionando favorito:', { tipo, itemId, user: user?.email, userId })
+    const favorito: any = {
+      tipo,
+      item_id: itemId,
+      user_identifier: userId,
+    };
 
-  // Criar novo favorito
-  const favorito: any = {
-    tipo,
-    item_id: itemId,
-    user_identifier: userId,
-  }
-
-  // Se logado, adicionar user_id
-  if (user) {
-    favorito.user_id = user.id
-    console.log('✅ Usuário logado, adicionando user_id:', user.id)
-  } else {
-    console.log('⚠️ Usuário não logado, usando apenas user_identifier')
-  }
-
-  const { data, error } = await supabase
-    .from('favoritos')
-    .insert([favorito])
-    .select()
-
-  if (error) {
-    // Se for erro de duplicata, buscar o favorito existente
-    if (error.code === '23505') {
-      console.log('ℹ️ Favorito já existe (duplicata)')
-      return
+    if (user) {
+      favorito.user_id = user.id;
     }
-    console.error('❌ Erro ao adicionar favorito:', error)
-    throw error
-  }
 
-  console.log('✅ Favorito adicionado com sucesso:', data)
+    const res = await fetch('/api/favoritos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(favorito)
+    });
+
+    if (!res.ok) {
+      throw new Error('Falha ao adicionar favorito');
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao adicionar favorito de usuário (MongoDB):', error);
+    throw error;
+  }
 }
 
 /**
@@ -820,25 +804,29 @@ export async function removerFavoritoUsuario(
   tipo: 'empresa' | 'local' | 'post',
   itemId: string
 ) {
-  const user = getUsuarioLogado()
-  const userId = getUserIdentifier()
+  try {
+    const user = getUsuarioLogado();
+    const userId = getUserIdentifier();
 
-  let query = supabase
-    .from('favoritos')
-    .delete()
-    .eq('tipo', tipo)
-    .eq('item_id', itemId)
+    const params = new URLSearchParams();
+    if (user) {
+      params.append('user_id', user.id);
+    } else {
+      params.append('user_identifier', userId);
+    }
+    params.append('tipo', tipo);
+    params.append('item_id', itemId);
 
-  if (user) {
-    query = query.eq('user_id', user.id)
-  } else {
-    query = query.eq('user_identifier', userId)
-  }
+    const res = await fetch(`/api/favoritos?${params.toString()}`, {
+      method: 'DELETE'
+    });
 
-  const { error } = await query
-
-  if (error) {
-    console.error('Erro ao remover favorito:', error)
-    throw error
+    if (!res.ok) {
+      throw new Error('Falha ao remover favorito');
+    }
+    return true;
+  } catch (error) {
+    console.error('Erro ao remover favorito de usuário (MongoDB):', error);
+    throw error;
   }
 }

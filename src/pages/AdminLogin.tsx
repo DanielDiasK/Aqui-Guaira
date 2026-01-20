@@ -16,7 +16,7 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !senha) {
       toast.error("Preencha todos os campos");
       return;
@@ -26,47 +26,33 @@ export default function AdminLogin() {
 
     try {
       console.log("🔐 Tentando login admin:", { email });
-      
-      const { data, error } = await supabase
-        .rpc("verificar_admin_login", {
-          admin_email: email,
-          admin_senha: senha
-        });
 
-      console.log("📊 Resposta do login:", { data, error });
+      const response = await fetch('/api/auth?action=admin_login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
 
-      if (error) {
-        console.error("❌ Erro ao verificar login:", error);
-        toast.error("Erro ao fazer login");
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("❌ Erro ao verificar login:", data.message);
+        toast.error(data.message || "Erro ao fazer login");
         setLoading(false);
         return;
       }
 
-      if (!data || data.length === 0) {
-        console.log("⚠️ Nenhum admin encontrado com este email");
-        toast.error("Email ou senha incorretos");
-        setLoading(false);
-        return;
-      }
-
-      console.log("✅ Admin encontrado:", data[0]);
-
-      if (!data[0].sucesso) {
-        console.log("🔒 Senha incorreta");
-        toast.error("Email ou senha incorretos");
-        setLoading(false);
-        return;
-      }
+      console.log("✅ Admin encontrado:", data);
 
       // Salvar dados do admin no localStorage
       localStorage.setItem("admin", JSON.stringify({
-        id: data[0].id,
-        email: data[0].email,
-        nome: data[0].nome,
+        id: data.id,
+        email: data.email,
+        nome: data.nome,
         loginTime: new Date().toISOString()
       }));
 
-      toast.success(`Bem-vindo, ${data[0].nome}!`);
+      toast.success(`Bem-vindo, ${data.nome}!`);
       navigate("/admin/dashboard");
     } catch (error) {
       console.error("Erro no login:", error);

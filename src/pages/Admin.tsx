@@ -11,11 +11,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { 
-  Shield, 
-  Building2, 
-  FileText, 
-  Users, 
+import {
+  Shield,
+  Building2,
+  FileText,
+  Users,
   Activity,
   CheckCircle2,
   XCircle,
@@ -102,7 +102,7 @@ export default function Admin() {
   const [empresasFiltradas, setEmpresasFiltradas] = useState<Empresa[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  
+
   const [empresaSelecionada, setEmpresaSelecionada] = useState<Empresa | null>(null);
   const [postSelecionado, setPostSelecionado] = useState<Post | null>(null);
   const [motivoBloqueio, setMotivoBloqueio] = useState("");
@@ -110,7 +110,7 @@ export default function Admin() {
   const [showBloqueioDialog, setShowBloqueioDialog] = useState(false);
   const [showRejeicaoDialog, setShowRejeicaoDialog] = useState(false);
   const [showDetalhesDialog, setShowDetalhesDialog] = useState(false);
-  
+
   // Filtros
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todas");
@@ -128,7 +128,7 @@ export default function Admin() {
 
     // Filtro por nome
     if (filtroNome.trim()) {
-      filtered = filtered.filter(e => 
+      filtered = filtered.filter(e =>
         e.nome.toLowerCase().includes(filtroNome.toLowerCase())
       );
     }
@@ -154,19 +154,19 @@ export default function Admin() {
     try {
       // Verificar se há admin logado no localStorage
       const adminStr = localStorage.getItem("admin");
-      
+
       if (!adminStr) {
         navigate("/admin");
         return;
       }
 
       const admin = JSON.parse(adminStr);
-      
+
       // Verificar se o login não expirou (24 horas)
       const loginTime = new Date(admin.loginTime);
       const now = new Date();
       const diffHours = (now.getTime() - loginTime.getTime()) / (1000 * 60 * 60);
-      
+
       if (diffHours > 24) {
         localStorage.removeItem("admin");
         toast.error("Sessão expirada. Faça login novamente.");
@@ -201,56 +201,46 @@ export default function Admin() {
   };
 
   const carregarEstatisticas = async () => {
-    const { data, error } = await supabase
-      .from("admin_estatisticas")
-      .select("*")
-      .single();
-
-    if (!error && data) {
-      setEstatisticas(data);
+    try {
+      const res = await fetch('/api/admin?action=stats');
+      if (res.ok) {
+        const data = await res.json();
+        setEstatisticas(data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar estatísticas:", error);
     }
   };
 
   const carregarEmpresas = async () => {
-    const { data, error } = await supabase
-      .from("empresas")
-      .select(`
-        *,
-        categorias(nome)
-      `)
-      .order("data_cadastro", { ascending: false });
-
-    if (!error && data) {
-      setEmpresas(data);
-    } else if (error) {
+    try {
+      const res = await fetch('/api/empresas?admin=true');
+      if (res.ok) {
+        const data = await res.json();
+        setEmpresas(data);
+      }
+    } catch (error) {
       console.error("Erro ao carregar empresas:", error);
     }
   };
 
   const carregarPosts = async () => {
-    const { data, error } = await supabase
-      .from("mural_posts")
-      .select(`
-        *,
-        empresas!empresa_id(nome),
-        users!user_id(nome, email)
-      `)
-      .order("data_criacao", { ascending: false });
-
-    if (!error && data) {
-      setPosts(data);
+    try {
+      const res = await fetch('/api/posts?admin=true');
+      if (res.ok) {
+        const data = await res.json();
+        setPosts(data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar posts:", error);
     }
   };
 
   const carregarCategorias = async () => {
-    const { data, error } = await supabase
-      .from("categorias")
-      .select("id, nome")
-      .order("nome");
-
-    if (!error && data) {
-      setCategorias(data);
-    }
+    // Usar categorias locais já implementadas em supabase.ts
+    const { buscarCategorias } = await import("@/lib/supabase");
+    const data = await buscarCategorias();
+    setCategorias(data);
   };
 
   const handleBloquearEmpresa = async () => {
@@ -261,28 +251,28 @@ export default function Admin() {
 
     if (!adminData) return;
 
-    // Atualizar empresa diretamente
-    const { error: updateError } = await supabase
-      .from("empresas")
-      .update({
-        ativa: false,
-        motivo_bloqueio: motivoBloqueio
-      })
-      .eq("id", empresaSelecionada.id);
+    const res = await fetch(`/api/empresas?id=${empresaSelecionada.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativa: false, motivo_bloqueio: motivoBloqueio })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao bloquear empresa");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: "bloquear_empresa",
-      entidade_tipo: "empresa",
-      entidade_id: empresaSelecionada.id,
-      detalhes: `Empresa "${empresaSelecionada.nome}" bloqueada: ${motivoBloqueio}`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "bloquear_empresa",
+        entidade_tipo: "empresa",
+        entidade_id: empresaSelecionada.id,
+        detalhes: `Empresa "${empresaSelecionada.nome}" bloqueada: ${motivoBloqueio}`
+      })
     });
 
     toast.success("Empresa bloqueada com sucesso");
@@ -295,28 +285,28 @@ export default function Admin() {
   const handleDesbloquearEmpresa = async (empresa: Empresa) => {
     if (!adminData) return;
 
-    // Atualizar empresa diretamente
-    const { error: updateError } = await supabase
-      .from("empresas")
-      .update({
-        ativa: true,
-        motivo_bloqueio: null
-      })
-      .eq("id", empresa.id);
+    const res = await fetch(`/api/empresas?id=${empresa.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ativa: true, motivo_bloqueio: null })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao desbloquear empresa");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: "desbloquear_empresa",
-      entidade_tipo: "empresa",
-      entidade_id: empresa.id,
-      detalhes: `Empresa "${empresa.nome}" desbloqueada`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "desbloquear_empresa",
+        entidade_tipo: "empresa",
+        entidade_id: empresa.id,
+        detalhes: `Empresa "${empresa.nome}" desbloqueada`
+      })
     });
 
     toast.success("Empresa desbloqueada com sucesso");
@@ -326,29 +316,28 @@ export default function Admin() {
   const handleAprovarEmpresa = async (empresa: Empresa) => {
     if (!adminData) return;
 
-    // Aprovar empresa: status='aprovado' e ativa=true
-    const { error: updateError } = await supabase
-      .from("empresas")
-      .update({
-        status: 'aprovado',
-        ativa: true,
-        verificado: true
-      })
-      .eq("id", empresa.id);
+    const res = await fetch(`/api/empresas?id=${empresa.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'aprovado', ativa: true, verificado: true })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao aprovar empresa");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: "aprovar_empresa",
-      entidade_tipo: "empresa",
-      entidade_id: empresa.id,
-      detalhes: `Empresa "${empresa.nome}" aprovada`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "aprovar_empresa",
+        entidade_tipo: "empresa",
+        entidade_id: empresa.id,
+        detalhes: `Empresa "${empresa.nome}" aprovada`
+      })
     });
 
     toast.success(`✅ ${empresa.nome} aprovada com sucesso!`);
@@ -358,29 +347,28 @@ export default function Admin() {
   const handleRejeitarEmpresa = async (empresa: Empresa, motivo: string) => {
     if (!adminData) return;
 
-    // Rejeitar empresa
-    const { error: updateError } = await supabase
-      .from("empresas")
-      .update({
-        status: 'rejeitado',
-        ativa: false,
-        motivo_bloqueio: motivo
-      })
-      .eq("id", empresa.id);
+    const res = await fetch(`/api/empresas?id=${empresa.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'rejeitado', ativa: false, motivo_bloqueio: motivo })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao rejeitar empresa");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: "rejeitar_empresa",
-      entidade_tipo: "empresa",
-      entidade_id: empresa.id,
-      detalhes: `Empresa "${empresa.nome}" rejeitada. Motivo: ${motivo}`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "rejeitar_empresa",
+        entidade_tipo: "empresa",
+        entidade_id: empresa.id,
+        detalhes: `Empresa "${empresa.nome}" rejeitada. Motivo: ${motivo}`
+      })
     });
 
     toast.success("Empresa rejeitada");
@@ -392,27 +380,28 @@ export default function Admin() {
 
     const novoDestaque = !empresa.destaque;
 
-    // Alternar destaque
-    const { error: updateError } = await supabase
-      .from("empresas")
-      .update({
-        destaque: novoDestaque
-      })
-      .eq("id", empresa.id);
+    const res = await fetch(`/api/empresas?id=${empresa.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ destaque: novoDestaque })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao atualizar destaque");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: novoDestaque ? "destacar_empresa" : "remover_destaque_empresa",
-      entidade_tipo: "empresa",
-      entidade_id: empresa.id,
-      detalhes: `Empresa "${empresa.nome}" ${novoDestaque ? 'adicionada ao' : 'removida do'} destaque`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: novoDestaque ? "destacar_empresa" : "remover_destaque_empresa",
+        entidade_tipo: "empresa",
+        entidade_id: empresa.id,
+        detalhes: `Empresa "${empresa.nome}" ${novoDestaque ? 'adicionada ao' : 'removida do'} destaque`
+      })
     });
 
     toast.success(novoDestaque ? "⭐ Empresa destacada!" : "Destaque removido");
@@ -422,29 +411,28 @@ export default function Admin() {
   const handleAprovarPost = async (post: Post) => {
     if (!adminData) return;
 
-    // Atualizar o post diretamente
-    const { error: updateError } = await supabase
-      .from("mural_posts")
-      .update({
-        aprovado: true,
-        data_aprovacao: new Date().toISOString(),
-        admin_aprovador_id: adminData.id
-      })
-      .eq("id", post.id);
+    const res = await fetch(`/api/posts?id=${post.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aprovado: true, data_aprovacao: new Date().toISOString(), admin_aprovador_id: adminData.id })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao aprovar post");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: "aprovar_post",
-      entidade_tipo: "post",
-      entidade_id: post.id,
-      detalhes: `Post "${post.titulo}" aprovado`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "aprovar_post",
+        entidade_tipo: "post",
+        entidade_id: post.id,
+        detalhes: `Post "${post.titulo}" aprovado`
+      })
     });
 
     toast.success("Post aprovado com sucesso");
@@ -459,28 +447,28 @@ export default function Admin() {
 
     if (!adminData) return;
 
-    // Atualizar o post com motivo de rejeição
-    const { error: updateError } = await supabase
-      .from("mural_posts")
-      .update({
-        aprovado: false,
-        motivo_rejeicao: motivoRejeicao
-      })
-      .eq("id", postSelecionado.id);
+    const res = await fetch(`/api/posts?id=${postSelecionado.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aprovado: false, motivo_rejeicao: motivoRejeicao })
+    });
 
-    if (updateError) {
+    if (!res.ok) {
       toast.error("Erro ao rejeitar post");
-      console.error(updateError);
       return;
     }
 
     // Registrar log
-    await supabase.from("admin_logs").insert({
-      admin_id: adminData.id,
-      acao: "rejeitar_post",
-      entidade_tipo: "post",
-      entidade_id: postSelecionado.id,
-      detalhes: `Post "${postSelecionado.titulo}" rejeitado: ${motivoRejeicao}`
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "rejeitar_post",
+        entidade_tipo: "post",
+        entidade_id: postSelecionado.id,
+        detalhes: `Post "${postSelecionado.titulo}" rejeitado: ${motivoRejeicao}`
+      })
     });
 
     toast.success("Post rejeitado");
@@ -673,8 +661,8 @@ export default function Admin() {
                 <div className="flex items-start gap-4">
                   {/* Logo */}
                   {empresa.logo ? (
-                    <img 
-                      src={empresa.logo} 
+                    <img
+                      src={empresa.logo}
                       alt={empresa.nome}
                       className="w-20 h-20 rounded-lg object-cover"
                     />
@@ -712,7 +700,7 @@ export default function Admin() {
                         </Badge>
                       )}
                     </div>
-                    
+
                     <CardDescription className="mb-3">
                       {empresa.categorias?.nome} • Cadastrada em {formatarData(empresa.data_cadastro)}
                     </CardDescription>
@@ -753,7 +741,7 @@ export default function Admin() {
                       <Eye className="w-4 h-4 mr-2" />
                       Detalhes
                     </Button>
-                    
+
                     {/* Botões para empresas PENDENTES */}
                     {empresa.status === 'pendente' && (
                       <>
@@ -779,7 +767,7 @@ export default function Admin() {
                         </Button>
                       </>
                     )}
-                    
+
                     {/* Botões para empresas ATIVAS/APROVADAS */}
                     {empresa.status === 'aprovado' && empresa.ativa && (
                       <>
@@ -805,7 +793,7 @@ export default function Admin() {
                         </Button>
                       </>
                     )}
-                    
+
                     {/* Botões para empresas BLOQUEADAS */}
                     {empresa.status === 'aprovado' && !empresa.ativa && (
                       <Button
@@ -917,8 +905,8 @@ export default function Admin() {
                 {post.imagem ? (
                   <div className="space-y-4">
                     <div className="relative rounded-lg overflow-hidden bg-muted">
-                      <img 
-                        src={post.imagem} 
+                      <img
+                        src={post.imagem}
                         alt={post.titulo}
                         className="w-full h-auto max-h-96 object-cover"
                       />
@@ -1011,8 +999,8 @@ export default function Admin() {
             <Button variant="outline" onClick={() => setShowRejeitarEmpresaDialog(false)}>
               Cancelar
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => {
                 if (empresaSelecionada && motivoRejeicaoEmpresa.trim()) {
                   handleRejeitarEmpresa(empresaSelecionada, motivoRejeicaoEmpresa);
@@ -1069,8 +1057,8 @@ export default function Admin() {
               {/* Header com Logo */}
               <div className="flex items-start gap-4">
                 {empresaSelecionada.logo ? (
-                  <img 
-                    src={empresaSelecionada.logo} 
+                  <img
+                    src={empresaSelecionada.logo}
                     alt={empresaSelecionada.nome}
                     className="w-24 h-24 rounded-lg object-cover"
                   />
@@ -1189,9 +1177,9 @@ export default function Admin() {
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                       {empresaSelecionada.imagens.map((img, idx) => (
-                        <img 
+                        <img
                           key={idx}
-                          src={img} 
+                          src={img}
                           alt={`${empresaSelecionada.nome} ${idx + 1}`}
                           className="w-full h-32 object-cover rounded-lg"
                         />

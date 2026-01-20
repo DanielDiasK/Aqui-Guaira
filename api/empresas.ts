@@ -44,8 +44,21 @@ export default async function handler(req: any, res: any) {
 
         // --- MÉTODOS DE ATUALIZAÇÃO ---
         if (req.method === 'PATCH') {
-            const { id } = req.query;
+            const { id, action } = req.query;
             if (!id) return res.status(400).json({ message: "ID é obrigatório para atualização" });
+
+            if (action === 'increment_views') {
+                const result = await db.collection("empresas").updateOne(
+                    { _id: new ObjectId(id) },
+                    { $inc: { visualizacoes: 1 } }
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Empresa não encontrada" });
+                }
+
+                return res.status(200).json({ message: "Visualização incrementada" });
+            }
 
             const updateData = req.body;
             delete updateData.id;
@@ -64,16 +77,21 @@ export default async function handler(req: any, res: any) {
         }
 
         // --- MÉTODOS DE BUSCA (GET) ---
-        const { categoria, bairro, busca, destaque, limit, slug, responsavel_telefone, id } = req.query;
+        const { categoria, bairro, busca, destaque, limit, slug, responsavel_telefone, id, admin } = req.query;
 
         // Busca por ID (Prioridade Máxima)
         if (id) {
-            const empresa = await db.collection("empresas").findOne({ _id: new ObjectId(id) });
+            const empresa = await db.collection("empresas").findOne({ _id: new ObjectId(id as string) });
             if (!empresa) return res.status(404).json({ message: "Empresa não encontrada" });
             return res.status(200).json({ ...empresa, id: empresa._id.toString(), _id: undefined });
         }
 
-        let query: any = { status: 'aprovado' }; // Apenas aprovados por padrão
+        let query: any = {};
+
+        // Se NÃO for admin, mostrar apenas aprovados
+        if (admin !== 'true') {
+            query.status = 'aprovado';
+        }
 
         if (responsavel_telefone) {
             query = { responsavel_telefone };
