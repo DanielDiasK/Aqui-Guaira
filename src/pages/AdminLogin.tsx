@@ -63,48 +63,54 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-primary/10 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-            <Shield className="w-8 h-8 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-[#f8fafc] dark:bg-zinc-950 p-4 relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-blue-500/5 rounded-full blur-[120px]" />
+      </div>
+
+      <Card className="w-full max-w-md shadow-2xl border-none rounded-[40px] overflow-hidden bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl animate-in fade-in zoom-in duration-700">
+        <CardHeader className="space-y-6 text-center pt-12 pb-8">
+          <div className="mx-auto w-24 h-24 bg-white dark:bg-zinc-800 rounded-[32px] shadow-2xl flex items-center justify-center p-4 border border-zinc-100 dark:border-zinc-700 transform hover:rotate-6 transition-transform duration-500">
+            <img src="/images/logo.png" alt="Aqui Guaíra" className="w-full h-full object-contain" />
           </div>
-          <div>
-            <CardTitle className="text-2xl">Painel Administrativo</CardTitle>
-            <CardDescription>
-              Faça login para acessar o painel de controle
+          <div className="space-y-2">
+            <CardTitle className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">Portal Admin</CardTitle>
+            <CardDescription className="text-zinc-500 font-medium px-8">
+              Autenticação segura para o núcleo de gerenciamento do Aqui Guaíra.
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email do Administrador</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <CardContent className="px-10 pb-12">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 pl-1">E-mail Corporativo</Label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="admin@aquiguaira.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-12 h-14 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-primary/20 transition-all font-medium"
                   disabled={loading}
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="senha">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="space-y-1.5">
+              <Label htmlFor="senha" className="text-[10px] uppercase font-black tracking-widest text-zinc-400 pl-1">Senha de Acesso</Label>
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
                 <Input
                   id="senha"
                   type="password"
                   placeholder="••••••••"
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="pl-10"
+                  className="pl-12 h-14 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 focus:ring-primary/20 transition-all font-medium"
                   disabled={loading}
                 />
               </div>
@@ -112,17 +118,26 @@ export default function AdminLogin() {
 
             <Button
               type="submit"
-              className="w-full"
-              size="lg"
+              className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest shadow-xl shadow-primary/20 transition-all active:scale-[0.98]"
               disabled={loading}
             >
-              {loading ? "Entrando..." : "Entrar no Painel"}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Validando...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span>Acessar Dashboard</span>
+                  <Shield className="w-4 h-4" />
+                </div>
+              )}
             </Button>
           </form>
 
-          <div className="mt-6 pt-6 border-t text-center text-sm text-muted-foreground">
-            <p>Acesso restrito a administradores</p>
-          </div>
+          <p className="mt-8 text-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+            <Lock className="w-3 h-3" /> Sistema Criptografado Multi-Camadas
+          </p>
         </CardContent>
       </Card>
     </div>
