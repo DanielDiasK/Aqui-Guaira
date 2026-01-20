@@ -4,7 +4,7 @@ import clientPromise from './_lib/mongodb.js';
 export default async function handler(req: any, res: any) {
     try {
         const client = await clientPromise;
-        const db = client.db("aqui-guaira");
+        const db = client.db("empresas");
 
         // Simple ping to verify connection
         await db.command({ ping: 1 });
@@ -12,7 +12,7 @@ export default async function handler(req: any, res: any) {
         res.status(200).json({
             status: 'ok',
             message: 'MongoDB Connection Successful',
-            database: 'aqui-guaira'
+            database: 'empresas'
         });
     } catch (error: any) {
         console.error('Database connection error:', error);

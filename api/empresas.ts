@@ -20,8 +20,8 @@ export default async function handler(req: any, res: any) {
         const client = await clientPromise;
         console.log('✅ Conectado ao MongoDB');
 
-        const db = client.db("aqui-guaira");
-        console.log('📂 Database selecionado: aqui-guaira');
+        const db = client.db("empresas");
+        console.log('📂 Database selecionado: empresas');
 
         const { categoria, bairro, busca, destaque, limit, slug } = req.query;
         console.log('🔍 Parâmetros recebidos:', { categoria, bairro, busca, destaque, limit, slug });
