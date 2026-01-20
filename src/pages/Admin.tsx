@@ -726,8 +726,11 @@ export default function Admin() {
             <div className="flex flex-col">
               {/* Banner Section */}
               <div className="h-64 relative overflow-hidden group">
-                {empresaSelecionada.banner ? (
-                  <img src={empresaSelecionada.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                {(empresaSelecionada.banner || (empresaSelecionada.imagens && empresaSelecionada.imagens[0])) ? (
+                  <img
+                    src={empresaSelecionada.banner || empresaSelecionada.imagens?.[0]}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-indigo-700" />
                 )}

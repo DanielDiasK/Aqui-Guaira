@@ -148,7 +148,7 @@ const SuaEmpresa = () => {
         estado: 'SP',
         cep: data.cep,
         latitude: -20.3167, // Coordenadas padrão de Guaíra
-        longitude: -48.3167,
+        longitude: -48.3115,
         telefone: data.celular,
         whatsapp: data.whatsapp,
         email: data.email,
@@ -158,6 +158,7 @@ const SuaEmpresa = () => {
         link_google_maps: data.link_google_maps || undefined,
         imagens,
         logo: logoUrl,
+        banner: imagens[0] || undefined, // ← Salva o banner explicitamente
         status: 'aprovado' as const, // ← Mudei para 'aprovado' para aparecer na listagem
         verificado: false,
         destaque: false,
