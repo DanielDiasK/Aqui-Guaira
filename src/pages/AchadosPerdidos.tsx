@@ -10,9 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, PlusCircle, MapPin, Calendar, Phone, CheckCircle, AlertCircle, Package, ArrowLeft, Home, Loader2, X, ImagePlus } from "lucide-react";
+import { Search, PlusCircle, MapPin, Calendar, Phone, CheckCircle, AlertCircle, Package, ArrowLeft, Home, Loader2, X, ImagePlus, User, Tag, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { supabase, getUsuarioLogado, uploadImagens } from "@/lib/supabase";
 import { LoginDialog } from "@/components/LoginDialog";
 
 interface ItemAchadoPerdido {
@@ -81,29 +80,13 @@ export default function AchadosPerdidos() {
   }, []);
 
   const carregarUsuario = async () => {
-    const usuarioLogado = await getUsuarioLogado();
-    setUser(usuarioLogado);
+    // setUser(usuarioLogado);
   };
 
   const carregarItens = async () => {
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('achados_perdidos')
-        .select(`
-          *,
-          users!user_id(nome)
-        `)
-        .order('criado_em', { ascending: false });
-
-      if (error) throw error;
-      setItens(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar itens:', error);
-      toast.error("Erro ao carregar itens");
-    } finally {
-      setLoading(false);
-    }
+    // Dados serão carregados de uma fonte externa futuramente
+    setLoading(false);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,83 +119,17 @@ export default function AchadosPerdidos() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user) {
-      toast.error("Você precisa estar logado");
-      return;
-    }
-
-    if (!titulo || !descricao || !categoria || !bairro || !dataOcorrencia || !telefoneContato || !nomeContato) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      let imagemUrl = null;
-
-      // Upload da imagem se houver
-      if (imagemFile) {
-        const urls = imagemFile ? await uploadImagens('posts-images', [imagemFile], 'achados-perdidos') : [];
-        imagemUrl = urls[0];
-      }
-
-      // Inserir item
-      const { error } = await supabase
-        .from('achados_perdidos')
-        .insert({
-          titulo,
-          descricao,
-          categoria,
-          tipo,
-          status: 'ativo',
-          bairro,
-          local_referencia: localReferencia || null,
-          data_ocorrencia: dataOcorrencia,
-          telefone_contato: telefoneContato,
-          nome_contato: nomeContato,
-          imagem: imagemUrl,
-          user_id: user.id
-        });
-
-      if (error) throw error;
-
-      toast.success(tipo === "perdido" ? "Item perdido cadastrado!" : "Item encontrado cadastrado!");
-      limparFormulario();
-      setOpenDialog(false);
-      carregarItens();
-    } catch (error) {
-      console.error('Erro ao cadastrar:', error);
-      toast.error("Erro ao cadastrar item");
-    } finally {
-      setSubmitting(false);
-    }
+    toast.info("Funcionalidade em desenvolvimento");
   };
 
   const marcarComoRecuperado = async (itemId: string) => {
-    try {
-      const { error } = await supabase
-        .from('achados_perdidos')
-        .update({ status: 'recuperado' })
-        .eq('id', itemId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-
-      toast.success("Item marcado como recuperado!");
-      carregarItens();
-    } catch (error) {
-      console.error('Erro ao atualizar:', error);
-      toast.error("Erro ao atualizar status");
-    }
+    toast.info("Funcionalidade em desenvolvimento");
   };
 
-  // Filtrar itens
   const itensFiltrados = itens.filter(item => {
     const matchBusca = item.titulo.toLowerCase().includes(busca.toLowerCase()) ||
-                       item.descricao.toLowerCase().includes(busca.toLowerCase()) ||
-                       item.bairro.toLowerCase().includes(busca.toLowerCase());
+      item.descricao.toLowerCase().includes(busca.toLowerCase()) ||
+      item.bairro.toLowerCase().includes(busca.toLowerCase());
     const matchTipo = filtroTipo === "todos" || item.tipo === filtroTipo;
     const matchCategoria = filtroCategoria === "todas" || item.categoria === filtroCategoria;
     const matchStatus = filtroStatus === "todos" || item.status === filtroStatus;
@@ -227,294 +144,283 @@ export default function AchadosPerdidos() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
-      <main className="flex-grow container mx-auto px-4 py-12 space-y-8">
-        {/* Botões de Navegação */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => navigate(-1)}
-            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </Button>
-          <Button
-            onClick={() => navigate('/')}
-            className="gap-2 bg-green-500 hover:bg-green-600 text-white"
-          >
-            <Home className="w-4 h-4" />
-            Página Inicial
-          </Button>
-        </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold gradient-text flex items-center gap-3">
-              <Package className="w-10 h-10 text-primary" />
-              Achados e Perdidos
-            </h1>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
-              Encontrou algo? Perdeu algo? Cadastre aqui e ajude a comunidade a recuperar seus pertences.
-            </p>
-          </div>
-          
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-              <Button variant="animated" className="gap-2">
-                <PlusCircle className="w-5 h-5" />
-                Cadastrar Item
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5 text-primary" />
-                  Cadastrar Item
-                </DialogTitle>
-                <DialogDescription>
-                  {user ? (
-                    <>Preencha os dados do item perdido ou encontrado. Seus dados de contato serão exibidos.</>
+      <main className="flex-grow">
+        {/* Premium Hero Section */}
+        <section className="relative pt-12 pb-20 overflow-hidden bg-background">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
+
+          <div className="container mx-auto px-4 relative z-10">
+            {/* Navegação */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate(-1)}
+                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Voltar
+                </Button>
+                <Button
+                  onClick={() => navigate('/')}
+                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
+                >
+                  <Home className="w-4 h-4" />
+                  Início
+                </Button>
+              </div>
+
+            </div>
+
+            <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
+              <div className="inline-flex p-3 bg-primary/10 rounded-2xl mb-2">
+                <Package className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-[1.1]">
+                Achados e <br />
+                <span className="gradient-text">Perdidos</span>
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+                Encontrou algo? Perdeu algo? Cadastre aqui e ajude a comunidade guairense a recuperar seus pertences.
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="rounded-xl px-8 py-7 bg-primary hover:bg-primary/90 text-lg font-bold gap-2">
+                    <PlusCircle className="w-6 h-6" />
+                    Cadastrar Item
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
+                      <Package className="w-6 h-6 text-primary" />
+                      Novo Cadastro
+                    </DialogTitle>
+                    <DialogDescription className="font-medium">
+                      {user ? "Preencha os detalhes do item para ajudar na identificação." : "Acesse sua conta para publicar um item."}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {!user ? (
+                    <div className="py-8 text-center bg-gray-50 rounded-2xl">
+                      <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
+                    </div>
                   ) : (
-                    <>Você precisa estar logado para cadastrar itens.</>
-                  )}
-                </DialogDescription>
-              </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+                      <div className="space-y-2">
+                        <Label className="font-bold">Este item foi... *</Label>
+                        <Select value={tipo} onValueChange={(value: "perdido" | "encontrado") => setTipo(value)}>
+                          <SelectTrigger className="py-6 rounded-xl border-2">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="perdido" className="py-3">
+                              <div className="flex items-center gap-2 font-bold text-red-600">
+                                <AlertCircle className="w-4 h-4" /> Perdido
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="encontrado" className="py-3">
+                              <div className="flex items-center gap-2 font-bold text-green-600">
+                                <CheckCircle className="w-4 h-4" /> Encontrado
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-              {!user ? (
-                <div className="py-8 text-center">
-                  <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Tipo */}
-                  <div className="space-y-2">
-                    <Label>Tipo *</Label>
-                    <Select value={tipo} onValueChange={(value: "perdido" | "encontrado") => setTipo(value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="perdido">
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-red-500" />
-                            Perdi algo
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="encontrado">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            Encontrei algo
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Título do Anúncio *</Label>
+                          <Input
+                            value={titulo}
+                            onChange={(e) => setTitulo(e.target.value)}
+                            placeholder="Ex: Carteira de Couro Marrom"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Título */}
-                    <div className="space-y-2">
-                      <Label>Título *</Label>
-                      <Input
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                        placeholder="Ex: Carteira marrom"
-                        required
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Categoria *</Label>
+                          <Select value={categoria} onValueChange={setCategoria}>
+                            <SelectTrigger className="py-6 rounded-xl border-2">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              {categorias.map(cat => (
+                                <SelectItem key={cat} value={cat} className="py-2.5">{cat}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
 
-                    {/* Categoria */}
-                    <div className="space-y-2">
-                      <Label>Categoria *</Label>
-                      <Select value={categoria} onValueChange={setCategoria}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categorias.map(cat => (
-                            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label className="font-bold">Descrição Detalhada *</Label>
+                        <Textarea
+                          value={descricao}
+                          onChange={(e) => setDescricao(e.target.value)}
+                          placeholder="Descreva cor, marca, marcas de uso, etc. Não informe dados sensíveis se for item encontrado."
+                          rows={3}
+                          className="rounded-xl border-2 p-4"
+                          required
+                        />
+                      </div>
 
-                  {/* Descrição */}
-                  <div className="space-y-2">
-                    <Label>Descrição *</Label>
-                    <Textarea
-                      value={descricao}
-                      onChange={(e) => setDescricao(e.target.value)}
-                      placeholder="Descreva o item com detalhes (cor, marca, características)"
-                      rows={3}
-                      required
-                    />
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Bairro *</Label>
+                          <Input
+                            value={bairro}
+                            onChange={(e) => setBairro(e.target.value)}
+                            placeholder="Onde aconteceu?"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Bairro */}
-                    <div className="space-y-2">
-                      <Label>Bairro *</Label>
-                      <Input
-                        value={bairro}
-                        onChange={(e) => setBairro(e.target.value)}
-                        placeholder="Ex: Centro"
-                        required
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Local aproximado</Label>
+                          <Input
+                            value={localReferencia}
+                            onChange={(e) => setLocalReferencia(e.target.value)}
+                            placeholder="Ex: Perto da Praça da Matriz"
+                            className="py-6 rounded-xl border-2"
+                          />
+                        </div>
+                      </div>
 
-                    {/* Local de Referência */}
-                    <div className="space-y-2">
-                      <Label>Local de Referência</Label>
-                      <Input
-                        value={localReferencia}
-                        onChange={(e) => setLocalReferencia(e.target.value)}
-                        placeholder="Ex: Próximo ao banco"
-                      />
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label className="font-bold">Data do Ocorrido *</Label>
+                        <Input
+                          type="date"
+                          value={dataOcorrencia}
+                          onChange={(e) => setDataOcorrencia(e.target.value)}
+                          className="py-6 rounded-xl border-2"
+                          required
+                        />
+                      </div>
 
-                  {/* Data da Ocorrência */}
-                  <div className="space-y-2">
-                    <Label>Data da Ocorrência *</Label>
-                    <Input
-                      type="date"
-                      value={dataOcorrencia}
-                      onChange={(e) => setDataOcorrencia(e.target.value)}
-                      required
-                    />
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Seu Nome para Contato *</Label>
+                          <Input
+                            value={nomeContato}
+                            onChange={(e) => setNomeContato(e.target.value)}
+                            placeholder="Nome completo"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Nome para Contato */}
-                    <div className="space-y-2">
-                      <Label>Seu Nome *</Label>
-                      <Input
-                        value={nomeContato}
-                        onChange={(e) => setNomeContato(e.target.value)}
-                        placeholder="Nome completo"
-                        required
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Telefone/WhatsApp *</Label>
+                          <Input
+                            value={telefoneContato}
+                            onChange={(e) => setTelefoneContato(e.target.value)}
+                            placeholder="(00) 00000-0000"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
+                      </div>
 
-                    {/* Telefone */}
-                    <div className="space-y-2">
-                      <Label>Telefone para Contato *</Label>
-                      <Input
-                        value={telefoneContato}
-                        onChange={(e) => setTelefoneContato(e.target.value)}
-                        placeholder="(00) 00000-0000"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Upload de Imagem */}
-                  <div className="space-y-2">
-                    <Label>Foto do Item (opcional)</Label>
-                    <div className="flex items-center gap-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => document.getElementById('image-upload')?.click()}
-                        className="gap-2"
-                      >
-                        <ImagePlus className="w-4 h-4" />
-                        Escolher Foto
-                      </Button>
-                      <input
-                        id="image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      {imagemPreview && (
-                        <div className="relative">
-                          <img src={imagemPreview} alt="Preview" className="w-20 h-20 object-cover rounded" />
+                      <div className="space-y-2">
+                        <Label className="font-bold">Foto do Item (Recomendado)</Label>
+                        <div className="flex items-center gap-4">
                           <Button
                             type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 w-6 h-6"
-                            onClick={() => {
-                              setImagemFile(null);
-                              setImagemPreview("");
-                            }}
+                            variant="outline"
+                            onClick={() => document.getElementById('image-upload')?.click()}
+                            className="gap-2 py-8 px-6 rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary transition-colors"
                           >
-                            <X className="w-4 h-4" />
+                            <ImagePlus className="w-5 h-5" />
+                            Adicionar Foto
                           </Button>
+                          <input
+                            id="image-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          {imagemPreview && (
+                            <div className="relative group">
+                              <img src={imagemPreview} alt="Preview" className="w-24 h-24 object-cover rounded-2xl border-2 border-primary/20 shadow-lg" />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute -top-2 -right-2 w-7 h-7 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform"
+                                onClick={() => { setImagemFile(null); setImagemPreview(""); }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
 
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={submitting}>
-                      {submitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Cadastrando...
-                        </>
-                      ) : (
-                        'Cadastrar'
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              )}
-            </DialogContent>
-          </Dialog>
-        </div>
+                      <DialogFooter className="pt-6">
+                        <Button type="button" variant="ghost" onClick={() => setOpenDialog(false)} className="rounded-xl font-bold">
+                          Cancelar
+                        </Button>
+                        <Button type="submit" disabled={submitting} className="rounded-xl px-12 font-bold py-6 h-auto">
+                          {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publicando...</> : 'Publicar Anúncio'}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </section>
 
-        {/* Filtros */}
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>Filtros de Busca</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-4 gap-4">
-              {/* Busca */}
+        {/* Filtros e Resultados Section */}
+        <section className="container mx-auto px-4 py-8 space-y-12">
+          {/* Barra de Filtros Premium */}
+          <Card className="bg-card border border-border/50 shadow-xl rounded-[2.5rem] p-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="space-y-2">
-                <Label>Buscar</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Label className="font-bold text-gray-500 uppercase text-[10px] tracking-widest pl-1">Busca Rápida</Label>
+                <div className="relative group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-primary transition-colors w-4 h-4" />
                   <Input
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
-                    placeholder="Item, local..."
-                    className="pl-10"
+                    placeholder="O que você perdeu?"
+                    className="pl-10 py-5 rounded-xl border-gray-100 focus:border-primary transition-all"
                   />
                 </div>
               </div>
 
-              {/* Tipo */}
               <div className="space-y-2">
-                <Label>Tipo</Label>
+                <Label className="font-bold text-gray-500 uppercase text-[10px] tracking-widest pl-1">Filtrar por Tipo</Label>
                 <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                  <SelectTrigger>
+                  <SelectTrigger className="py-5 rounded-xl border-gray-100 font-medium">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="perdido">Perdidos</SelectItem>
-                    <SelectItem value="encontrado">Encontrados</SelectItem>
+                  <SelectContent className="rounded-xl font-medium">
+                    <SelectItem value="todos">Todos os registros</SelectItem>
+                    <SelectItem value="perdido">Itens Perdidos</SelectItem>
+                    <SelectItem value="encontrado">Itens Encontrados</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* Categoria */}
               <div className="space-y-2">
-                <Label>Categoria</Label>
+                <Label className="font-bold text-gray-500 uppercase text-[10px] tracking-widest pl-1">Categoria Principal</Label>
                 <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
-                  <SelectTrigger>
+                  <SelectTrigger className="py-5 rounded-xl border-gray-100 font-medium">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todas">Todas</SelectItem>
+                  <SelectContent className="rounded-xl font-medium">
+                    <SelectItem value="todas">Todas Categorias</SelectItem>
                     {categorias.map(cat => (
                       <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                     ))}
@@ -522,124 +428,138 @@ export default function AchadosPerdidos() {
                 </Select>
               </div>
 
-              {/* Status */}
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label className="font-bold text-gray-500 uppercase text-[10px] tracking-widest pl-1">Status do Registro</Label>
                 <Select value={filtroStatus} onValueChange={setFiltroStatus}>
-                  <SelectTrigger>
+                  <SelectTrigger className="py-5 rounded-xl border-gray-100 font-medium">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ativo">Ativos</SelectItem>
-                    <SelectItem value="recuperado">Recuperados</SelectItem>
-                    <SelectItem value="todos">Todos</SelectItem>
+                  <SelectContent className="rounded-xl font-medium">
+                    <SelectItem value="ativo">Ativos (Ainda perdido)</SelectItem>
+                    <SelectItem value="recuperado">Recuperados (Resolvido)</SelectItem>
+                    <SelectItem value="todos">Mostrar Todos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Resultados */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-3 text-muted-foreground">Carregando itens...</span>
-          </div>
-        ) : itensFiltrados.length === 0 ? (
-          <Card className="py-20 text-center">
-            <CardContent>
-              <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Nenhum item encontrado</h3>
-              <p className="text-muted-foreground">
-                {busca || filtroTipo !== "todos" || filtroCategoria !== "todas"
-                  ? "Tente ajustar os filtros de busca"
-                  : "Seja o primeiro a cadastrar um item"}
-              </p>
-            </CardContent>
           </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {itensFiltrados.map((item) => (
-              <Card key={item.id} className="hover:shadow-lg transition-all">
-                {item.imagem && (
-                  <div className="w-full h-48 overflow-hidden rounded-t-lg">
-                    <img
-                      src={item.imagem}
-                      alt={item.titulo}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <CardTitle className="text-lg">{item.titulo}</CardTitle>
-                    <Badge
-                      variant={item.tipo === "perdido" ? "destructive" : "default"}
-                      className={item.tipo === "encontrado" ? "bg-green-600" : ""}
-                    >
-                      {item.tipo === "perdido" ? (
-                        <>
-                          <AlertCircle className="w-3 h-3 mr-1" />
-                          Perdido
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Encontrado
-                        </>
+
+          {/* Listagem de Resultados */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+              <Loader2 className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-muted-foreground font-bold">Localizando pertences...</p>
+            </div>
+          ) : itensFiltrados.length === 0 ? (
+            <div className="text-center py-24 bg-muted/20 rounded-[2.5rem] border-2 border-dashed border-border/50 flex flex-col items-center gap-4">
+              <Package className="w-20 h-20 text-muted-foreground/30" />
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-foreground">Nenhum item localizado</h3>
+                <p className="text-muted-foreground font-medium">Tente ajustar seus filtros ou cadastre um novo item.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {itensFiltrados.map((item) => (
+                <Card key={item.id} className="group bg-card border border-border/50 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 flex flex-col rounded-[2rem]">
+                  {/* Container da Imagem */}
+                  <div className="relative h-64 overflow-hidden bg-muted/20">
+                    {item.imagem ? (
+                      <img
+                        src={item.imagem}
+                        alt={item.titulo}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted/20 to-muted">
+                        <Package className="w-16 h-16 text-muted-foreground/30" />
+                      </div>
+                    )}
+
+                    {/* Badge de Status/Tipo */}
+                    <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+                      <Badge
+                        className={`px-4 py-1.5 rounded-xl border-none font-black text-[10px] uppercase shadow-lg ${item.tipo === "perdido" ? "bg-red-500 text-white" : "bg-green-500 text-white"
+                          }`}
+                      >
+                        {item.tipo === "perdido" ? (
+                          <><AlertCircle className="w-3 h-3 mr-1.5" /> Perdido</>
+                        ) : (
+                          <><CheckCircle className="w-3 h-3 mr-1.5" /> Encontrado</>
+                        )}
+                      </Badge>
+
+                      {item.status === "recuperado" && (
+                        <Badge className="bg-blue-600 text-white px-4 py-1.5 rounded-xl border-none font-black text-[10px] uppercase shadow-lg">
+                          <CheckCircle className="w-3 h-3 mr-1.5" /> Recuperado
+                        </Badge>
                       )}
-                    </Badge>
-                  </div>
-                  <CardDescription className="line-clamp-2">{item.descricao}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Package className="w-4 h-4" />
-                    <span>{item.categoria}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    <span>{item.bairro}</span>
-                    {item.local_referencia && ` - ${item.local_referencia}`}
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    <span>{formatarData(item.data_ocorrencia)}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="w-4 h-4 text-primary" />
-                    <a href={`tel:${item.telefone_contato}`} className="text-primary hover:underline">
-                      {item.telefone_contato}
-                    </a>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Contato: {item.nome_contato}
+                    </div>
                   </div>
 
-                  {item.status === "recuperado" && (
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 w-full justify-center">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Recuperado
-                    </Badge>
-                  )}
+                  {/* Conteúdo do Card */}
+                  <div className="p-6 flex-grow flex flex-col gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-3 h-3 text-primary" />
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{item.categoria}</span>
+                      </div>
+                      <h3 className="text-xl font-black text-foreground leading-tight group-hover:text-primary transition-colors">
+                        {item.titulo}
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-medium line-clamp-2 leading-relaxed italic">
+                        "{item.descricao}"
+                      </p>
+                    </div>
 
-                  {user?.id === item.user_id && item.status === "ativo" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full"
-                      onClick={() => marcarComoRecuperado(item.id)}
-                    >
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Marcar como Recuperado
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                    <div className="mt-auto space-y-4">
+                      <div className="space-y-2.5 pt-4 border-t border-border/50">
+                        <div className="flex items-center gap-3 text-sm font-bold text-foreground">
+                          <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors">
+                            <MapPin className="w-4 h-4 text-primary" />
+                          </div>
+                          <span className="truncate">[{item.bairro}] <span className="text-muted-foreground font-medium">{item.local_referencia}</span></span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm font-bold text-foreground">
+                          <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors">
+                            <Calendar className="w-4 h-4 text-primary" />
+                          </div>
+                          <span>{formatarData(item.data_ocorrencia)}</span>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm font-bold text-primary">
+                          <div className="p-2 bg-primary/10 rounded-lg">
+                            <Phone className="w-4 h-4" />
+                          </div>
+                          <a href={`tel:${item.telefone_contato}`} className="hover:underline">
+                            {item.telefone_contato}
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest pt-2">
+                        <span className="flex items-center gap-1.5">
+                          <User className="w-3 h-3" /> Por: {item.users?.nome || 'Comunidade'}
+                        </span>
+                      </div>
+
+                      {user?.id === item.user_id && item.status === "ativo" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full rounded-xl py-6 font-bold border-2 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all gap-2"
+                          onClick={() => marcarComoRecuperado(item.id)}
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                          Marcar como Recuperado
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
 
       <Footer />

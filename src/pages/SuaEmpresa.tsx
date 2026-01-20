@@ -187,10 +187,10 @@ const SuaEmpresa = () => {
       setTimeout(() => navigate('/dashboard'), 1500);
     } catch (error: any) {
       console.error('Erro ao cadastrar:', error);
-      
+
       // Mensagem de erro mais específica
       let mensagem = "Tente novamente mais tarde";
-      
+
       if (error?.message?.includes('row-level security') || error?.code === '42501') {
         mensagem = "❌ Permissão negada. Execute o arquivo 'supabase/fix-rls.sql' no Supabase SQL Editor.";
       } else if (error?.message?.includes('Bucket not found')) {
@@ -202,7 +202,7 @@ const SuaEmpresa = () => {
       } else if (error?.message) {
         mensagem = `❌ Erro: ${error.message}`;
       }
-      
+
       toast("Erro ao cadastrar", {
         description: mensagem,
         duration: 5000
@@ -329,20 +329,20 @@ const SuaEmpresa = () => {
           <div className="flex gap-2 mb-6">
             <Button
               onClick={() => navigate(-1)}
-              className="gap-2 bg-orange-500 hover:bg-orange-600 text-white"
+              className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
             <Button
               onClick={() => navigate('/')}
-              className="gap-2 bg-green-500 hover:bg-green-600 text-white"
+              className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
             >
               <Home className="w-4 h-4" />
-              Página Inicial
+              Início
             </Button>
           </div>
-          
+
           <div className="flex flex-col gap-4 max-w-3xl">
             <h2 className="text-3xl font-bold gradient-text flex items-center gap-3"><Building2 className="h-8 w-8 text-primary" /> Sua Empresa</h2>
             <p className="text-sm text-muted-foreground max-w-xl">Cadastre seu negócio no diretório local ou acesse para ajustar suas informações. Todos os campos principais são obrigatórios para garantir qualidade dos dados exibidos.</p>
@@ -420,8 +420,8 @@ const SuaEmpresa = () => {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-xs font-medium">Categoria Principal *</label>
-                        <Select 
-                          value={categoriaSelecionada} 
+                        <Select
+                          value={categoriaSelecionada}
                           onValueChange={(v) => {
                             setCategoriaSelecionada(v);
                             cadastroForm.setValue("categoria", v);
@@ -462,7 +462,7 @@ const SuaEmpresa = () => {
                             ?.subcategorias.map((sub) => {
                               const isSelected = subcategoriasSelecionadas.includes(sub);
                               const canAdd = subcategoriasSelecionadas.length < 3;
-                              
+
                               return (
                                 <div
                                   key={sub}
@@ -477,13 +477,12 @@ const SuaEmpresa = () => {
                                       cadastroForm.setValue("subcategorias", novas);
                                     }
                                   }}
-                                  className={`p-3 rounded-md border-2 cursor-pointer transition-all text-sm ${
-                                    isSelected 
-                                      ? 'border-primary bg-primary/10 text-primary font-medium' 
-                                      : canAdd 
-                                        ? 'border-border hover:border-primary/50 hover:bg-accent/50' 
-                                        : 'border-border/50 opacity-50 cursor-not-allowed'
-                                  }`}
+                                  className={`p-3 rounded-md border-2 cursor-pointer transition-all text-sm ${isSelected
+                                    ? 'border-primary bg-primary/10 text-primary font-medium'
+                                    : canAdd
+                                      ? 'border-border hover:border-primary/50 hover:bg-accent/50'
+                                      : 'border-border/50 opacity-50 cursor-not-allowed'
+                                    }`}
                                 >
                                   {sub}
                                   {isSelected && <span className="ml-2 text-primary">✓</span>}
@@ -498,8 +497,8 @@ const SuaEmpresa = () => {
                           {subcategoriasSelecionadas.map(sub => (
                             <Badge key={sub} variant="default" className="gap-1">
                               {sub}
-                              <X 
-                                className="h-3 w-3 cursor-pointer" 
+                              <X
+                                className="h-3 w-3 cursor-pointer"
                                 onClick={() => {
                                   const novas = subcategoriasSelecionadas.filter(s => s !== sub);
                                   setSubcategoriasSelecionadas(novas);

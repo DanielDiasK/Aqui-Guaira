@@ -174,16 +174,16 @@ const SearchSection = () => {
         // Filtrar também por subcategorias no lado do cliente (pois PostgreSQL não suporta ILIKE em arrays diretamente)
         let resultados = data || [];
         const searchLower = searchTerm.toLowerCase();
-        
+
         resultados = resultados.filter(empresa => {
           // Já passou pelos filtros do .or() acima
           const matchBasico = true;
-          
+
           // Verificar subcategorias
-          const matchSubcategorias = empresa.subcategorias?.some((sub: string) => 
+          const matchSubcategorias = empresa.subcategorias?.some((sub: string) =>
             sub.toLowerCase().includes(searchLower)
           );
-          
+
           return matchBasico || matchSubcategorias;
         });
 
@@ -249,7 +249,7 @@ const SearchSection = () => {
         return (
           <div className="mb-2 animate-fade-in flex items-center justify-center">
             <p className="text-lg text-gray-900 font-black drop-shadow-lg text-center leading-tight">
-              📦 Ponto de coleta<br/>
+              📦 Ponto de coleta<br />
               <span className="text-2xl font-black drop-shadow-xl" style={{ color: '#FFE600', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>Mercado Livre</span>
             </p>
           </div>
@@ -291,7 +291,7 @@ const SearchSection = () => {
   };
 
   return (
-    <section className="container mx-auto px-4 -mt-16 relative z-10">
+    <section className="container mx-auto px-4 mt-8 relative z-10">
       <div className="glass-card rounded-3xl shadow-2xl p-8 md:p-10 border-2 animate-slide-up">
         <h3 className="text-3xl md:text-4xl font-bold text-center mb-3 gradient-text">
           Encontre empresas locais
@@ -308,7 +308,7 @@ const SearchSection = () => {
               {empresasDestaque.map((empresa) => {
                 const slideIndex = carouselIndex[empresa.id] || 0;
                 const isLogoSlide = slideIndex === 4;
-                
+
                 return (
                   <div
                     key={empresa.id}
@@ -317,28 +317,27 @@ const SearchSection = () => {
                   >
                     {/* Logo como background */}
                     {empresa.logo && (
-                      <div 
-                        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${
-                          isLogoSlide ? 'opacity-90' : 'opacity-40 group-hover:opacity-50'
-                        }`}
+                      <div
+                        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${isLogoSlide ? 'opacity-90' : 'opacity-40 group-hover:opacity-50'
+                          }`}
                         style={{ backgroundImage: `url(${empresa.logo})` }}
                       />
                     )}
-                    
+
                     {/* Conteúdo por cima do background */}
                     <div className={`relative z-10 transition-opacity duration-700 ${isLogoSlide ? 'opacity-0' : 'opacity-100'}`}>
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-semibold text-sm text-gray-900 drop-shadow-sm">{empresa.nome}</h3>
                         <span className="text-amber-500 text-lg drop-shadow-sm">⭐</span>
                       </div>
-                      
+
                       <p className="text-xs text-gray-700 mb-3 drop-shadow-sm font-medium">{empresa.categoria_nome}</p>
-                      
+
                       {/* Carousel de informações */}
                       <div className="min-h-[60px] flex items-center">
                         {renderCarouselContent(empresa)}
                       </div>
-                      
+
                       <div className="flex items-center gap-3 text-xs text-gray-700 mt-2 drop-shadow-sm font-medium">
                         <div className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
@@ -361,8 +360,8 @@ const SearchSection = () => {
                 {/* Filtro de Categoria */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="sm"
                       className={`h-8 px-2 hover:bg-primary/10 ${categoriaFiltro ? 'text-primary' : 'text-muted-foreground'}`}
                       disabled={loadingCategorias}
@@ -412,7 +411,7 @@ const SearchSection = () => {
                 {categoriaFiltro && (
                   <>
                     <div className="h-5 w-px bg-border/60" />
-                    <Badge 
+                    <Badge
                       variant="secondary"
                       className="flex items-center gap-1 pr-0.5 py-0.5 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15"
                     >
@@ -455,8 +454,8 @@ const SearchSection = () => {
                         {/* Logo ou Ícone */}
                         <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
                           {empresa.logo ? (
-                            <img 
-                              src={empresa.logo} 
+                            <img
+                              src={empresa.logo}
                               alt={empresa.nome}
                               className="w-full h-full object-cover"
                             />
@@ -475,7 +474,7 @@ const SearchSection = () => {
                               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 flex-shrink-0" />
                             )}
                           </div>
-                          
+
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
                             {empresa.categoria_nome && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
@@ -507,7 +506,7 @@ const SearchSection = () => {
                       </button>
                     ))}
                   </div>
-                  
+
                   {/* Footer do Dropdown */}
                   <div className="px-4 py-2 bg-muted/30 border-t border-border">
                     <p className="text-xs text-center text-muted-foreground">
@@ -533,8 +532,8 @@ const SearchSection = () => {
                 </div>
               )}
             </div>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="px-8 py-7 rounded-2xl shadow-lg bg-gradient-to-r from-primary to-primary/80"
               onClick={() => searchTerm.trim() && navigate(`/empresas?search=${searchTerm}`)}
             >
@@ -549,8 +548,8 @@ const SearchSection = () => {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="gap-2 border-2"
             size="default"
             onClick={handleMeusFavoritos}
@@ -558,11 +557,11 @@ const SearchSection = () => {
             <Heart className="h-5 w-5" />
             Meus Favoritos
           </Button>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="gap-2 border-2"
                 size="default"
               >

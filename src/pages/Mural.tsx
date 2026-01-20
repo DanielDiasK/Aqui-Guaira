@@ -9,33 +9,28 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { ImagePlus, PlusCircle, Send, Loader2, X, Clock, CheckCircle2, MapPin, ArrowLeft, Home } from "lucide-react";
+import { ImagePlus, PlusCircle, Send, Loader2, X, Clock, CheckCircle2, MapPin, ArrowLeft, Home, Sparkles, MessageSquare, TrendingUp, Filter } from "lucide-react";
 import { toast } from "sonner";
 import { LoginDialog } from "@/components/LoginDialog";
-import { getUsuarioLogado, supabase, uploadImagens } from "@/lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 interface Post {
   id: string;
   titulo: string;
   conteudo: string;
-  imagem?: string;
+  imagem_url?: string;
   aprovado: boolean;
-  data_criacao: string;
-  data_aprovacao?: string;
-  empresa_id?: string;
-  user_id: string;
-  bairro?: string;
+  bairro: string;
   logradouro?: string;
-  empresas?: {
-    nome: string;
-    logo?: string;
-  };
-  users?: {
+  user_id: string;
+  created_at: string;
+  users: {
     nome: string;
   };
 }
 
 const Mural = () => {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Post[]>([]);
   const [meusPostsPendentes, setMeusPostsPendentes] = useState<Post[]>([]);
   const [open, setOpen] = useState(false);
@@ -43,7 +38,7 @@ const Mural = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
 
-  const user = getUsuarioLogado();
+  const user = null; // getUsuarioLogado();
 
   // Campos do formulário
   const [titulo, setTitulo] = useState("");
@@ -58,473 +53,352 @@ const Mural = () => {
     carregarPosts();
   }, []); // Apenas na montagem
 
+  // Observer para posts pendentes se o usuário estiver logado
   useEffect(() => {
     if (user) {
-      carregarMeusPosts();
+      carregarMeusPostsPendentes();
     }
-  }, [user?.id]); // Apenas quando o ID do usuário mudar
+  }, [user]);
 
   const carregarPosts = async () => {
     setLoadingPosts(true);
-    try {
-      const { data, error } = await supabase
-        .from('mural_posts')
-        .select(`
-          *,
-          empresas!empresa_id(nome, logo),
-          users!user_id(nome)
-        `)
-        .eq('aprovado', true)
-        .order('data_criacao', { ascending: false })
-        .limit(50);
+    // Dados serão carregados de uma fonte externa futuramente
+    setLoadingPosts(false);
+  };
 
-      if (error) {
-        console.error('Erro ao carregar posts:', error);
+  const carregarMeusPostsPendentes = async () => {
+    // Dados serão carregados de uma fonte externa futuramente
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Imagem muito grande. O tamanho máximo é 5MB.");
         return;
       }
-      
-      setPosts(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar posts:', error);
-    } finally {
-      setLoadingPosts(false);
-    }
-  };
-
-  const carregarMeusPosts = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('mural_posts')
-        .select(`
-          *,
-          empresas!empresa_id(nome, logo)
-        `)
-        .eq('user_id', user.id)
-        .eq('aprovado', false)
-        .is('motivo_rejeicao', null) // Apenas posts pendentes (não rejeitados)
-        .order('data_criacao', { ascending: false });
-
-      if (error) throw error;
-      setMeusPostsPendentes(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar meus posts:', error);
-    }
-  };
-
-  const resetForm = () => {
-    setTitulo("");
-    setConteudo("");
-    setImagemFile(null);
-    setImagemPreview("");
-    setBairro("");
-    setLogradouro("");
-  };
-
-  const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setImagemFile(file);
-    setImagemPreview(URL.createObjectURL(file));
-  };
-
-  const removeImage = () => {
-    setImagemFile(null);
-    setImagemPreview("");
-  };
-
-  const submitPost = async () => {
-    // Validações
-    if (!titulo.trim()) {
-      toast.error('Digite o título do post');
-      return;
-    }
-    if (!conteudo.trim()) {
-      toast.error('Digite o conteúdo do post');
-      return;
-    }
-
-    // Precisa estar logado
-    if (!user) {
-      setShowLogin(true);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Upload da imagem (opcional)
-      let imagemUrl = "";
-      if (imagemFile) {
-        const urls = await uploadImagens('posts-images', [imagemFile], 'mural');
-        imagemUrl = urls[0] || "";
-      }
-
-      // Criar post
-      const postData = {
-        titulo: titulo.trim(),
-        conteudo: conteudo.trim(),
-        imagem: imagemUrl || null,
-        user_id: user.id,
-        aprovado: false, // Aguarda aprovação do admin
-        bairro: bairro.trim() || null,
-        logradouro: logradouro.trim() || null,
+      setImagemFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagemPreview(reader.result as string);
       };
-
-      const { error } = await supabase
-        .from('mural_posts')
-        .insert([postData]);
-
-      if (error) throw error;
-
-      toast.success('Post enviado com sucesso!', {
-        description: 'Seu post está aguardando aprovação do administrador.'
-      });
-
-      resetForm();
-      setOpen(false);
-      await carregarMeusPosts(); // Atualizar lista de posts pendentes
-    } catch (error: any) {
-      console.error('Erro ao criar post:', error);
-      toast.error('Erro ao criar post', {
-        description: error.message
-      });
-    } finally {
-      setLoading(false);
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleLoginSuccess = () => {
-    carregarMeusPosts();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.info("Funcionalidade em desenvolvimento");
+  };
+
+  const formatarData = (data: string) => {
+    return new Date(data).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-12 pb-32 space-y-10 flex-grow">
-        {/* Botões de Navegação */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => navigate(-1)}
-            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </Button>
-          <Button
-            onClick={() => navigate('/')}
-            className="gap-2 bg-green-500 hover:bg-green-600 text-white"
-          >
-            <Home className="w-4 h-4" />
-            Página Inicial
-          </Button>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold gradient-text">Mural da Cidade</h2>
-            <p className="text-muted-foreground max-w-xl text-sm mt-2">Compartilhe acontecimentos, observações e destaques do seu bairro. Cada postagem entra como pendente aguardando moderação.</p>
-          </div>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button variant="animated" className="gap-2">
-                <PlusCircle className="h-5 w-5" /> Nova Postagem
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <PlusCircle className="h-5 w-5 text-primary" />
-                  Criar nova postagem no mural
-                </DialogTitle>
-                <DialogDescription>
-                  {user ? (
-                    <>Seu post será enviado para aprovação do administrador antes de ser publicado.</>
-                  ) : (
-                    <>Você precisa estar logado para criar posts no mural.</>
-                  )}
-                </DialogDescription>
-              </DialogHeader>
 
-              <div className="space-y-5">
-                {/* Opção de login */}
-                {!user && (
-                  <Alert>
-                    <Clock className="h-4 w-4" />
-                    <AlertDescription>
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">Fazer login para postar</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Apenas usuários autenticados podem criar posts
-                          </p>
-                        </div>
-                        <Button 
-                          variant="default" 
-                          size="sm" 
-                          onClick={() => setShowLogin(true)}
-                        >
-                          Login
-                        </Button>
-                      </div>
-                    </AlertDescription>
-                  </Alert>
-                )}
+      <main className="flex-grow">
+        {/* Premium Hero Section */}
+        <section className="relative pt-12 pb-20 overflow-hidden bg-background">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
 
-                {user && (
-                  <>
-                    {/* Endereço */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="bairro">Bairro</Label>
-                        <Input
-                          id="bairro"
-                          placeholder="Ex: Jardim Paulista"
-                          value={bairro}
-                          onChange={(e) => setBairro(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="logradouro">Rua / Avenida</Label>
-                        <Input
-                          id="logradouro"
-                          placeholder="Ex: Av. Principal, 123"
-                          value={logradouro}
-                          onChange={(e) => setLogradouro(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Título */}
-                    <div className="space-y-2">
-                      <Label htmlFor="titulo">Título *</Label>
-                      <Input
-                        id="titulo"
-                        placeholder="Digite um título para o post"
-                        value={titulo}
-                        onChange={(e) => setTitulo(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Conteúdo */}
-                    <div className="space-y-2">
-                      <Label htmlFor="conteudo">Conteúdo *</Label>
-                      <Textarea
-                        id="conteudo"
-                        placeholder="Escreva o conteúdo do seu post..."
-                        rows={6}
-                        value={conteudo}
-                        onChange={(e) => setConteudo(e.target.value)}
-                      />
-                    </div>
-
-                    {/* Upload de imagem */}
-                    <div className="space-y-2">
-                      <Label>Imagem (opcional)</Label>
-                      {!imagemPreview ? (
-                        <div
-                          className="rounded-xl border-2 border-dashed p-6 text-center cursor-pointer border-border hover:border-primary/70 hover:bg-accent/30 transition-all"
-                          onClick={() => document.getElementById('file-input-mural')?.click()}
-                        >
-                          <input 
-                            id="file-input-mural" 
-                            className="hidden" 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={handleImage} 
-                          />
-                          <div className="flex flex-col items-center gap-2">
-                            <ImagePlus className="h-8 w-8 text-primary" />
-                            <p className="text-xs text-muted-foreground">
-                              Clique para selecionar uma imagem
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="relative rounded-lg overflow-hidden border">
-                          <img src={imagemPreview} alt="preview" className="w-full h-64 object-cover" />
-                          <button
-                            type="button"
-                            onClick={removeImage}
-                            className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-2 shadow hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <Alert>
-                      <Clock className="h-4 w-4" />
-                      <AlertDescription className="text-sm">
-                        Seu post ficará pendente até ser aprovado por um administrador
-                      </AlertDescription>
-                    </Alert>
-                  </>
-                )}
+          <div className="container mx-auto px-4 relative z-10">
+            {/* Navegação */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate(-1)}
+                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Voltar
+                </Button>
+                <Button
+                  onClick={() => navigate('/')}
+                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
+                >
+                  <Home className="w-4 h-4" />
+                  Início
+                </Button>
               </div>
 
-              <DialogFooter className="gap-2">
-                <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button 
-                  onClick={submitPost} 
-                  disabled={loading || !user || !titulo.trim() || !conteudo.trim()} 
-                  className="gap-2"
-                >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Enviar para Aprovação
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+            </div>
 
-        {/* Meus Posts Pendentes */}
-        {user && meusPostsPendentes.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5 text-yellow-600" />
-                Seus Posts Aguardando Aprovação
-              </CardTitle>
-              <CardDescription>
-                {meusPostsPendentes.length} {meusPostsPendentes.length === 1 ? 'post pendente' : 'posts pendentes'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {meusPostsPendentes.map((post) => (
-                <Card key={post.id} className="border-yellow-200 bg-yellow-50/50">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{post.titulo}</CardTitle>
-                        <CardDescription className="mt-1">
-                          Enviado em {new Date(post.data_criacao).toLocaleDateString('pt-BR')}
-                        </CardDescription>
-                        {(post.bairro || post.logradouro) && (
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <Badge variant="secondary" className="gap-1">
-                              <MapPin className="w-3 h-3" />
-                              <span className="text-xs">
-                                {[post.logradouro, post.bairro].filter(Boolean).join(' • ')}
-                              </span>
-                            </Badge>
-                          </div>
-                        )}
+            <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
+              <div className="inline-flex p-3 bg-primary/10 rounded-2xl mb-2">
+                <TrendingUp className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-[1.1]">
+                Mural da <br />
+                <span className="gradient-text">Nossa Cidade</span>
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+                Avisos, utilidade pública e notícias da comunidade. Participe e mantenha todos informados sobre o que acontece em Guaíra-SP.
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="rounded-xl px-10 py-8 bg-primary hover:bg-primary/90 text-lg font-bold gap-3">
+                    <PlusCircle className="w-6 h-6" />
+                    Publicar Aviso
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden">
+                  <div className="bg-primary/5 p-6 border-b border-primary/10">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-3 text-2xl font-black">
+                        <MessageSquare className="w-6 h-6 text-primary" />
+                        Novo Aviso no Mural
+                      </DialogTitle>
+                      <DialogDescription className="font-medium text-primary/70">
+                        Seu aviso será analisado por nossa equipe antes de ser publicado.
+                      </DialogDescription>
+                    </DialogHeader>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="font-bold text-gray-700">O que você quer anunciar? *</Label>
+                        <Input
+                          placeholder="Título curto e direto"
+                          value={titulo}
+                          onChange={(e) => setTitulo(e.target.value)}
+                          className="py-6 rounded-xl border-2 focus:border-primary transition-all"
+                          required
+                        />
                       </div>
-                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                        <Clock className="w-3 h-3 mr-1" />
-                        Pendente
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{post.conteudo}</p>
-                    {post.imagem && (
-                      <img 
-                        src={post.imagem} 
-                        alt={post.titulo}
-                        className="mt-3 w-full max-w-xs rounded-lg"
-                      />
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Lista de posts */}
-        <div className="space-y-6">
-          {loadingPosts ? (
-            <Card className="glass-card border-2">
-              <CardContent className="py-12 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </CardContent>
-            </Card>
-          ) : posts.length === 0 ? (
-            <Card className="glass-card border-2">
-              <CardHeader>
-                <CardTitle className="text-lg">Nenhuma postagem ainda</CardTitle>
-                <CardDescription>Seja o primeiro a compartilhar algo sobre seu bairro!</CardDescription>
-              </CardHeader>
-            </Card>
-          ) : (
-            posts.map((post) => (
-              <Card key={post.id} className="glass-card overflow-hidden border-2 hover:border-primary/40 transition-all">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3 flex-1">
-                      {/* Avatar */}
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <span className="text-sm font-semibold text-primary">
-                            {post.users?.nome?.charAt(0).toUpperCase() || 'U'}
-                          </span>
+                      <div className="space-y-2">
+                        <Label className="font-bold text-gray-700">Descrição detalhada *</Label>
+                        <Textarea
+                          placeholder="Escreva aqui as informações do seu aviso..."
+                          rows={4}
+                          value={conteudo}
+                          onChange={(e) => setConteudo(e.target.value)}
+                          className="rounded-xl border-2 focus:border-primary transition-all p-4"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold text-gray-700">Qual o Bairro? *</Label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <Input
+                              placeholder="Ex: Miguel Fabiano"
+                              value={bairro}
+                              onChange={(e) => setBairro(e.target.value)}
+                              className="pl-10 py-6 rounded-xl border-2"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold text-gray-700">Rua (Opcional)</Label>
+                          <Input
+                            placeholder="Ex: Rua 10, nº 123"
+                            value={logradouro}
+                            onChange={(e) => setLogradouro(e.target.value)}
+                            className="py-6 rounded-xl border-2"
+                          />
                         </div>
                       </div>
 
-                      {/* Info do autor */}
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg mb-1">{post.titulo}</CardTitle>
-                        <CardDescription className="text-xs">
-                          Por {post.users?.nome || 'Usuário'} • {new Date(post.data_criacao).toLocaleDateString("pt-BR", {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </CardDescription>
+                      <div className="space-y-2">
+                        <Label className="font-bold text-gray-700">Adicionar Foto (Recomendado)</Label>
+                        <div className="flex items-center gap-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => document.getElementById('mural-image-upload')?.click()}
+                            className="gap-2 py-8 px-6 rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary transition-colors flex-grow md:flex-grow-0"
+                          >
+                            <ImagePlus className="w-5 h-5" />
+                            Escolher Arquivo
+                          </Button>
+                          <input
+                            id="mural-image-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          {imagemPreview && (
+                            <div className="relative group">
+                              <img src={imagemPreview} alt="Preview" className="w-24 h-24 object-cover rounded-2xl border-2 border-primary/20 shadow-lg" />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute -top-2 -right-2 w-7 h-7 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform"
+                                onClick={() => { setImagemFile(null); setImagemPreview(""); }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Badge aprovado */}
-                    <Badge variant="default" className="bg-green-600 flex-shrink-0">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Aprovado
-                    </Badge>
-                  </div>
-                </CardHeader>
+                    <DialogFooter className="pt-4">
+                      {!user && (
+                        <p className="text-sm text-red-500 font-bold mb-4 w-full">
+                          Você precisa estar logado para publicar.
+                        </p>
+                      )}
+                      <div className="flex w-full gap-3">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="flex-1 rounded-xl h-12 font-bold"
+                          onClick={() => setOpen(false)}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="submit"
+                          className="flex-1 rounded-xl h-12 font-bold shadow-lg shadow-primary/20 gap-2"
+                          disabled={loading || !user}
+                        >
+                          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                          Enviar para Análise
+                        </Button>
+                      </div>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </section>
 
-                <CardContent className="space-y-4">
-                  <p className="text-sm leading-relaxed whitespace-pre-line">{post.conteudo}</p>
-                  
-                  {/* Imagem */}
-                  {post.imagem && (
-                    <div className="rounded-lg overflow-hidden border">
-                      <img 
-                        src={post.imagem} 
-                        alt={post.titulo} 
-                        className="w-full max-h-96 object-cover" 
-                      />
+        <section className="container mx-auto px-4 py-8 max-w-5xl space-y-12">
+          {/* Seus Posts Pendentes */}
+          {meusPostsPendentes.length > 0 && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-orange-100 rounded-xl">
+                  <Clock className="w-6 h-6 text-orange-600" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Publicações em <span className="text-orange-500">Análise</span></h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {meusPostsPendentes.map((post) => (
+                  <Card key={post.id} className="bg-orange-50/50 border-orange-100 rounded-3xl overflow-hidden group hover:border-orange-300 transition-all">
+                    <div className="p-6 flex flex-col md:flex-row gap-4">
+                      {post.imagem_url && (
+                        <img
+                          src={post.imagem_url}
+                          alt={post.titulo}
+                          className="w-full md:w-24 h-24 object-cover rounded-2xl opacity-60"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <Badge variant="outline" className="bg-white text-orange-600 border-orange-200 mb-2 font-bold animate-pulse">Aguardando...</Badge>
+                        <h3 className="font-black text-gray-800 leading-tight">{post.titulo}</h3>
+                        <p className="text-xs text-orange-700/70 font-bold mt-1 uppercase tracking-widest">{post.bairro}</p>
+                      </div>
                     </div>
-                  )}
-                </CardContent>
-                {(post.bairro || post.logradouro) && (
-                  <div className="px-6 pb-4">
-                    <Badge variant="secondary" className="gap-1">
-                      <MapPin className="w-3 h-3" />
-                      <span className="text-xs">
-                        {[post.logradouro, post.bairro].filter(Boolean).join(' • ')}
-                      </span>
-                    </Badge>
-                  </div>
-                )}
-              </Card>
-            ))
+                  </Card>
+                ))}
+              </div>
+            </div>
           )}
-        </div>
-      </main>
-      <Footer />
 
-      {/* Dialog de Login */}
-      <LoginDialog
-        open={showLogin}
-        onOpenChange={setShowLogin}
-        onLoginSuccess={handleLoginSuccess}
-      />
+          {/* Feed do Mural */}
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <TrendingUp className="w-7 h-7 text-primary" />
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Últimos <span className="text-primary">Avisos</span></h2>
+              </div>
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold hidden sm:flex">
+                {posts.length} avisos ativos
+              </Badge>
+            </div>
+
+            {loadingPosts ? (
+              <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
+                <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+                <p className="text-muted-foreground font-bold">Lendo o mural...</p>
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="py-24 text-center bg-muted/20 rounded-[2.5rem] border-2 border-dashed border-border/50 flex flex-col items-center gap-4">
+                <MessageSquare className="w-20 h-20 text-muted-foreground/30" />
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-foreground">O mural está vazio</h3>
+                  <p className="text-muted-foreground font-medium">Seja o primeiro a publicar um aviso útil para a cidade!</p>
+                </div>
+              </div>
+            ) : (
+              <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+                {posts.map((post) => (
+                  <Card key={post.id} className="break-inside-avoid-column bg-card border border-border/50 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 group rounded-[2rem]">
+                    {post.imagem_url && (
+                      <div className="relative overflow-hidden h-56">
+                        <img
+                          src={post.imagem_url}
+                          alt={post.titulo}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      </div>
+                    )}
+
+                    <div className="p-8 space-y-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-primary/10 rounded-lg">
+                              <MapPin className="w-4 h-4 text-primary" />
+                            </div>
+                            <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">{post.bairro}</span>
+                          </div>
+                        </div>
+                        <h3 className="text-2xl font-black text-foreground group-hover:text-primary transition-colors leading-tight">{post.titulo}</h3>
+                        <p className="text-muted-foreground font-medium leading-relaxed whitespace-pre-wrap">{post.conteudo}</p>
+                      </div>
+
+                      <div className="pt-6 border-t border-border/10 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-black text-xs shadow-lg">
+                            {post.users.nome.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-foreground line-clamp-1">{post.users.nome}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{formatarData(post.created_at)}</p>
+                          </div>
+                        </div>
+                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
+      </main>
+
+      <Footer />
     </div>
   );
 };

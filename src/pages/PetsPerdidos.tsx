@@ -10,26 +10,28 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  Search, 
-  PlusCircle, 
-  MapPin, 
-  Calendar, 
-  Phone, 
-  Heart, 
-  AlertCircle, 
+import {
+  Search,
+  PlusCircle,
+  MapPin,
+  Calendar,
+  Phone,
+  Heart,
+  AlertCircle,
   CheckCircle,
   Dog,
   Cat,
-  ArrowLeft, 
-  Home, 
-  Loader2, 
-  X, 
+  ArrowLeft,
+  Home,
+  Loader2,
+  X,
   ImagePlus,
-  MessageCircle
+  MessageCircle,
+  Sparkles,
+  User,
+  PawPrint
 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase, getUsuarioLogado, uploadImagens } from "@/lib/supabase";
 import { LoginDialog } from "@/components/LoginDialog";
 
 interface Pet {
@@ -61,12 +63,11 @@ interface Pet {
 const tiposPet = [
   { value: "cachorro", label: "🐕 Cachorro", icon: Dog },
   { value: "gato", label: "🐱 Gato", icon: Cat },
-  { value: "outro", label: "🐾 Outro", icon: Heart }
+  { value: "outro", label: "🐾 Outro", icon: PawPrint }
 ];
 
-const portes = ["pequeno", "medio", "grande"];
 const cores = [
-  "Preto", "Branco", "Marrom", "Caramelo", "Cinza", 
+  "Preto", "Branco", "Marrom", "Caramelo", "Cinza",
   "Rajado", "Malhado", "Tricolor", "Dourado", "Outro"
 ];
 
@@ -110,29 +111,13 @@ export default function PetsPerdidos() {
   }, []);
 
   const carregarUsuario = async () => {
-    const usuarioLogado = await getUsuarioLogado();
-    setUser(usuarioLogado);
+    // setUser(usuarioLogado);
   };
 
   const carregarPets = async () => {
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('pets_perdidos')
-        .select(`
-          *,
-          users!user_id(nome)
-        `)
-        .order('criado_em', { ascending: false });
-
-      if (error) throw error;
-      setPets(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar pets:', error);
-      toast.error("Erro ao carregar pets");
-    } finally {
-      setLoading(false);
-    }
+    // Dados serão carregados de uma fonte externa futuramente
+    setLoading(false);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,91 +156,18 @@ export default function PetsPerdidos() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user) {
-      toast.error("Você precisa estar logado");
-      return;
-    }
-
-    if (!nome || !tipo || !cor || !descricao || !bairro || !dataOcorrencia || !telefoneContato || !nomeContato) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-
-    setSubmitting(true);
-
-    try {
-      let imagemUrl = null;
-
-      if (imagemFile) {
-        const urls = imagemFile ? await uploadImagens('posts-images', [imagemFile], 'pets') : [];
-        imagemUrl = urls[0];
-      }
-
-      const { error } = await supabase
-        .from('pets_perdidos')
-        .insert({
-          nome,
-          tipo,
-          raca: raca || null,
-          cor,
-          porte: porte || null,
-          idade_aproximada: idadeAproximada || null,
-          descricao,
-          categoria,
-          status: 'ativo',
-          bairro,
-          local_referencia: localReferencia || null,
-          data_ocorrencia: dataOcorrencia,
-          telefone_contato: telefoneContato,
-          whatsapp_contato: whatsappContato || null,
-          nome_contato: nomeContato,
-          caracteristicas_especiais: caracteristicasEspeciais || null,
-          imagem: imagemUrl,
-          user_id: user.id
-        });
-
-      if (error) throw error;
-
-      const mensagem = categoria === "perdido" ? "Pet perdido cadastrado!" :
-                      categoria === "encontrado" ? "Pet encontrado cadastrado!" :
-                      "Pet disponível para adoção cadastrado!";
-      
-      toast.success(mensagem);
-      limparFormulario();
-      setOpenDialog(false);
-      carregarPets();
-    } catch (error) {
-      console.error('Erro ao cadastrar:', error);
-      toast.error("Erro ao cadastrar pet");
-    } finally {
-      setSubmitting(false);
-    }
+    toast.info("Funcionalidade em desenvolvimento");
   };
 
   const marcarComoResolvido = async (petId: string) => {
-    try {
-      const { error } = await supabase
-        .from('pets_perdidos')
-        .update({ status: 'resolvido' })
-        .eq('id', petId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-
-      toast.success("Pet marcado como resolvido!");
-      carregarPets();
-    } catch (error) {
-      console.error('Erro ao atualizar:', error);
-      toast.error("Erro ao atualizar status");
-    }
+    toast.info("Funcionalidade em desenvolvimento");
   };
 
   const petsFiltrados = pets.filter(pet => {
     const matchBusca = pet.nome.toLowerCase().includes(busca.toLowerCase()) ||
-                       pet.descricao.toLowerCase().includes(busca.toLowerCase()) ||
-                       pet.bairro.toLowerCase().includes(busca.toLowerCase()) ||
-                       (pet.raca && pet.raca.toLowerCase().includes(busca.toLowerCase()));
+      pet.descricao.toLowerCase().includes(busca.toLowerCase()) ||
+      pet.bairro.toLowerCase().includes(busca.toLowerCase()) ||
+      (pet.raca && pet.raca.toLowerCase().includes(busca.toLowerCase()));
     const matchCategoria = filtroCategoria === "todos" || pet.categoria === filtroCategoria;
     const matchTipo = filtroTipo === "todos" || pet.tipo === filtroTipo;
     const matchStatus = filtroStatus === "todos" || pet.status === filtroStatus;
@@ -267,387 +179,345 @@ export default function PetsPerdidos() {
     return new Date(data).toLocaleDateString('pt-BR');
   };
 
-  const getCategoriaBadge = (categoria: string) => {
-    switch(categoria) {
+  const getCategoriaInfo = (categoria: string) => {
+    switch (categoria) {
       case "perdido":
-        return { color: "bg-red-600", icon: AlertCircle, text: "Perdido" };
+        return { color: "bg-red-500", icon: AlertCircle, text: "Perdido" };
       case "encontrado":
-        return { color: "bg-green-600", icon: CheckCircle, text: "Encontrado" };
+        return { color: "bg-green-500", icon: CheckCircle, text: "Encontrado" };
       case "adocao":
-        return { color: "bg-blue-600", icon: Heart, text: "Adoção" };
+        return { color: "bg-blue-500", icon: Heart, text: "Adoção" };
       default:
-        return { color: "bg-gray-600", icon: Heart, text: categoria };
+        return { color: "bg-gray-500", icon: Heart, text: categoria };
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
-      
-      <main className="flex-grow container mx-auto px-4 py-12 space-y-8">
-        {/* Botões de Navegação */}
-        <div className="flex gap-2">
-          <Button
-            onClick={() => navigate(-1)}
-            className="gap-2 bg-orange-500 hover:bg-orange-600 text-white"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar
-          </Button>
-          <Button
-            onClick={() => navigate('/')}
-            className="gap-2 bg-green-500 hover:bg-green-600 text-white"
-          >
-            <Home className="w-4 h-4" />
-            Página Inicial
-          </Button>
-        </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-4xl font-bold gradient-text flex items-center gap-3">
-              <Heart className="w-10 h-10 text-primary" />
-              Pets Perdidos e Adoção
-            </h1>
-            <p className="text-muted-foreground mt-2 max-w-2xl">
-              Ajude a reunir pets com suas famílias ou encontre um novo amigo para adotar.
-            </p>
-          </div>
-          
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-              <Button variant="animated" className="gap-2">
-                <PlusCircle className="w-5 h-5" />
-                Cadastrar Pet
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-primary" />
-                  Cadastrar Pet
-                </DialogTitle>
-                <DialogDescription>
-                  {user ? (
-                    <>Preencha os dados do pet. Quanto mais informações, melhor!</>
+      <main className="flex-grow">
+        {/* Premium Hero Section */}
+        <section className="relative pt-12 pb-20 overflow-hidden bg-background border-b border-border/50">
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
+
+          <div className="container mx-auto px-4 relative z-10">
+            {/* Navegação */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => navigate(-1)}
+                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Voltar
+                </Button>
+                <Button
+                  onClick={() => navigate('/')}
+                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
+                >
+                  <Home className="w-4 h-4" />
+                  Início
+                </Button>
+              </div>
+
+            </div>
+
+            <div className="max-w-4xl mx-auto text-center space-y-6">
+              <div className="inline-flex p-3 bg-primary/10 rounded-2xl mb-2">
+                <PawPrint className="w-8 h-8 text-primary" />
+              </div>
+              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-[1.1]">
+                Pets Perdidos e <br />
+                <span className="gradient-text">Adoção</span>
+              </h1>
+              <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
+                Ajude a reunir pets com suas famílias ou encontre um novo melhor amigo para adotar em Guaíra-SP.
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="rounded-xl px-8 py-7 bg-primary hover:bg-primary/90 text-lg font-bold gap-2">
+                    <PlusCircle className="w-6 h-6" />
+                    Cadastrar Pet
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2 text-2xl font-bold">
+                      <PawPrint className="w-6 h-6 text-primary" />
+                      Novo Cadastro de Pet
+                    </DialogTitle>
+                    <DialogDescription className="font-medium">
+                      {user ? "Preencha as informações do animalzinho. Fotos ajudam muito!" : "Acesse sua conta para publicar."}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {!user ? (
+                    <div className="py-8 text-center bg-gray-50 rounded-2xl">
+                      <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
+                    </div>
                   ) : (
-                    <>Você precisa estar logado para cadastrar pets.</>
-                  )}
-                </DialogDescription>
-              </DialogHeader>
+                    <form onSubmit={handleSubmit} className="space-y-6 mt-4">
+                      <div className="space-y-2">
+                        <Label className="font-bold">Categoria do Anúncio *</Label>
+                        <Select value={categoria} onValueChange={(value: "perdido" | "encontrado" | "adocao") => setCategoria(value)}>
+                          <SelectTrigger className="py-6 rounded-xl border-2">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="perdido" className="py-3">
+                              <div className="flex items-center gap-2 font-bold text-red-600">
+                                <AlertCircle className="w-4 h-4" /> Meu pet está perdido
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="encontrado" className="py-3">
+                              <div className="flex items-center gap-2 font-bold text-green-600">
+                                <CheckCircle className="w-4 h-4" /> Encontrei um pet
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="adocao" className="py-3">
+                              <div className="flex items-center gap-2 font-bold text-blue-600">
+                                <Heart className="w-4 h-4" /> Pet para adoção
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-              {!user ? (
-                <div className="py-8 text-center">
-                  <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Categoria */}
-                  <div className="space-y-2">
-                    <Label>Categoria *</Label>
-                    <Select value={categoria} onValueChange={(value: "perdido" | "encontrado" | "adocao") => setCategoria(value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="perdido">
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4 text-red-500" />
-                            Meu pet está perdido
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="encontrado">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            Encontrei um pet
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="adocao">
-                          <div className="flex items-center gap-2">
-                            <Heart className="w-4 h-4 text-blue-500" />
-                            Pet para adoção
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Nome do Pet (ou apelido) *</Label>
+                          <Input
+                            value={nome}
+                            onChange={(e) => setNome(e.target.value)}
+                            placeholder="Ex: Rex, Mel, Pipoca"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Nome */}
-                    <div className="space-y-2">
-                      <Label>Nome do Pet *</Label>
-                      <Input
-                        value={nome}
-                        onChange={(e) => setNome(e.target.value)}
-                        placeholder="Ex: Rex, Mimi"
-                        required
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Espécie *</Label>
+                          <Select value={tipo} onValueChange={(value: "cachorro" | "gato" | "outro") => setTipo(value)}>
+                            <SelectTrigger className="py-6 rounded-xl border-2">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              {tiposPet.map(t => (
+                                <SelectItem key={t.value} value={t.value} className="py-2.5">
+                                  <span className="flex items-center gap-2">{t.label}</span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
 
-                    {/* Tipo */}
-                    <div className="space-y-2">
-                      <Label>Tipo *</Label>
-                      <Select value={tipo} onValueChange={(value: "cachorro" | "gato" | "outro") => setTipo(value)}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {tiposPet.map(t => (
-                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Raça</Label>
+                          <Input
+                            value={raca}
+                            onChange={(e) => setRaca(e.target.value)}
+                            placeholder="Ex: Labrador, SRD"
+                            className="py-6 rounded-xl border-2"
+                          />
+                        </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {/* Raça */}
-                    <div className="space-y-2">
-                      <Label>Raça</Label>
-                      <Input
-                        value={raca}
-                        onChange={(e) => setRaca(e.target.value)}
-                        placeholder="Ex: Vira-lata, SRD"
-                      />
-                    </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Cor Dominante *</Label>
+                          <Select value={cor} onValueChange={setCor}>
+                            <SelectTrigger className="py-6 rounded-xl border-2">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              {cores.map(c => (
+                                <SelectItem key={c} value={c} className="py-2">{c}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
 
-                    {/* Cor */}
-                    <div className="space-y-2">
-                      <Label>Cor *</Label>
-                      <Select value={cor} onValueChange={setCor}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {cores.map(c => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Porte</Label>
+                          <Select value={porte} onValueChange={setPorte}>
+                            <SelectTrigger className="py-6 rounded-xl border-2">
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              <SelectItem value="pequeno">Pequeno</SelectItem>
+                              <SelectItem value="medio">Médio</SelectItem>
+                              <SelectItem value="grande">Grande</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
 
-                    {/* Porte */}
-                    <div className="space-y-2">
-                      <Label>Porte</Label>
-                      <Select value={porte} onValueChange={setPorte}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pequeno">Pequeno</SelectItem>
-                          <SelectItem value="medio">Médio</SelectItem>
-                          <SelectItem value="grande">Grande</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <Label className="font-bold">Descrição e Comportamento *</Label>
+                        <Textarea
+                          value={descricao}
+                          onChange={(e) => setDescricao(e.target.value)}
+                          placeholder="Descreva detalhes que ajudem a identificar, temperamento, etc."
+                          rows={3}
+                          className="rounded-xl border-2 p-4"
+                          required
+                        />
+                      </div>
 
-                  {/* Idade */}
-                  <div className="space-y-2">
-                    <Label>Idade Aproximada</Label>
-                    <Input
-                      value={idadeAproximada}
-                      onChange={(e) => setIdadeAproximada(e.target.value)}
-                      placeholder="Ex: 2 anos, 6 meses, filhote"
-                    />
-                  </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Bairro *</Label>
+                          <Input
+                            value={bairro}
+                            onChange={(e) => setBairro(e.target.value)}
+                            placeholder="Onde foi visto pela última vez?"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
 
-                  {/* Descrição */}
-                  <div className="space-y-2">
-                    <Label>Descrição *</Label>
-                    <Textarea
-                      value={descricao}
-                      onChange={(e) => setDescricao(e.target.value)}
-                      placeholder="Descreva o pet, comportamento, onde foi visto..."
-                      rows={3}
-                      required
-                    />
-                  </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Data da Ocorrência *</Label>
+                          <Input
+                            type="date"
+                            value={dataOcorrencia}
+                            onChange={(e) => setDataOcorrencia(e.target.value)}
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
+                      </div>
 
-                  {/* Características Especiais */}
-                  <div className="space-y-2">
-                    <Label>Características Especiais</Label>
-                    <Textarea
-                      value={caracteristicasEspeciais}
-                      onChange={(e) => setCaracteristicasEspeciais(e.target.value)}
-                      placeholder="Coleira, manchas, cicatrizes, comportamento único..."
-                      rows={2}
-                    />
-                  </div>
+                      <div className="grid md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-bold">Seu Nome *</Label>
+                          <Input
+                            value={nomeContato}
+                            onChange={(e) => setNomeContato(e.target.value)}
+                            placeholder="Responsável"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">Telefone *</Label>
+                          <Input
+                            value={telefoneContato}
+                            onChange={(e) => setTelefoneContato(e.target.value)}
+                            placeholder="Fixo ou Celular"
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-bold">WhatsApp</Label>
+                          <Input
+                            value={whatsappContato}
+                            onChange={(e) => setWhatsappContato(e.target.value)}
+                            placeholder="WhatsApp"
+                            className="py-6 rounded-xl border-2"
+                          />
+                        </div>
+                      </div>
 
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Bairro */}
-                    <div className="space-y-2">
-                      <Label>Bairro *</Label>
-                      <Input
-                        value={bairro}
-                        onChange={(e) => setBairro(e.target.value)}
-                        placeholder="Ex: Centro"
-                        required
-                      />
-                    </div>
-
-                    {/* Local de Referência */}
-                    <div className="space-y-2">
-                      <Label>Local de Referência</Label>
-                      <Input
-                        value={localReferencia}
-                        onChange={(e) => setLocalReferencia(e.target.value)}
-                        placeholder="Ex: Próximo à praça"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Data */}
-                  <div className="space-y-2">
-                    <Label>Data {categoria === "adocao" ? "do Anúncio" : "da Ocorrência"} *</Label>
-                    <Input
-                      type="date"
-                      value={dataOcorrencia}
-                      onChange={(e) => setDataOcorrencia(e.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {/* Nome para Contato */}
-                    <div className="space-y-2">
-                      <Label>Seu Nome *</Label>
-                      <Input
-                        value={nomeContato}
-                        onChange={(e) => setNomeContato(e.target.value)}
-                        placeholder="Nome completo"
-                        required
-                      />
-                    </div>
-
-                    {/* Telefone */}
-                    <div className="space-y-2">
-                      <Label>Telefone *</Label>
-                      <Input
-                        value={telefoneContato}
-                        onChange={(e) => setTelefoneContato(e.target.value)}
-                        placeholder="(00) 00000-0000"
-                        required
-                      />
-                    </div>
-
-                    {/* WhatsApp */}
-                    <div className="space-y-2">
-                      <Label>WhatsApp</Label>
-                      <Input
-                        value={whatsappContato}
-                        onChange={(e) => setWhatsappContato(e.target.value)}
-                        placeholder="(00) 00000-0000"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Upload de Imagem */}
-                  <div className="space-y-2">
-                    <Label>Foto do Pet (Recomendado)</Label>
-                    <div className="flex items-center gap-4">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => document.getElementById('pet-image-upload')?.click()}
-                        className="gap-2"
-                      >
-                        <ImagePlus className="w-4 h-4" />
-                        Escolher Foto
-                      </Button>
-                      <input
-                        id="pet-image-upload"
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                      {imagemPreview && (
-                        <div className="relative">
-                          <img src={imagemPreview} alt="Preview" className="w-24 h-24 object-cover rounded-lg" />
+                      <div className="space-y-2">
+                        <Label className="font-bold">Foto do Pet (Imprescindível)</Label>
+                        <div className="flex items-center gap-4">
                           <Button
                             type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute -top-2 -right-2 w-6 h-6"
-                            onClick={() => {
-                              setImagemFile(null);
-                              setImagemPreview("");
-                            }}
+                            variant="outline"
+                            onClick={() => document.getElementById('pet-image-upload')?.click()}
+                            className="gap-2 py-8 px-6 rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary transition-colors"
                           >
-                            <X className="w-4 h-4" />
+                            <ImagePlus className="w-5 h-5" />
+                            Escolher Foto
                           </Button>
+                          <input
+                            id="pet-image-upload"
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          {imagemPreview && (
+                            <div className="relative group">
+                              <img src={imagemPreview} alt="Preview" className="w-24 h-24 object-cover rounded-2xl border-2 border-primary/20 shadow-lg" />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute -top-2 -right-2 w-7 h-7 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform"
+                                onClick={() => { setImagemFile(null); setImagemPreview(""); }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
 
-                  <DialogFooter>
-                    <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" disabled={submitting}>
-                      {submitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Cadastrando...
-                        </>
-                      ) : (
-                        'Cadastrar'
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              )}
-            </DialogContent>
-          </Dialog>
-        </div>
+                      <DialogFooter className="pt-6">
+                        <Button type="button" variant="ghost" onClick={() => setOpenDialog(false)} className="rounded-xl font-bold">
+                          Cancelar
+                        </Button>
+                        <Button type="submit" disabled={submitting} className="rounded-xl px-12 font-bold py-6 h-auto">
+                          {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Publicando...</> : 'Publicar Anúncio'}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  )}
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </section>
 
-        {/* Filtros */}
-        <Card className="glass-card">
-          <CardHeader>
-            <CardTitle>Filtros de Busca</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-4 gap-4">
+        {/* Filtros e Resultados */}
+        <section className="container mx-auto px-4 py-8 space-y-12">
+          {/* Barra de Filtros Premium */}
+          <Card className="bg-card border border-border/50 shadow-xl rounded-[2.5rem] p-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="space-y-2">
-                <Label>Buscar</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Label className="font-bold text-muted-foreground uppercase text-[10px] tracking-widest pl-1">Busca Rápida</Label>
+                <div className="relative group">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-hover:text-primary transition-colors w-4 h-4" />
                   <Input
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
-                    placeholder="Nome, raça, local..."
-                    className="pl-10"
+                    placeholder="Nome, raça ou local..."
+                    className="pl-10 py-5 rounded-xl border-border/50 focus:border-primary transition-all bg-muted/20"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Categoria</Label>
+                <Label className="font-bold text-muted-foreground uppercase text-[10px] tracking-widest pl-1">Categoria</Label>
                 <Select value={filtroCategoria} onValueChange={setFiltroCategoria}>
-                  <SelectTrigger>
+                  <SelectTrigger className="py-5 rounded-xl border-border/50 font-bold bg-muted/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
-                    <SelectItem value="perdido">Perdidos</SelectItem>
-                    <SelectItem value="encontrado">Encontrados</SelectItem>
-                    <SelectItem value="adocao">Adoção</SelectItem>
+                  <SelectContent className="rounded-xl font-medium">
+                    <SelectItem value="todos">Todos (Perdidos/Adoção)</SelectItem>
+                    <SelectItem value="perdido">Apenas Perdidos</SelectItem>
+                    <SelectItem value="encontrado">Apenas Encontrados</SelectItem>
+                    <SelectItem value="adocao">Apenas Adoção</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label>Tipo de Animal</Label>
+                <Label className="font-bold text-muted-foreground uppercase text-[10px] tracking-widest pl-1">Espécie</Label>
                 <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                  <SelectTrigger>
+                  <SelectTrigger className="py-5 rounded-xl border-border/50 font-bold bg-muted/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos</SelectItem>
+                  <SelectContent className="rounded-xl font-medium">
+                    <SelectItem value="todos">Todas Espécies</SelectItem>
                     <SelectItem value="cachorro">Cachorros</SelectItem>
                     <SelectItem value="gato">Gatos</SelectItem>
                     <SelectItem value="outro">Outros</SelectItem>
@@ -656,164 +526,156 @@ export default function PetsPerdidos() {
               </div>
 
               <div className="space-y-2">
-                <Label>Status</Label>
+                <Label className="font-bold text-muted-foreground uppercase text-[10px] tracking-widest pl-1">Status</Label>
                 <Select value={filtroStatus} onValueChange={setFiltroStatus}>
-                  <SelectTrigger>
+                  <SelectTrigger className="py-5 rounded-xl border-border/50 font-bold bg-muted/20">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ativo">Ativos</SelectItem>
-                    <SelectItem value="resolvido">Resolvidos</SelectItem>
+                  <SelectContent className="rounded-xl font-medium">
+                    <SelectItem value="ativo">Apenas Ativos</SelectItem>
+                    <SelectItem value="resolvido">Apenas Resolvidos</SelectItem>
                     <SelectItem value="todos">Todos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Resultados */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-3 text-muted-foreground">Carregando pets...</span>
-          </div>
-        ) : petsFiltrados.length === 0 ? (
-          <Card className="py-20 text-center">
-            <CardContent>
-              <Heart className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Nenhum pet encontrado</h3>
-              <p className="text-muted-foreground">
-                {busca || filtroCategoria !== "todos" || filtroTipo !== "todos"
-                  ? "Tente ajustar os filtros de busca"
-                  : "Seja o primeiro a cadastrar um pet"}
-              </p>
-            </CardContent>
           </Card>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {petsFiltrados.map((pet) => {
-              const badge = getCategoriaBadge(pet.categoria);
-              const IconeTipo = tiposPet.find(t => t.value === pet.tipo)?.icon || Heart;
-              
-              return (
-                <Card key={pet.id} className="hover:shadow-xl transition-all overflow-hidden">
-                  {pet.imagem ? (
-                    <div className="relative w-full h-56 overflow-hidden">
-                      <img
-                        src={pet.imagem}
-                        alt={pet.nome}
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <Badge className={`${badge.color} text-white`}>
-                          <badge.icon className="w-3 h-3 mr-1" />
-                          {badge.text}
-                        </Badge>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative w-full h-56 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                      <IconeTipo className="w-24 h-24 text-muted-foreground/30" />
-                      <div className="absolute top-3 right-3">
-                        <Badge className={`${badge.color} text-white`}>
-                          <badge.icon className="w-3 h-3 mr-1" />
-                          {badge.text}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
-                  
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-xl flex items-center gap-2">
-                        <IconeTipo className="w-5 h-5" />
-                        {pet.nome}
-                      </CardTitle>
-                    </div>
-                    {pet.raca && (
-                      <p className="text-sm text-muted-foreground">{pet.raca}</p>
-                    )}
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-3">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">{pet.cor}</Badge>
-                      {pet.porte && <Badge variant="secondary">Porte {pet.porte}</Badge>}
-                      {pet.idade_aproximada && <Badge variant="secondary">{pet.idade_aproximada}</Badge>}
-                    </div>
 
-                    <CardDescription className="line-clamp-2">{pet.descricao}</CardDescription>
+          {/* Listagem de Resultados */}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+              <Loader2 className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-muted-foreground font-bold">Procurando pets...</p>
+            </div>
+          ) : petsFiltrados.length === 0 ? (
+            <div className="text-center py-24 bg-muted/20 rounded-[2.5rem] border-2 border-dashed border-border/50 flex flex-col items-center gap-4">
+              <PawPrint className="w-20 h-20 text-muted-foreground/30" />
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-foreground">Nenhum pet localizado</h3>
+                <p className="text-muted-foreground font-medium">Tente ajustar seus filtros ou publique um novo anúncio.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {petsFiltrados.map((pet) => {
+                const info = getCategoriaInfo(pet.categoria);
+                const IconeTipo = tiposPet.find(t => t.value === pet.tipo)?.icon || PawPrint;
 
-                    {pet.caracteristicas_especiais && (
-                      <div className="text-sm bg-yellow-50 border border-yellow-200 rounded p-2">
-                        <p className="font-semibold text-yellow-800 text-xs mb-1">Características:</p>
-                        <p className="text-yellow-700 text-xs">{pet.caracteristicas_especiais}</p>
-                      </div>
-                    )}
-
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <MapPin className="w-4 h-4 flex-shrink-0" />
-                        <span>{pet.bairro}</span>
-                        {pet.local_referencia && <span className="text-xs">• {pet.local_referencia}</span>}
-                      </div>
-                      
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="w-4 h-4 flex-shrink-0" />
-                        <span>{formatarData(pet.data_ocorrencia)}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                        <a href={`tel:${pet.telefone_contato}`} className="text-primary hover:underline text-sm">
-                          {pet.telefone_contato}
-                        </a>
-                      </div>
-                      
-                      {pet.whatsapp_contato && (
-                        <div className="flex items-center gap-2">
-                          <MessageCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                          <a 
-                            href={`https://wa.me/55${pet.whatsapp_contato.replace(/\D/g, '')}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-600 hover:underline text-sm"
-                          >
-                            WhatsApp
-                          </a>
+                return (
+                  <Card key={pet.id} className="group bg-card border border-border/50 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 flex flex-col rounded-[2rem]">
+                    {/* Imagem */}
+                    <div className="relative h-72 overflow-hidden bg-muted/20">
+                      {pet.imagem ? (
+                        <img
+                          src={pet.imagem}
+                          alt={pet.nome}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="relative w-full h-full bg-gradient-to-br from-muted/20 to-muted flex items-center justify-center">
+                          <IconeTipo className="w-24 h-24 text-muted-foreground/30" />
                         </div>
                       )}
-                      
-                      <div className="text-xs text-muted-foreground pt-2 border-t">
-                        Contato: {pet.nome_contato}
+
+                      {/* Floating Badge */}
+                      <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+                        <Badge className={`${info.color} text-white px-4 py-1.5 rounded-xl border-none font-black text-[10px] uppercase shadow-lg`}>
+                          <info.icon className="w-3 h-3 mr-1.5" />
+                          {info.text}
+                        </Badge>
+                        {pet.status === "resolvido" && (
+                          <Badge className="bg-blue-600 text-white px-4 py-1.5 rounded-xl border-none font-black text-[10px] uppercase shadow-lg">
+                            <CheckCircle className="w-3 h-3 mr-1.5" /> Resolvido
+                          </Badge>
+                        )}
                       </div>
                     </div>
 
-                    {pet.status === "resolvido" && (
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700 w-full justify-center">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Resolvido
-                      </Badge>
-                    )}
+                    {/* Conteúdo */}
+                    <div className="p-6 flex-grow flex flex-col gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 p-2 bg-muted rounded-lg">
+                            <IconeTipo className="w-4 h-4 text-primary" />
+                            <span className="text-[10px] font-black text-muted-foreground border-l border-border pl-2 uppercase tracking-widest leading-none">{pet.tipo}</span>
+                          </div>
+                        </div>
+                        <h3 className="text-2xl font-black text-foreground group-hover:text-primary transition-colors mt-2">{pet.nome}</h3>
+                        {pet.raca && <p className="text-sm font-bold text-primary/70">{pet.raca}</p>}
+                      </div>
 
-                    {user?.id === pet.user_id && pet.status === "ativo" && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => marcarComoResolvido(pet.id)}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Marcar como Resolvido
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="bg-muted text-muted-foreground font-bold border-none">{pet.cor}</Badge>
+                        {pet.porte && <Badge variant="secondary" className="bg-muted text-muted-foreground font-bold border-none">Porte {pet.porte}</Badge>}
+                      </div>
+
+                      <p className="text-sm text-muted-foreground font-medium line-clamp-2 italic leading-relaxed">
+                        "{pet.descricao}"
+                      </p>
+
+                      <div className="mt-auto space-y-4">
+                        <div className="space-y-2 pt-4 border-t border-border/50 text-sm font-bold text-foreground">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors">
+                              <MapPin className="w-4 h-4 text-primary" />
+                            </div>
+                            <span className="truncate">{pet.bairro} {pet.local_referencia && <span className="text-muted-foreground font-medium">• {pet.local_referencia}</span>}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-muted rounded-lg group-hover:bg-primary/10 transition-colors">
+                              <Calendar className="w-4 h-4 text-primary" />
+                            </div>
+                            <span>{formatarData(pet.data_ocorrencia)}</span>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          {pet.telefone_contato && (
+                            <Button
+                              variant="outline"
+                              className="rounded-xl border-2 font-black text-xs py-6 h-auto transition-all active:scale-95"
+                              onClick={() => window.location.href = `tel:${pet.telefone_contato}`}
+                            >
+                              <Phone className="w-4 h-4 mr-2 text-primary" />
+                              LIGAR
+                            </Button>
+                          )}
+                          {pet.whatsapp_contato && (
+                            <Button
+                              className="bg-green-500 hover:bg-green-600 text-white rounded-xl font-black text-xs py-6 h-auto shadow-lg shadow-green-100 transition-all active:scale-95"
+                              onClick={() => window.open(`https://wa.me/55${pet.whatsapp_contato?.replace(/\D/g, '')}`, '_blank')}
+                            >
+                              <MessageCircle className="w-4 h-4 mr-2" />
+                              ZAP
+                            </Button>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-widest pt-2">
+                          <span className="flex items-center gap-1.5">
+                            <User className="w-3 h-3" /> Por: {pet.users?.nome || 'Comunidade'}
+                          </span>
+                        </div>
+
+                        {user?.id === pet.user_id && pet.status === "ativo" && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="w-full rounded-xl py-5 font-bold border-none transition-all gap-2"
+                            onClick={() => marcarComoResolvido(pet.id)}
+                          >
+                            <CheckCircle className="w-4 h-4" />
+                            Marcar como Resolvido
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </main>
 
       <Footer />

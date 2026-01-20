@@ -37,7 +37,7 @@ All colors MUST be HSL.
     --ring: 142 71% 35%;
 
     --radius: 0.75rem;
-    
+
     --hero-bg: 120 40% 88%;
     --hero-text: 0 0% 30%;
     --search-bg: 0 0% 98%;
@@ -87,11 +87,11 @@ All colors MUST be HSL.
     --border: 0 0% 25%;
     --input: 0 0% 25%;
     --ring: 142 71% 45%;
-    
+
     --hero-bg: 0 0% 18%;
     --hero-text: 0 0% 85%;
     --search-bg: 0 0% 15%;
-    
+
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 90%;
     --sidebar-primary: 142 71% 45%;
@@ -107,47 +107,25 @@ All colors MUST be HSL.
   .glass-card {
     @apply bg-background/80 backdrop-blur-xl border border-border/50;
   }
-  
+
   .gradient-text {
     @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
   }
 
-  /* Hover glow util (can be applied to wrappers) */
-  .hover-glow {
-    @apply transition-shadow duration-300 hover:shadow-[0_0_0_3px_hsl(var(--primary)/0.35)];
+  /* standard helpers */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-/* Keyframes para efeitos sutis */
-@keyframes subtlePulseBorder {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary)/0.0); }
-  50% { box-shadow: 0 0 0 4px hsl(var(--primary)/0.15); }
+html {
+  scroll-behavior: smooth;
 }
-
-@keyframes softGlow {
-  0% { filter: brightness(1); }
-  50% { filter: brightness(1.08); }
-  100% { filter: brightness(1); }
-}
-
-@layer utilities {
-  .animate-soft-glow { animation: softGlow 4s ease-in-out infinite; }
-  .focus-pulse-border:focus { animation: subtlePulseBorder 1.8s ease-in-out; }
-  .anchor-highlight { animation: subtlePulseBorder 2s ease-in-out; }
-  .empresa-btn { position: relative; transition: box-shadow .5s ease; background: transparent; }
-  .empresa-btn:hover { animation: empresaBorderPulse 1.8s ease-in-out infinite; }
-  .empresa-btn::before { display: none !important; }
-  .empresa-btn:hover::before { display: none !important; }
-}
-
-/* Keyframe fora da layer para evitar conflitos */
-@keyframes empresaBorderPulse {
-  0% { box-shadow: 0 0 0 0 hsl(var(--primary)/0.0), 0 0 0 0 hsl(var(--primary)/0.0); }
-  50% { box-shadow: 0 0 0 2px hsl(var(--primary)/0.55), 0 0 10px 4px hsl(var(--primary)/0.30); }
-  100% { box-shadow: 0 0 0 0 hsl(var(--primary)/0.0), 0 0 0 0 hsl(var(--primary)/0.0); }
-}
-
-html { scroll-behavior: smooth; }
 
 /* Animações splash screen */
 @keyframes typing-line-1 {
@@ -155,12 +133,15 @@ html { scroll-behavior: smooth; }
     width: 0;
     opacity: 0;
   }
+
   1% {
     opacity: 1;
   }
+
   50% {
     width: 100%;
   }
+
   100% {
     width: 100%;
     opacity: 1;
@@ -168,13 +149,17 @@ html { scroll-behavior: smooth; }
 }
 
 @keyframes typing-line-2 {
-  0%, 50% {
+
+  0%,
+  50% {
     width: 0;
     opacity: 0;
   }
+
   51% {
     opacity: 1;
   }
+
   100% {
     width: 100%;
     opacity: 1;
@@ -185,6 +170,7 @@ html { scroll-behavior: smooth; }
   0% {
     width: 0%;
   }
+
   100% {
     width: 100%;
   }
@@ -195,6 +181,7 @@ html { scroll-behavior: smooth; }
     transform: scale(0.5);
     opacity: 0;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -205,6 +192,7 @@ html { scroll-behavior: smooth; }
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
