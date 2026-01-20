@@ -122,12 +122,9 @@ const SuaEmpresa = () => {
         }
       }
 
-      // Buscar ID da categoria
-      const { data: categoriaData } = await supabase
-        .from('categorias')
-        .select('id')
-        .eq('nome', data.categoria)
-        .single();
+      // Buscar ID da categoria - Agora via JSON local
+      const categoriaEncontrada = categoriasData.categorias.find(c => c.nome === data.categoria);
+      const categoriaId = categoriaEncontrada?.id || 'outros';
 
       // Criar slug
       const slug = data.nomeFantasia
@@ -143,7 +140,7 @@ const SuaEmpresa = () => {
         nome: data.nomeFantasia,
         slug,
         descricao: data.descricao,
-        categoria_id: categoriaData?.id,
+        categoria_id: categoriaId,
         subcategorias: data.subcategorias, // ← Subcategorias adicionadas
         endereco: data.endereco,
         bairro: data.bairro,

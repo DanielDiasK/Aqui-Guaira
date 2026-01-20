@@ -204,7 +204,7 @@ export function calcularDistancia(
 }
 
 /**
- * Upload de imagem para o Supabase Storage
+ * Upload de imagem para o MongoDB (via API Customizada)
  */
 export async function uploadImagem(
   bucket: 'empresas-images' | 'posts-images' | 'locais-images',
@@ -212,22 +212,38 @@ export async function uploadImagem(
   pasta?: string
 ): Promise<string | null> {
   try {
-    const fileExt = file.name.split('.').pop()
-    const fileName = `${crypto.randomUUID()}.${fileExt}`
-    const filePath = pasta ? `${pasta}/${fileName}` : fileName
+    console.log(`📤 Iniciando upload de "${file.name}" para MongoDB...`);
 
-    const { error } = await supabase.storage.from(bucket).upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    })
+    // Converter arquivo para Base64
+    const base64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
 
-    if (error) throw error
+    // Enviar para nossa API de upload
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: file.name,
+        type: file.type,
+        data: base64
+      })
+    });
 
-    const { data } = supabase.storage.from(bucket).getPublicUrl(filePath)
-    return data.publicUrl
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Falha no upload para MongoDB');
+    }
+
+    const { url } = await response.json();
+    console.log(`✅ Upload concluído: ${url}`);
+    return url;
   } catch (error) {
-    console.error('Erro ao fazer upload:', error)
-    return null
+    console.error('❌ Erro ao fazer upload para MongoDB:', error);
+    return null;
   }
 }
 
