@@ -14,7 +14,7 @@
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 */
 
-import { Search, Heart, Building2, MapPin, Star, ChevronDown, Filter, X, Check } from "lucide-react";
+import { Search, Heart, Building2, MapPin, Star, ChevronDown, Filter, X, Check, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,14 +33,6 @@ import {
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface Categoria {
-  id: string;
-  nome: string;
-  icone: string;
-  cor: string;
-  subcategorias: string[];
-}
-
 const SearchSection = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<EmpresaCompleta[]>([]);
@@ -49,7 +41,6 @@ const SearchSection = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [categoriaFiltro, setCategoriaFiltro] = useState<string | null>(null);
   const [empresasDestaque, setEmpresasDestaque] = useState<EmpresaCompleta[]>([]);
-  const [carouselIndex, setCarouselIndex] = useState<{ [key: string]: number }>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const user = getUsuarioLogado();
@@ -68,24 +59,6 @@ const SearchSection = () => {
 
     carregarEmpresasDestaque();
   }, []);
-
-  // Carousel automático para empresas em destaque
-  useEffect(() => {
-    if (empresasDestaque.length === 0) return;
-
-    const interval = setInterval(() => {
-      setCarouselIndex(prev => {
-        const newIndex = { ...prev };
-        empresasDestaque.forEach(empresa => {
-          const currentIndex = prev[empresa.id] || 0;
-          newIndex[empresa.id] = (currentIndex + 1) % 5; // 5 slides (incluindo logo)
-        });
-        return newIndex;
-      });
-    }, 4000); // 4 segundos
-
-    return () => clearInterval(interval);
-  }, [empresasDestaque]);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
@@ -110,13 +83,11 @@ const SearchSection = () => {
 
       setLoading(true);
       try {
-        // Busca na API MongoDB via helper function
         const data = await buscarEmpresas({
           busca: searchTerm,
           categoria: categoriaFiltro || undefined
         });
 
-        // Limitar a 8 resultados finais
         setSearchResults(data.slice(0, 8));
         setShowDropdown(true);
       } catch (error) {
@@ -148,130 +119,109 @@ const SearchSection = () => {
     navigate('/meus-locais');
   };
 
-  const renderCarouselContent = (empresa: EmpresaCompleta) => {
-    const slideIndex = carouselIndex[empresa.id] || 0;
-
-    switch (slideIndex) {
-      case 0:
-        // Slide 1: Subcategorias
-        return empresa.subcategorias && empresa.subcategorias.length > 0 ? (
-          <div className="flex flex-wrap gap-1 mb-2 animate-fade-in">
-            {empresa.subcategorias.slice(0, 2).map((sub, idx) => (
-              <span key={idx} className="text-xs text-gray-900 font-semibold drop-shadow-md">
-                • {sub}
-              </span>
-            ))}
-            {empresa.subcategorias.length > 2 && (
-              <span className="text-xs text-gray-900 font-semibold drop-shadow-md">
-                • +{empresa.subcategorias.length - 2} mais
-              </span>
-            )}
-          </div>
-        ) : null;
-
-      case 1:
-        // Slide 2: Ponto de coleta Mercado Livre
-        return (
-          <div className="mb-2 animate-fade-in">
-            <p className="text-sm text-gray-900 font-semibold drop-shadow-md">
-              📍 {empresa.endereco || `${empresa.bairro}, Guaíra-SP`}
-            </p>
-          </div>
-        );
-
-      case 2:
-        // Slide 3: Endereço
-        return (
-          <div className="mb-2 animate-fade-in">
-            <p className="text-sm text-gray-900 font-semibold drop-shadow-md">
-              📍 {empresa.endereco || `${empresa.bairro}, Guaíra-SP`}
-            </p>
-          </div>
-        );
-
-      case 3:
-        // Slide 4: WhatsApp
-        return empresa.whatsapp ? (
-          <div className="mb-2 animate-fade-in">
-            <p className="text-sm text-green-600 font-bold drop-shadow-md">
-              💬 WhatsApp: {empresa.whatsapp}
-            </p>
-          </div>
-        ) : (
-          <div className="mb-2 animate-fade-in">
-            <p className="text-sm text-gray-900 font-semibold drop-shadow-md">
-              📞 {empresa.telefone}
-            </p>
-          </div>
-        );
-
-      case 4:
-        // Slide 5: Apenas logo em destaque (sem texto)
-        return null;
-
-      default:
-        return null;
-    }
-  };
-
   return (
     <section className="container mx-auto px-4 mt-8 relative z-10">
-      <div className="glass-card rounded-3xl shadow-2xl p-8 md:p-10 border-2 animate-slide-up">
-        <h3 className="text-3xl md:text-4xl font-bold text-center mb-3 gradient-text">
-          Encontre empresas locais
-        </h3>
-        <p className="text-center text-muted-foreground mb-6 text-lg">
-          Busque por nome, categoria ou serviço
-        </p>
+      <div className="glass-card rounded-[3rem] shadow-2xl p-8 md:p-12 border-2 border-primary/5 animate-slide-up bg-background/40 backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto text-center mb-12">
+          <h3 className="text-4xl md:text-5xl font-black mb-4 tracking-tight leading-tight">
+            Encontre <span className="gradient-text">empresas locais</span>
+          </h3>
+          <p className="text-muted-foreground text-lg md:text-xl font-medium">
+            O guia definitivo de Guaíra. Busque por nome, categoria ou serviço.
+          </p>
+        </div>
 
         {/* Empresas em Destaque */}
         {empresasDestaque.length > 0 && (
-          <div className="mb-8">
-            <p className="text-base font-medium text-muted-foreground mb-3 text-center">⭐ Empresas em Destaque</p>
-            <div className="grid gap-3 md:grid-cols-3 max-w-4xl mx-auto">
-              {empresasDestaque.map((empresa) => {
-                const slideIndex = carouselIndex[empresa.id] || 0;
-                const isLogoSlide = slideIndex === 4;
-
-                return (
-                  <div
-                    key={empresa.id}
-                    onClick={() => navigate(`/empresas?id=${empresa.id}`)}
-                    className="relative overflow-hidden p-4 rounded-lg border-2 border-primary/20 bg-gradient-to-br from-amber-50/50 to-orange-50/50 hover:shadow-md transition-all cursor-pointer group"
+          <div className="mb-20">
+            <div className="flex items-center justify-center gap-3 mb-10">
+              <Sparkles className="h-6 w-6 text-amber-500 fill-amber-500 animate-pulse" />
+              <h4 className="text-2xl font-black text-foreground tracking-tight">
+                Empresas em <span className="text-primary">Destaque</span>
+              </h4>
+              <Sparkles className="h-6 w-6 text-amber-500 fill-amber-500 animate-pulse" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {empresasDestaque.map((emp) => (
+                <div key={emp.id} className="relative group">
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/empresas?id=${emp.id}`)}
+                    className="w-full text-left relative rounded-[2.5rem] overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-2xl transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:-translate-y-2"
                   >
-                    {/* Logo como background */}
-                    {empresa.logo && (
-                      <div
-                        className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ${isLogoSlide ? 'opacity-90' : 'opacity-40 group-hover:opacity-50'
-                          }`}
-                        style={{ backgroundImage: `url(${empresa.logo})` }}
-                      />
-                    )}
-
-                    {/* Conteúdo por cima do background */}
-                    <div className={`relative z-10 transition-opacity duration-700 ${isLogoSlide ? 'opacity-0' : 'opacity-100'}`}>
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-sm text-gray-900 drop-shadow-sm">{empresa.nome}</h3>
-                        <span className="text-amber-500 text-lg drop-shadow-sm">⭐</span>
+                    {/* Imagem de Capa */}
+                    <div className="h-48 w-full overflow-hidden relative bg-gradient-to-br from-primary/5 to-accent/10">
+                      {emp.imagens && emp.imagens.length > 0 ? (
+                        <img
+                          src={emp.imagens[0]}
+                          alt={emp.nome}
+                          className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-1000"
+                        />
+                      ) : (
+                        <div className="h-full w-full flex items-center justify-center">
+                          <Building2 className="h-20 w-20 text-primary/20" />
+                        </div>
+                      )}
+                      
+                      {/* Badge de Destaque Premium */}
+                      <div className="absolute top-4 left-4 z-20">
+                        <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none shadow-xl gap-1.5 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest">
+                          <Star className="h-3.5 w-3.5 fill-white" />
+                          Destaque
+                        </Badge>
                       </div>
 
-                      <p className="text-xs text-gray-700 mb-3 drop-shadow-sm font-medium">{empresa.categoria_nome}</p>
+                      {/* Overlay gradiente */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    </div>
 
-                      {/* Carousel de informações */}
-                      <div className="min-h-[60px] flex items-center">
-                        {renderCarouselContent(empresa)}
+                    <div className="p-6 space-y-4">
+                      <div className="flex items-center gap-4">
+                        {/* Logo Premium */}
+                        {emp.logo ? (
+                          <div className="flex-shrink-0 w-16 h-16 rounded-[1.25rem] overflow-hidden border-4 border-background shadow-2xl bg-background -mt-14 relative z-10 group-hover:scale-105 transition-transform">
+                            <img
+                              src={emp.logo}
+                              alt={`Logo ${emp.nome}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex-shrink-0 w-16 h-16 rounded-[1.25rem] bg-gradient-to-br from-primary/10 to-accent/20 flex items-center justify-center border-4 border-background shadow-2xl -mt-14 relative z-10">
+                            <Building2 className="h-8 w-8 text-primary" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-black text-xl truncate group-hover:text-primary transition-colors">
+                            {emp.nome}
+                          </h3>
+                          <Badge variant="secondary" className="text-[9px] font-black uppercase tracking-tighter bg-primary/10 text-primary border-none">
+                            {emp.categoria_nome}
+                          </Badge>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs text-gray-700 mt-2 drop-shadow-sm font-medium">
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {empresa.bairro}
+                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 min-h-[40px]">
+                        {emp.descricao}
+                      </p>
+                      
+                      <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                          <div className="p-1 bg-primary/5 rounded-md">
+                            <MapPin className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                          {emp.bairro}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] font-black uppercase text-primary group-hover:translate-x-1 transition-transform">
+                          Ver Detalhes
+                          <Check className="h-3 w-3" />
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -400,32 +350,14 @@ const SearchSection = () => {
                                 {empresa.subcategorias[0]}
                               </span>
                             )}
-                            {empresa.subcategorias && empresa.subcategorias.length > 1 && (
-                              <span className="text-xs px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
-                                +{empresa.subcategorias.length - 1}
-                              </span>
-                            )}
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <MapPin className="h-3 w-3" />
                               <span className="line-clamp-1">{empresa.bairro}</span>
                             </div>
                           </div>
-
-                          {empresa.descricao && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-                              {empresa.descricao}
-                            </p>
-                          )}
                         </div>
                       </button>
                     ))}
-                  </div>
-
-                  {/* Footer do Dropdown */}
-                  <div className="px-4 py-2 bg-muted/30 border-t border-border">
-                    <p className="text-xs text-center text-muted-foreground">
-                      {searchResults.length} {searchResults.length === 1 ? 'resultado encontrado' : 'resultados encontrados'}
-                    </p>
                   </div>
                 </div>
               )}
@@ -528,7 +460,6 @@ const SearchSection = () => {
         </div>
       </div>
 
-      {/* Dialog de Login */}
       <LoginDialog
         open={showLogin}
         onOpenChange={setShowLogin}
