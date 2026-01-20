@@ -102,9 +102,10 @@ export default async function handler(req: any, res: any) {
 
         let query: any = {};
 
-        // Se NÃO for admin, mostrar apenas aprovados
+        // Se NÃO for admin, mostrar apenas aprovados e ATIVAS
         if (admin !== 'true') {
             query.status = 'aprovado';
+            query.ativa = { $ne: false };
         }
 
         if (responsavel_telefone) {

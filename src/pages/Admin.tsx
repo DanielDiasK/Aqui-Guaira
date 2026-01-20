@@ -252,7 +252,7 @@ export default function Admin() {
     const res = await fetch(`/api/empresas?id=${empresaSelecionada.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ativa: false, motivo_bloqueio: motivoBloqueio })
+      body: JSON.stringify({ ativa: false, status: 'bloqueado', motivo_bloqueio: motivoBloqueio })
     });
     if (res.ok) {
       await fetch('/api/admin', {
@@ -694,7 +694,7 @@ export default function Admin() {
             <DialogDescription>A empresa não aparecerá mais no site. Informe o motivo:</DialogDescription>
           </DialogHeader>
           <Textarea
-            className="rounded-2xl bg-zinc-50 border-zinc-200"
+            className="rounded-2xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
             placeholder="Ex: Informações falsas, fotos impróprias..."
             value={motivoBloqueio}
             onChange={(e) => setMotivoBloqueio(e.target.value)}
@@ -709,7 +709,12 @@ export default function Admin() {
       <Dialog open={showRejeicaoDialog} onOpenChange={setShowRejeicaoDialog}>
         <DialogContent className="rounded-3xl">
           <DialogHeader><DialogTitle>Rejeitar Conteúdo</DialogTitle></DialogHeader>
-          <Textarea value={motivoRejeicao} onChange={(e) => setMotivoRejeicao(e.target.value)} placeholder="Motivo da rejeição para o usuário..." />
+          <Textarea
+            className="rounded-2xl bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 min-h-[100px]"
+            value={motivoRejeicao}
+            onChange={(e) => setMotivoRejeicao(e.target.value)}
+            placeholder="Motivo da rejeição para o usuário..."
+          />
           <DialogFooter>
             <Button variant="destructive" onClick={async () => {
               const res = await fetch(`/api/posts?id=${postSelecionado?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aprovado: false, motivo_rejeicao: motivoRejeicao }) });
@@ -735,13 +740,6 @@ export default function Admin() {
                   <div className="w-full h-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-indigo-700" />
                 )}
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
-
-                <div className="absolute bottom-6 left-10 flex items-center gap-2">
-                  <Badge className="bg-white/20 text-white backdrop-blur-md border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">Cod: {empresaSelecionada.id.slice(-6)}</Badge>
-                  <Badge className="bg-primary text-white border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">
-                    Desde {new Date(empresaSelecionada.data_cadastro).getFullYear()}
-                  </Badge>
-                </div>
               </div>
 
               {/* Profile Info Section */}
@@ -912,7 +910,7 @@ function QuickButton({ icon: Icon, label, onClick, disabled, accent }: any) {
       disabled={disabled}
       onClick={onClick}
       className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all duration-300
-        ${disabled ? 'opacity-40 cursor-not-allowed bg-zinc-50' :
+        ${disabled ? 'opacity-40 cursor-not-allowed bg-zinc-50 dark:bg-zinc-800' :
           accent ? 'bg-primary/5 border-primary/20 text-primary hover:bg-primary shadow-sm hover:text-white hover:shadow-lg hover:shadow-primary/20' :
             'bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 hover:border-primary hover:bg-primary/5 hover:text-primary'}
       `}
@@ -943,10 +941,10 @@ function PostStatusBadge({ aprovado, pendente }: any) {
 
 function ActionBtn({ icon: Icon, label, onClick, variant = 'default' }: any) {
   const styles: any = {
-    default: "bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-600 hover:bg-zinc-50",
-    success: "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-500 hover:text-white",
-    danger: "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-500 hover:text-white",
-    'ghost-danger': "bg-transparent text-zinc-300 hover:text-rose-600 hover:bg-rose-50 border-transparent",
+    default: "bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700",
+    success: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/50 hover:bg-emerald-500 hover:text-white",
+    danger: "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/50 hover:bg-rose-500 hover:text-white",
+    'ghost-danger': "bg-transparent text-zinc-300 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 border-transparent",
   };
   return (
     <Button
