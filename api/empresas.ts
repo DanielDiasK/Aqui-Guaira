@@ -16,10 +16,15 @@ export default async function handler(req: any, res: any) {
     }
 
     try {
+        console.log('🔵 Tentando conectar ao MongoDB...');
         const client = await clientPromise;
+        console.log('✅ Conectado ao MongoDB');
+
         const db = client.db("aqui-guaira");
+        console.log('📂 Database selecionado: aqui-guaira');
 
         const { categoria, bairro, busca, destaque, limit, slug } = req.query;
+        console.log('🔍 Parâmetros recebidos:', { categoria, bairro, busca, destaque, limit, slug });
 
         const query: any = { status: 'aprovado' }; // Apenas aprovados por padrão
 
@@ -64,11 +69,16 @@ export default async function handler(req: any, res: any) {
 
         const limite = limit ? parseInt(limit as string) : 50;
 
+        console.log('🔎 Query MongoDB:', JSON.stringify(query));
+        console.log('📊 Limite:', limite);
+
         const empresas = await db
             .collection("empresas")
             .find(query)
             .limit(limite)
             .toArray();
+
+        console.log(`✅ ${empresas.length} empresas encontradas`);
 
         // Normalizar _id para id (string)
         const empresasFormatadas = empresas.map(emp => ({
@@ -79,7 +89,12 @@ export default async function handler(req: any, res: any) {
 
         res.status(200).json(empresasFormatadas);
     } catch (error: any) {
-        console.error('Erro ao buscar empresas:', error);
-        res.status(500).json({ status: 'error', message: error.message });
+        console.error('❌ Erro ao buscar empresas:', error);
+        console.error('Stack:', error.stack);
+        res.status(500).json({
+            status: 'error',
+            message: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 }
