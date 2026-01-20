@@ -721,26 +721,20 @@ export default function Admin() {
 
       {/* Detalhes Modal (Premium Style) */}
       <Dialog open={showDetalhesDialog} onOpenChange={setShowDetalhesDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 bg-white dark:bg-zinc-950">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 bg-white dark:bg-zinc-950 overflow-x-hidden">
           {empresaSelecionada && (
             <div className="flex flex-col">
               {/* Banner Section */}
               <div className="h-64 relative overflow-hidden group">
                 {empresaSelecionada.banner ? (
-                  <img src={empresaSelecionada.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={empresaSelecionada.banner} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary via-primary/80 to-indigo-600" />
+                  <div className="w-full h-full bg-gradient-to-br from-emerald-500 via-emerald-600 to-indigo-700" />
                 )}
-                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-
-                <div className="absolute top-6 right-6 flex gap-2">
-                  <Button variant="ghost" className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-full h-10 w-10 p-0" onClick={() => setShowDetalhesDialog(false)}>
-                    <X className="w-6 h-6" />
-                  </Button>
-                </div>
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
 
                 <div className="absolute bottom-6 left-10 flex items-center gap-2">
-                  <Badge className="bg-white/20 text-white backdrop-blur-md border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">Id: {empresaSelecionada.id.slice(-6)}</Badge>
+                  <Badge className="bg-white/20 text-white backdrop-blur-md border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">Cod: {empresaSelecionada.id.slice(-6)}</Badge>
                   <Badge className="bg-primary text-white border-none px-3 py-1 text-[10px] font-black uppercase tracking-widest">
                     Desde {new Date(empresaSelecionada.data_cadastro).getFullYear()}
                   </Badge>
