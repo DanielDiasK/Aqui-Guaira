@@ -32,7 +32,8 @@ import {
   Globe,
   Instagram,
   Facebook,
-  Search
+  Search,
+  Trash2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -310,6 +311,40 @@ export default function Admin() {
     });
 
     toast.success("Empresa desbloqueada com sucesso");
+    await carregarDados();
+  };
+
+  const handleExcluirEmpresa = async (empresa: Empresa) => {
+    if (!adminData) return;
+
+    // Confirmação extra (pode ser um dialog ou o window.confirm)
+    if (!window.confirm(`Tem certeza que deseja EXCLUIR PERMANENTEMENTE a empresa "${empresa.nome}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+
+    const res = await fetch(`/api/empresas?id=${empresa.id}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) {
+      toast.error("Erro ao excluir empresa");
+      return;
+    }
+
+    // Registrar log
+    await fetch('/api/admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_id: adminData.id,
+        acao: "excluir_empresa",
+        entidade_tipo: "empresa",
+        entidade_id: empresa.id,
+        detalhes: `Empresa "${empresa.nome}" excluída permanentemente`
+      })
+    });
+
+    toast.success("Empresa excluída permanentemente");
     await carregarDados();
   };
 
@@ -805,6 +840,15 @@ export default function Admin() {
                         Desbloquear
                       </Button>
                     )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleExcluirEmpresa(empresa)}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Excluir
+                    </Button>
                   </div>
                 </div>
               </CardHeader>

@@ -76,6 +76,20 @@ export default async function handler(req: any, res: any) {
             return res.status(200).json({ message: "Atualizado com sucesso" });
         }
 
+        // --- MÉTODOS DE EXCLUSÃO (DELETE) ---
+        if (req.method === 'DELETE') {
+            const { id } = req.query;
+            if (!id) return res.status(400).json({ message: "ID é obrigatório para exclusão" });
+
+            const result = await db.collection("empresas").deleteOne({ _id: new ObjectId(id) });
+
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: "Empresa não encontrada" });
+            }
+
+            return res.status(200).json({ message: "Excluído com sucesso" });
+        }
+
         // --- MÉTODOS DE BUSCA (GET) ---
         const { categoria, bairro, busca, destaque, limit, slug, responsavel_telefone, id, admin } = req.query;
 
