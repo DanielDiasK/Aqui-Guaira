@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Building2, RefreshCcw, LocateFixed, Phone, Mail, Globe, Clipboard, ExternalLink, Heart, Check, Loader2, ArrowLeft, Home, Search, Sparkles, Utensils, ShoppingCart, Stethoscope, Shirt, Wrench, Car, Monitor, Book, Trophy, PartyPopper, PawPrint, Briefcase, DollarSign, Tv, Key, Package, Factory, Landmark } from "lucide-react";
+import { MapPin, Building2, RefreshCcw, LocateFixed, Phone, Mail, Globe, Clipboard, ExternalLink, Heart, Check, Loader2, ArrowLeft, Home, Search, Sparkles, Utensils, ShoppingCart, Stethoscope, Shirt, Wrench, Car, Monitor, Book, Trophy, PartyPopper, PawPrint, Briefcase, DollarSign, Tv, Key, Package, Factory, Landmark, PlusCircle } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -336,7 +336,7 @@ const Empresas = () => {
 
             </div>
 
-            <div className="max-w-4xl mx-auto text-center space-y-6">
+            <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
               <div className="inline-flex p-3 bg-primary/10 rounded-2xl mb-2">
                 <Building2 className="w-8 h-8 text-primary" />
               </div>
@@ -347,6 +347,17 @@ const Empresas = () => {
               <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
                 Explore empresas locais por categoria, bairro ou proximidade. Ative a localização para ordenar por distância em tempo real.
               </p>
+            </div>
+
+            <div className="flex justify-center">
+              <Button
+                onClick={() => navigate('/sua-empresa')}
+                size="lg"
+                className="rounded-xl px-10 py-8 bg-primary hover:bg-primary/90 text-lg font-bold gap-3"
+              >
+                <PlusCircle className="w-6 h-6" />
+                Cadastre sua Empresa
+              </Button>
             </div>
           </div>
         </section>
@@ -380,15 +391,7 @@ const Empresas = () => {
                   <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Categoria</label>
                   <Select value={categoria} onValueChange={setCategoria}>
                     <SelectTrigger className="py-7 rounded-2xl border-border font-bold bg-muted/20 text-lg">
-                      <div className="flex items-center gap-2">
-                        <span className="text-primary/60">
-                          {categoria === "todas"
-                            ? <Building2 className="w-5 h-5" />
-                            : getCategoryIcon(categoriasData.categorias.find(c => c.nome === categoria)?.icone || "")
-                          }
-                        </span>
-                        <SelectValue placeholder="Todas as Categorias" />
-                      </div>
+                      <SelectValue placeholder="Todas as Categorias" />
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-border shadow-2xl">
                       <SelectItem value="todas" className="font-bold">
@@ -465,175 +468,176 @@ const Empresas = () => {
             {/* 🏢 CARDS DE EMPRESAS - SEÇÃO PRINCIPAL (CLICÁVEIS PARA PÁGINA)    */}
             {/* ═══════════════════════════════════════════════════════════════════ */}
             {!selecionada && (
-              <Card className="bg-card border border-border/50 shadow-xl rounded-[2.5rem] overflow-hidden">
-                <CardHeader className="p-8 pb-4">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 bg-primary/10 rounded-xl text-primary">
-                      <Building2 className="w-5 h-5" />
+              <div className="space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-xl">
+                      <Building2 className="w-7 h-7 text-primary" />
                     </div>
-                    <CardTitle className="text-2xl font-black text-foreground tracking-tight">Todas as <span className="text-primary">Empresas</span></CardTitle>
+                    <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Todas as <span className="text-primary">Empresas</span></h2>
                   </div>
-                  <CardDescription className="font-medium text-muted-foreground">
-                    Exibindo {paginated.length} de {empresasFiltradas.length} empresas encontradas.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-8 pt-4 space-y-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                    {paginated.map(emp => (
-                      <div key={emp.id} className="relative">
-                        {/* Card clicável - Abre página com detalhes completos */}
-                        <button
-                          type="button"
-                          onClick={() => abrirDetalhes(emp)}
-                          className="w-full text-left group relative rounded-[2rem] overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:-translate-y-1"
-                        >
-                          {/* Imagem de Capa */}
-                          <div className="h-48 w-full overflow-hidden relative bg-gradient-to-br from-primary/5 to-accent/10">
-                            {emp.imagens && emp.imagens.length > 0 ? (
-                              <img
-                                src={emp.imagens[0]}
-                                alt={emp.nome}
-                                className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <Building2 className="h-20 w-20 text-primary/20" />
-                              </div>
-                            )}
-                            {/* Overlay gradiente */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                          </div>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold hidden sm:flex">
+                    {empresasFiltradas.length} empresas encontradas
+                  </Badge>
+                </div>
 
-                          <div className="p-5 space-y-3">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                {/* Logo */}
-                                {emp.logo ? (
-                                  <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-primary/20 bg-background shadow-md -mt-8 relative z-10">
-                                    <img
-                                      src={emp.logo}
-                                      alt={`Logo ${emp.nome}`}
-                                      className="w-full h-full object-cover"
-                                    />
-                                  </div>
-                                ) : (
-                                  <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary/10 to-accent/20 flex items-center justify-center border-2 border-primary/20 shadow-md -mt-8 relative z-10">
-                                    <Building2 className="h-8 w-8 text-primary" />
-                                  </div>
-                                )}
-
-                                {/* Nome */}
-                                <h3 className="font-semibold text-lg flex items-center gap-2 truncate">
-                                  <span className="truncate">{emp.nome}</span>
-                                  {favoritos.has(emp.id) && <Badge variant="secondary" className="animate-pulse flex-shrink-0">Favorito</Badge>}
-                                </h3>
-                              </div>
-
-                              {/* Categoria */}
-                              <Badge className="flex-shrink-0">{emp.categoria_nome}</Badge>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+                  {paginated.map(emp => (
+                    <div key={emp.id} className="relative">
+                      {/* Card clicável - Abre página com detalhes completos */}
+                      <button
+                        type="button"
+                        onClick={() => abrirDetalhes(emp)}
+                        className="w-full text-left group relative rounded-[2rem] overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-xl transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:-translate-y-1"
+                      >
+                        {/* Imagem de Capa */}
+                        <div className="h-48 w-full overflow-hidden relative bg-gradient-to-br from-primary/5 to-accent/10">
+                          {emp.imagens && emp.imagens.length > 0 ? (
+                            <img
+                              src={emp.imagens[0]}
+                              alt={emp.nome}
+                              className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <Building2 className="h-20 w-20 text-primary/20" />
                             </div>
-                            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{emp.descricao}</p>
-                            {emp.subcategorias && emp.subcategorias.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {emp.subcategorias.slice(0, 2).map((sub, idx) => (
-                                  <Badge key={idx} variant="secondary" className="text-[10px] px-2 py-0">
-                                    {sub}
-                                  </Badge>
-                                ))}
-                                {emp.subcategorias.length > 2 && (
-                                  <Badge variant="outline" className="text-[10px] px-2 py-0">
-                                    +{emp.subcategorias.length - 2}
-                                  </Badge>
-                                )}
-                              </div>
-                            )}
-                            <div className="flex items-center justify-between text-xs mt-2">
-                              <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-primary" />{emp.bairro}</span>
-                              {emp.distancia !== null && userLocation ? (
-                                <span className="font-medium">{emp.distancia.toFixed(2)} km</span>
+                          )}
+                          {/* Overlay gradiente */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                        </div>
+
+                        <div className="p-5 space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              {/* Logo */}
+                              {emp.logo ? (
+                                <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-primary/20 bg-background shadow-md -mt-8 relative z-10">
+                                  <img
+                                    src={emp.logo}
+                                    alt={`Logo ${emp.nome}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
                               ) : (
-                                <span className="text-muted-foreground">Sem distância</span>
+                                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-primary/10 to-accent/20 flex items-center justify-center border-2 border-primary/20 shadow-md -mt-8 relative z-10">
+                                  <Building2 className="h-8 w-8 text-primary" />
+                                </div>
+                              )}
+
+                              {/* Nome */}
+                              <h3 className="font-semibold text-lg flex items-center gap-2 truncate">
+                                <span className="truncate">{emp.nome}</span>
+                                {favoritos.has(emp.id) && <Badge variant="secondary" className="animate-pulse flex-shrink-0">Favorito</Badge>}
+                              </h3>
+                            </div>
+
+                            {/* Categoria */}
+                            <Badge className="flex-shrink-0">{emp.categoria_nome}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{emp.descricao}</p>
+                          {emp.subcategorias && emp.subcategorias.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {emp.subcategorias.slice(0, 2).map((sub, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-[10px] px-2 py-0">
+                                  {sub}
+                                </Badge>
+                              ))}
+                              {emp.subcategorias.length > 2 && (
+                                <Badge variant="outline" className="text-[10px] px-2 py-0">
+                                  +{emp.subcategorias.length - 2}
+                                </Badge>
                               )}
                             </div>
+                          )}
+                          <div className="flex items-center justify-between text-xs mt-2">
+                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3 text-primary" />{emp.bairro}</span>
+                            {emp.distancia !== null && userLocation ? (
+                              <span className="font-medium">{emp.distancia.toFixed(2)} km</span>
+                            ) : (
+                              <span className="text-muted-foreground">Sem distância</span>
+                            )}
                           </div>
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={favoritos.has(emp.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-                          onClick={() => toggleFavorito(emp.id)}
-                          className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-primary hover:text-primary-foreground transition-colors"
-                        >
-                          <Heart className={"h-4 w-4 " + (favoritos.has(emp.id) ? "fill-primary text-primary" : "")} />
-                        </button>
-                      </div>
-                    ))}
-                    {empresasFiltradas.length === 0 && (
-                      <div className="col-span-full text-center py-16 px-4">
-                        <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-                        <h3 className="text-lg font-semibold text-foreground mb-2">
-                          Nenhuma empresa encontrada
-                        </h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {busca && `Não há empresas cadastradas que correspondam a "${busca}".`}
-                          {!busca && categoria !== "todas" && `Não há empresas na categoria "${categoria}".`}
-                          {!busca && categoria === "todas" && bairro !== "todos" && `Não há empresas no bairro "${bairro}".`}
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setBusca("");
-                              setCategoria("todas");
-                              setBairro("todos");
-                            }}
-                          >
-                            Limpar filtros
-                          </Button>
-                          <Button
-                            onClick={() => navigate('/sua-empresa')}
-                            className="gap-2"
-                          >
-                            <Building2 className="h-4 w-4" />
-                            Cadastrar empresa
-                          </Button>
                         </div>
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={favoritos.has(emp.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                        onClick={() => toggleFavorito(emp.id)}
+                        className="absolute top-2 right-2 bg-background/70 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-primary hover:text-primary-foreground transition-colors"
+                      >
+                        <Heart className={"h-4 w-4 " + (favoritos.has(emp.id) ? "fill-primary text-primary" : "")} />
+                      </button>
+                    </div>
+                  ))}
+                  {empresasFiltradas.length === 0 && (
+                    <div className="col-span-full text-center py-16 px-4">
+                      <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        Nenhuma empresa encontrada
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        {busca && `Não há empresas cadastradas que correspondam a "${busca}".`}
+                        {!busca && categoria !== "todas" && `Não há empresas na categoria "${categoria}".`}
+                        {!busca && categoria === "todas" && bairro !== "todos" && `Não há empresas no bairro "${bairro}".`}
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setBusca("");
+                            setCategoria("todas");
+                            setBairro("todos");
+                          }}
+                        >
+                          Limpar filtros
+                        </Button>
+                        <Button
+                          onClick={() => navigate('/sua-empresa')}
+                          className="gap-2"
+                        >
+                          <Building2 className="h-4 w-4" />
+                          Cadastrar empresa
+                        </Button>
                       </div>
-                    )}
-                  </div>
-                  {empresasFiltradas.length > pageSize && (
-                    <Pagination className="pt-2">
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            href="#"
-                            onClick={(e) => { e.preventDefault(); setPage(p => Math.max(1, p - 1)); }}
-                            className={page === 1 ? "pointer-events-none opacity-40" : ""}
-                          />
-                        </PaginationItem>
-                        {Array.from({ length: totalPages }).map((_, i) => (
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              href="#"
-                              isActive={page === i + 1}
-                              onClick={(e) => { e.preventDefault(); setPage(i + 1); }}
-                            >
-                              {i + 1}
-                            </PaginationLink>
-                          </PaginationItem>
-                        ))}
-                        <PaginationItem>
-                          <PaginationNext
-                            href="#"
-                            onClick={(e) => { e.preventDefault(); setPage(p => Math.min(totalPages, p + 1)); }}
-                            className={page === totalPages ? "pointer-events-none opacity-40" : ""}
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
+                    </div>
                   )}
-                </CardContent>
-              </Card>
-            )}
+                </div>
+
+                {empresasFiltradas.length > pageSize && (
+                  <Pagination className="pt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); setPage(p => Math.max(1, p - 1)); }}
+                          className={page === 1 ? "pointer-events-none opacity-40" : ""}
+                        />
+                      </PaginationItem>
+                      {Array.from({ length: totalPages }).map((_, i) => (
+                        <PaginationItem key={i}>
+                          <PaginationLink
+                            href="#"
+                            isActive={page === i + 1}
+                            onClick={(e) => { e.preventDefault(); setPage(i + 1); }}
+                          >
+                            {i + 1}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ))}
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); setPage(p => Math.min(totalPages, p + 1)); }}
+                          className={page === totalPages ? "pointer-events-none opacity-40" : ""}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </div>
+            )
+            }
 
             {/* Página de detalhes */}
             {selecionada ? (
