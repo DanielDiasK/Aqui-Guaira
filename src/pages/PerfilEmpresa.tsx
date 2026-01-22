@@ -265,31 +265,31 @@ const PerfilEmpresa = () => {
                                 </section>
 
                                 {/* Canais de Contato e Localização - Lado a Lado (Full Width) */}
-                                <div className="grid md:grid-cols-2 gap-8">
+                                <div className="grid lg:grid-cols-2 gap-8">
                                     {/* Card de Contato */}
-                                    <Card className="border-2 border-border/50 bg-muted/20 rounded-[3rem] p-8 space-y-8 shadow-sm">
+                                    <Card className="border-2 border-border/50 bg-black/20 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 space-y-6 md:space-y-8 shadow-sm">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                                 <Phone className="w-6 h-6" />
                                             </div>
-                                            <h2 className="text-2xl font-black tracking-tight">Canais de Contato</h2>
+                                            <h2 className="text-2xl font-black tracking-tight text-foreground">Canais de Contato</h2>
                                         </div>
 
                                         <div className="grid gap-4">
                                             {empresa.whatsapp && (
-                                                <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-green-500/10 border-2 border-green-500/20 hover:bg-green-500/20 transition-all shadow-sm">
+                                                <div className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-[2rem] bg-green-500/10 border-2 border-green-500/20 hover:bg-green-500/20 transition-all shadow-sm gap-4">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="p-3 bg-green-500 rounded-2xl shadow-lg shadow-green-200">
+                                                        <div className="p-3 bg-green-500 rounded-2xl">
                                                             <Phone className="w-5 h-5 text-white" />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-xs uppercase font-black text-green-600/70 tracking-widest leading-none mb-1">WhatsApp</span>
-                                                            <span className="font-black text-green-700 text-xl">{empresa.whatsapp}</span>
+                                                            <span className="text-xs uppercase font-black text-green-500/80 tracking-widest leading-none mb-1">WhatsApp</span>
+                                                            <span className="font-black text-green-500 text-xl">{empresa.whatsapp}</span>
                                                         </div>
                                                     </div>
                                                     <Button
                                                         size="lg"
-                                                        className="bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold shadow-lg px-8 py-6"
+                                                        className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold shadow-lg px-8 py-6"
                                                         asChild
                                                     >
                                                         <a href={`https://wa.me/${empresa.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer">Conversar</a>
@@ -300,16 +300,16 @@ const PerfilEmpresa = () => {
                                             <div className="grid sm:grid-cols-2 gap-4">
                                                 {empresa.telefone && (
                                                     <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-blue-500/10 border-2 border-blue-500/20 hover:bg-blue-500/20 transition-all shadow-sm">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="p-2 bg-blue-500 rounded-xl">
+                                                        <div className="flex items-center gap-3 overflow-hidden">
+                                                            <div className="p-2 bg-blue-500 rounded-xl flex-shrink-0">
                                                                 <Phone className="w-4 h-4 text-white" />
                                                             </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] uppercase font-black text-blue-600/70 tracking-widest leading-none mb-1">Telefone</span>
-                                                                <span className="font-bold text-blue-700 text-base">{empresa.telefone}</span>
+                                                            <div className="flex flex-col overflow-hidden text-ellipsis">
+                                                                <span className="text-[10px] uppercase font-black text-blue-400 tracking-widest leading-none mb-1">Telefone</span>
+                                                                <span className="font-bold text-blue-300 text-base">{empresa.telefone}</span>
                                                             </div>
                                                         </div>
-                                                        <button onClick={() => copiar(empresa.telefone)} className="p-2 rounded-xl hover:bg-white/50 transition-colors">
+                                                        <button onClick={() => copiar(empresa.telefone)} className="p-2 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0">
                                                             {copiado === empresa.telefone ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5 text-muted-foreground" />}
                                                         </button>
                                                     </div>
@@ -317,16 +317,16 @@ const PerfilEmpresa = () => {
 
                                                 {empresa.email && (
                                                     <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-purple-500/10 border-2 border-purple-500/20 hover:bg-purple-500/20 transition-all shadow-sm">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="p-2 bg-purple-500 rounded-xl">
+                                                        <div className="flex items-center gap-3 overflow-hidden">
+                                                            <div className="p-2 bg-purple-500 rounded-xl flex-shrink-0">
                                                                 <Mail className="w-4 h-4 text-white" />
                                                             </div>
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[10px] uppercase font-black text-purple-600/70 tracking-widest leading-none mb-1">E-mail</span>
-                                                                <span className="font-bold text-purple-700 text-sm truncate max-w-[100px]">{empresa.email}</span>
+                                                            <div className="flex flex-col overflow-hidden">
+                                                                <span className="text-[10px] uppercase font-black text-purple-400 tracking-widest leading-none mb-1">E-mail</span>
+                                                                <span className="font-bold text-purple-300 text-sm truncate max-w-[100px]">{empresa.email}</span>
                                                             </div>
                                                         </div>
-                                                        <button onClick={() => copiar(empresa.email)} className="p-2 rounded-xl hover:bg-white/50 transition-colors">
+                                                        <button onClick={() => copiar(empresa.email)} className="p-2 rounded-xl hover:bg-white/10 transition-colors flex-shrink-0">
                                                             {copiado === empresa.email ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5 text-muted-foreground" />}
                                                         </button>
                                                     </div>
@@ -334,20 +334,20 @@ const PerfilEmpresa = () => {
                                             </div>
 
                                             {empresa.site && (
-                                                <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-primary/10 border-2 border-primary/20 hover:bg-primary/20 transition-all shadow-sm">
+                                                <div className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 rounded-[2rem] bg-primary/10 border-2 border-primary/20 hover:bg-primary/20 transition-all shadow-sm gap-4">
                                                     <div className="flex items-center gap-4">
                                                         <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary/20">
                                                             <Globe className="w-5 h-5 text-white" />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-xs uppercase font-black text-primary/70 tracking-widest leading-none mb-1">Website Oficial</span>
+                                                            <span className="text-xs uppercase font-black text-primary tracking-widest leading-none mb-1">Website Oficial</span>
                                                             <span className="font-black text-primary text-lg truncate max-w-[200px]">{empresa.site}</span>
                                                         </div>
                                                     </div>
                                                     <Button
-                                                        variant="ghost"
+                                                        variant="outline"
                                                         size="lg"
-                                                        className="bg-white/50 hover:bg-white text-primary rounded-2xl font-bold border-2 border-primary/10 px-8"
+                                                        className="w-full sm:w-auto bg-primary/20 hover:bg-primary text-white border-none rounded-2xl font-bold px-8 py-6"
                                                         asChild
                                                     >
                                                         <a href={empresa.site.startsWith('http') ? empresa.site : `https://${empresa.site}`} target="_blank" rel="noopener noreferrer">Acessar</a>
@@ -357,13 +357,13 @@ const PerfilEmpresa = () => {
                                         </div>
 
                                         {/* Redes Sociais */}
-                                        <div className="flex gap-4">
+                                        <div className="flex flex-col sm:flex-row gap-4">
                                             {empresa.instagram && (
                                                 <a
                                                     href={empresa.instagram.startsWith('http') ? empresa.instagram : `https://instagram.com/${empresa.instagram.replace('@', '')}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-[2rem] bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-black shadow-xl hover:shadow-orange-200 transition-all hover:scale-[1.03] active:scale-95 group"
+                                                    className="flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-[2rem] bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-black shadow-xl hover:shadow-orange-500/20 transition-all hover:scale-[1.03] active:scale-95 group"
                                                 >
                                                     <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md group-hover:rotate-12 transition-transform">
                                                         <Instagram className="w-6 h-6" />
@@ -376,7 +376,7 @@ const PerfilEmpresa = () => {
                                                     href={empresa.facebook.startsWith('http') ? empresa.facebook : `https://facebook.com/${empresa.facebook.replace('@', '')}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-[2rem] bg-blue-600 text-white font-black shadow-xl hover:shadow-blue-200 transition-all hover:scale-[1.03] active:scale-95 group"
+                                                    className="flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-[2rem] bg-[#1877F2] text-white font-black shadow-xl hover:shadow-blue-500/20 transition-all hover:scale-[1.03] active:scale-95 group"
                                                 >
                                                     <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md group-hover:rotate-12 transition-transform">
                                                         <Facebook className="w-6 h-6" />
@@ -388,18 +388,18 @@ const PerfilEmpresa = () => {
                                     </Card>
 
                                     {/* Card de Localização */}
-                                    <Card className="border-2 border-border/50 bg-muted/20 rounded-[3rem] p-8 space-y-8 overflow-hidden shadow-sm flex flex-col">
+                                    <Card className="border-2 border-border/50 bg-black/20 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 space-y-6 md:space-y-8 overflow-hidden shadow-sm flex flex-col">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                                 <MapPin className="w-6 h-6" />
                                             </div>
-                                            <h2 className="text-2xl font-black tracking-tight">Onde Estamos</h2>
+                                            <h2 className="text-2xl font-black tracking-tight text-foreground">Onde Estamos</h2>
                                         </div>
 
                                         <div className="flex-1 space-y-6">
-                                            <div className="text-lg font-medium text-muted-foreground bg-white/50 p-6 rounded-[2rem] border-2 border-border/30 shadow-inner">
-                                                <p className="font-black text-foreground text-xl mb-1">{empresa.endereco}</p>
-                                                <p className="opacity-80">{empresa.bairro}</p>
+                                            <div className="text-lg font-medium bg-black/40 p-6 rounded-[2rem] border-2 border-border/30 shadow-inner">
+                                                <p className="font-black text-white text-xl mb-1">{empresa.endereco}</p>
+                                                <p className="text-white/70">{empresa.bairro}</p>
                                                 <p className="text-sm font-bold text-primary uppercase tracking-widest">{empresa.cidade} - {empresa.estado}</p>
                                             </div>
 
@@ -413,7 +413,7 @@ const PerfilEmpresa = () => {
                                                         allowFullScreen
                                                         loading="lazy"
                                                         referrerPolicy="no-referrer-when-downgrade"
-                                                        className="grayscale-[0.2] contrast-[1.1] transition-all duration-500 group-hover:grayscale-0"
+                                                        className="grayscale-[0.4] contrast-[1.2] invert-[0.85] hue-rotate-[180deg] transition-all duration-500 group-hover:grayscale-0 group-hover:invert-0 group-hover:hue-rotate-0"
                                                     ></iframe>
                                                 </div>
                                             )}
