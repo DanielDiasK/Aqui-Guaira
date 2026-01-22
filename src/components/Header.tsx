@@ -254,67 +254,90 @@ const Header = () => {
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72 sm:w-80">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5 text-primary" />
-                    Menu
+              <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col">
+                <SheetHeader className="p-6 border-b">
+                  <SheetTitle className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-lg">
+                      <Building2 className="h-6 w-6 text-primary" />
+                    </div>
+                    <div className="flex flex-col items-start leading-none">
+                      <span className="text-xl font-bold">Menu Principal</span>
+                      <span className="text-xs text-muted-foreground font-medium">Aqui Guaíra</span>
+                    </div>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 flex flex-col gap-1">
-                  {mainNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = active === item.label;
-                    const isSuaEmpresa = item.label === "Sua Empresa";
-                    return (
-                      <a
-                        key={item.label}
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-                          ? isSuaEmpresa
-                            ? 'bg-green-600 text-white'
-                            : 'bg-primary text-primary-foreground'
-                          : isSuaEmpresa
-                            ? 'hover:bg-green-50 text-green-600 border border-green-200'
-                            : 'hover:bg-accent'
-                          }`}
-                      >
-                        <Icon className={`h-5 w-5 ${isSuaEmpresa && !isActive ? 'text-green-600' : ''}`} />
-                        <span className={`font-medium ${isSuaEmpresa ? 'font-semibold' : ''}`}>{item.label}</span>
-                      </a>
-                    );
-                  })}
+                <div className="flex-grow overflow-y-auto px-4 py-6">
+                  <div className="flex flex-col gap-2">
+                    <span className="px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Navegação</span>
+                    {mainNavItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive = active === item.label;
+                      const isSuaEmpresa = item.label === "Sua Empresa";
+                      return (
+                        <a
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-300 ${isActive
+                            ? isSuaEmpresa
+                              ? 'bg-green-600 text-white shadow-lg shadow-green-200'
+                              : 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
+                            : isSuaEmpresa
+                              ? 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100'
+                              : 'hover:bg-accent border border-transparent'
+                            }`}
+                        >
+                          <div className={`p-2 rounded-xl ${isActive ? 'bg-white/20' : isSuaEmpresa ? 'bg-green-100' : 'bg-secondary'}`}>
+                            <Icon className={`h-5 w-5 ${isActive ? 'text-white' : isSuaEmpresa ? 'text-green-600' : 'text-primary'}`} />
+                          </div>
+                          <span className={`text-base font-bold ${isSuaEmpresa ? 'text-green-800' : ''}`}>{item.label}</span>
+                        </a>
+                      );
+                    })}
 
-                  <div className="my-2 border-t border-border" />
+                    <div className="my-4 border-t border-border/50" />
+                    <span className="px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Social & Negócios</span>
 
-                  <a
-                    href="/marketplace"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors shadow-sm"
-                  >
-                    <ShoppingBag className="h-5 w-5" />
-                    <span className="font-semibold">Marketplace</span>
-                  </a>
+                    <a
+                      href="/marketplace"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-4 px-4 py-4 rounded-2xl bg-orange-500 text-white hover:bg-orange-600 transition-all shadow-lg shadow-orange-200"
+                    >
+                      <div className="p-2 bg-white/20 rounded-xl">
+                        <ShoppingBag className="h-5 w-5" />
+                      </div>
+                      <span className="text-base font-black">Marketplace Aqui Guaíra</span>
+                    </a>
 
-                  <div className="my-2 border-t border-border" />
+                    <div className="my-4 border-t border-border/50" />
+                    <span className="px-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground/60 mb-2">Ferramentas Úteis</span>
 
-                  {ferramentasItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <a
-                        key={item.label}
-                        href={item.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-accent transition-colors"
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span className="font-medium">{item.label}</span>
-                      </a>
-                    );
-                  })}
+                    <div className="grid grid-cols-1 gap-2">
+                      {ferramentasItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <a
+                            key={item.label}
+                            href={item.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-4 px-4 py-3 rounded-2xl border border-border bg-card hover:bg-accent transition-all group"
+                          >
+                            <div className="p-2 rounded-xl bg-secondary group-hover:bg-primary/10 transition-colors">
+                              <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                            </div>
+                            <span className="text-sm font-bold">{item.label}</span>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 bg-muted/30 border-t">
+                  <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-[0.2em]">
+                    © 2024 Aqui Guaíra • Portal da Cidade
+                  </p>
                 </div>
               </SheetContent>
             </Sheet>

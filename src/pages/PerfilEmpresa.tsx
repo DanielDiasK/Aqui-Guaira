@@ -267,7 +267,7 @@ const PerfilEmpresa = () => {
                                 {/* Canais de Contato e Localização - Lado a Lado (Full Width) */}
                                 <div className="grid lg:grid-cols-2 gap-8">
                                     {/* Card de Contato */}
-                                    <Card className="border-2 border-border/50 bg-black/20 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 space-y-6 md:space-y-8 shadow-sm">
+                                    <Card className="border-2 border-border/50 bg-white dark:bg-black/20 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 space-y-6 md:space-y-8 shadow-sm">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                                 <Phone className="w-6 h-6" />
@@ -388,7 +388,7 @@ const PerfilEmpresa = () => {
                                     </Card>
 
                                     {/* Card de Localização */}
-                                    <Card className="border-2 border-border/50 bg-black/20 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 space-y-6 md:space-y-8 overflow-hidden shadow-sm flex flex-col">
+                                    <Card className="border-2 border-border/50 bg-white dark:bg-black/20 rounded-[2.5rem] md:rounded-[3rem] p-5 md:p-8 space-y-6 md:space-y-8 overflow-hidden shadow-sm flex flex-col">
                                         <div className="flex items-center gap-4">
                                             <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                                                 <MapPin className="w-6 h-6" />
@@ -397,9 +397,9 @@ const PerfilEmpresa = () => {
                                         </div>
 
                                         <div className="flex-1 space-y-6">
-                                            <div className="text-lg font-medium bg-black/40 p-6 rounded-[2rem] border-2 border-border/30 shadow-inner">
-                                                <p className="font-black text-white text-xl mb-1">{empresa.endereco}</p>
-                                                <p className="text-white/70">{empresa.bairro}</p>
+                                            <div className="text-lg font-medium bg-black/5 dark:bg-black/40 p-6 rounded-[2rem] border-2 border-border/30 shadow-inner">
+                                                <p className="font-black text-foreground dark:text-white text-xl mb-1">{empresa.endereco}</p>
+                                                <p className="text-muted-foreground dark:text-white/70">{empresa.bairro}</p>
                                                 <p className="text-sm font-bold text-primary uppercase tracking-widest">{empresa.cidade} - {empresa.estado}</p>
                                             </div>
 
@@ -413,7 +413,7 @@ const PerfilEmpresa = () => {
                                                         allowFullScreen
                                                         loading="lazy"
                                                         referrerPolicy="no-referrer-when-downgrade"
-                                                        className="grayscale-[0.4] contrast-[1.2] invert-[0.85] hue-rotate-[180deg] transition-all duration-500 group-hover:grayscale-0 group-hover:invert-0 group-hover:hue-rotate-0"
+                                                        className="grayscale-[0.4] contrast-[1.2] transition-all duration-500 group-hover:grayscale-0 dark:invert-[0.85] dark:hue-rotate-[180deg] dark:group-hover:invert-0 dark:group-hover:hue-rotate-0"
                                                     ></iframe>
                                                 </div>
                                             )}
