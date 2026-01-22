@@ -60,9 +60,25 @@ export default async function handler(req: any, res: any) {
 
         // --- MÉTODOS DE ATUALIZAÇÃO (PATCH) ---
         if (req.method === 'PATCH') {
-            const { id } = req.query;
-            if (!id) return res.status(400).json({ message: "ID do post é obrigatório" });
+            const { id, action, comentarioId } = req.query;
 
+            // Atualizar Comentário
+            if (action === 'comentario' || comentarioId) {
+                const targetId = comentarioId || id;
+                if (!targetId) return res.status(400).json({ message: "ID do comentário é obrigatório" });
+                const updateData = req.body;
+                delete updateData.id;
+                delete updateData._id;
+
+                await db.collection("comentarios").updateOne(
+                    { _id: new ObjectId(targetId as string) },
+                    { $set: { ...updateData, updated_at: new Date() } }
+                );
+                return res.status(200).json({ message: "Comentário atualizado" });
+            }
+
+            // Atualizar Post
+            if (!id) return res.status(400).json({ message: "ID do post é obrigatório" });
             const updateData = req.body;
             delete updateData.id;
             delete updateData._id;
@@ -88,6 +104,7 @@ export default async function handler(req: any, res: any) {
                 const novoComentario = {
                     ...data,
                     status: 'aprovado',
+                    curtidas: 0,
                     created_at: new Date()
                 };
                 const result = await db.collection("comentarios").insertOne(novoComentario);
@@ -99,17 +116,25 @@ export default async function handler(req: any, res: any) {
                 ...data,
                 status: 'pendente',
                 created_at: new Date(),
+                curtidas: 0,
                 visualizacoes: 0
             };
             const result = await db.collection("posts").insertOne(novoPost);
             return res.status(201).json({ ...novoPost, id: result.insertedId.toString() });
         }
 
-        // --- EXCLUIR POST (DELETE) ---
+        // --- EXCLUIR POST OU COMENTÁRIO (DELETE) ---
         if (req.method === 'DELETE') {
-            const { id } = req.query;
-            if (!id) return res.status(400).json({ message: "ID do post é obrigatório" });
+            const { id, action, comentarioId } = req.query;
 
+            if (action === 'comentario' || comentarioId) {
+                const targetId = comentarioId || id;
+                if (!targetId) return res.status(400).json({ message: "ID do comentário é obrigatório" });
+                await db.collection("comentarios").deleteOne({ _id: new ObjectId(targetId as string) });
+                return res.status(200).json({ message: "Comentário excluído" });
+            }
+
+            if (!id) return res.status(400).json({ message: "ID do post é obrigatório" });
             const result = await db.collection("posts").deleteOne({ _id: new ObjectId(id as string) });
 
             if (result.deletedCount === 0) {
