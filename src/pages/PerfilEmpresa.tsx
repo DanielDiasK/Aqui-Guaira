@@ -208,14 +208,7 @@ const PerfilEmpresa = () => {
                             )}
                             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60"></div>
 
-                            {/* Overlay Glass Stats */}
-                            <div className="absolute bottom-6 right-6 flex gap-4">
-                                <div className="glass-card px-4 py-2 rounded-2xl flex items-center gap-2">
-                                    <Badge variant="secondary" className="bg-primary/20 text-primary border-none">
-                                        {empresa.categoria_nome}
-                                    </Badge>
-                                </div>
-                            </div>
+
                         </div>
 
                         <div className="px-6 md:px-12 py-8 space-y-12 relative">
