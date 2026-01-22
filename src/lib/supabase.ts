@@ -492,6 +492,7 @@ export async function criarComentario(comentario: {
   post_id: string
   autor_nome: string
   conteudo: string
+  user_id?: string
 }) {
   try {
     const res = await fetch('/api/posts?action=comentario', {

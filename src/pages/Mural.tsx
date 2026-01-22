@@ -194,7 +194,8 @@ const Mural = () => {
       const resp = await criarComentario({
         post_id: postId,
         autor_nome: user.nome || user.email,
-        conteudo: texto
+        conteudo: texto,
+        user_id: user.id
       });
       if (resp) {
         setNovoComentarioTexto(prev => ({ ...prev, [postId]: "" }));
@@ -218,7 +219,7 @@ const Mural = () => {
   const handleExcluirComentario = async (postId: string, comentarioId: string) => {
     if (!window.confirm("Excluir comentário?")) return;
     try {
-      const res = await fetch(`/api/posts?action=comentario&id=${comentarioId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/posts?action=comentario&comentarioId=${comentarioId}`, { method: 'DELETE' });
       if (res.ok) {
         toast.success("Comentário removido");
         carregarComentariosData(postId);
@@ -464,8 +465,14 @@ const Mural = () => {
                                         <TrendingUp className="w-3.5 h-3.5" />
                                         <span className="text-[10px] font-black">{comment.curtidas || 0}</span>
                                       </button>
-                                      {(user?.id === comment.user_id || user?.id === post.user_id) && (
-                                        <button onClick={() => handleExcluirComentario(post.id, comment.id)} className="p-1.5 text-zinc-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash className="w-3.5 h-3.5" /></button>
+                                      {(user?.id && (user.id === comment.user_id || user.id === post.user_id)) && (
+                                        <button 
+                                          onClick={() => handleExcluirComentario(post.id, comment.id)} 
+                                          className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-all"
+                                          title="Excluir comentário"
+                                        >
+                                          <Trash className="w-4 h-4" />
+                                        </button>
                                       )}
                                     </div>
                                   </div>
