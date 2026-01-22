@@ -5,13 +5,20 @@ import {
     Image as ImageIcon, Smile, MapPin, Calendar,
     MessageCircle, Repeat2, Heart, Share, Trash2, ShieldCheck,
     TrendingUp, Sparkles, X, Plus, CheckCircle2, MoreVertical,
-    Loader2, ArrowLeft, Send, MessageSquare, Quote
+    Loader2, ArrowLeft, Send, MessageSquare, Quote, Pencil, ShieldAlert
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { getUsuarioLogado, buscarPosts, criarPost, uploadImagem, buscarComentarios, criarComentario } from "@/lib/supabase";
 
@@ -54,6 +61,11 @@ const XFeed = () => {
     const [userApoios, setUserApoios] = useState<Record<string, boolean>>({});
     const [novoComentario, setNovoComentario] = useState<Record<string, string>>({});
     const [comentarioApoios, setComentarioApoios] = useState<Record<string, boolean>>({});
+
+    // Editing state
+    const [editingPost, setEditingPost] = useState<Post | null>(null);
+    const [isSavingEdit, setIsSavingEdit] = useState(false);
+    const [editContent, setEditContent] = useState("");
 
     useEffect(() => {
         carregarPosts();
@@ -152,14 +164,41 @@ const XFeed = () => {
     };
 
     const handleExcluirPost = async (postId: string) => {
-        if (!window.confirm("Excluir publicação?")) return;
+        if (!window.confirm("Excluir publicação permanentemente?")) return;
         try {
             const res = await fetch(`/api/posts?id=${postId}`, { method: 'DELETE' });
             if (res.ok) {
-                toast.success("Removido");
+                toast.success("Publicação removida");
                 carregarPosts();
+            } else {
+                toast.error("Erro ao excluir");
             }
-        } catch (err) { }
+        } catch (err) {
+            toast.error("Erro inesperado ao excluir");
+        }
+    };
+
+    const handleSalvarEdicao = async () => {
+        if (!editingPost || !editContent.trim()) return;
+        setIsSavingEdit(true);
+        try {
+            const res = await fetch(`/api/posts?id=${editingPost.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ conteudo: editContent })
+            });
+            if (res.ok) {
+                toast.success("Publicação atualizada!");
+                setEditingPost(null);
+                carregarPosts();
+            } else {
+                toast.error("Erro ao salvar alterações");
+            }
+        } catch (err) {
+            toast.error("Erro ao conectar ao servidor");
+        } finally {
+            setIsSavingEdit(false);
+        }
     };
 
     return (
@@ -251,19 +290,38 @@ const XFeed = () => {
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
-                                            {user?.id === post.user_id && (
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="rounded-2xl text-rose-500 bg-rose-500/5 hover:bg-rose-500/10"
-                                                    onClick={() => handleExcluirPost(post.id)}
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </Button>
-                                            )}
-                                            <Button variant="ghost" size="icon" className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 group-hover:bg-primary/5 transition-colors">
-                                                <MoreHorizontal className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="rounded-2xl bg-zinc-50 dark:bg-zinc-900 group-hover:bg-primary/5 transition-all active:scale-95">
+                                                        <MoreHorizontal className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-48 p-2 rounded-2xl border-none shadow-2xl bg-white dark:bg-[#1A1A1E]">
+                                                    {user?.id === post.user_id ? (
+                                                        <>
+                                                            <DropdownMenuItem
+                                                                className="rounded-xl gap-3 font-bold py-3 cursor-pointer focus:bg-primary/10 focus:text-primary"
+                                                                onClick={() => {
+                                                                    setEditingPost(post);
+                                                                    setEditContent(post.conteudo);
+                                                                }}
+                                                            >
+                                                                <Pencil className="w-4 h-4" /> Editar Post
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem
+                                                                className="rounded-xl gap-3 font-bold py-3 cursor-pointer text-rose-500 focus:bg-rose-500/10 focus:text-rose-500"
+                                                                onClick={() => handleExcluirPost(post.id)}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" /> Excluir Post
+                                                            </DropdownMenuItem>
+                                                        </>
+                                                    ) : (
+                                                        <DropdownMenuItem className="rounded-xl gap-3 font-bold py-3 cursor-pointer focus:bg-zinc-100 dark:focus:bg-zinc-800">
+                                                            <ShieldAlert className="w-4 h-4" /> Denunciar Post
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </div>
 
@@ -358,6 +416,41 @@ const XFeed = () => {
             <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
                 <DialogContent className="max-w-[90vw] p-0 border-none bg-transparent shadow-none">
                     <img src={selectedImage!} className="max-w-full max-h-[90vh] object-contain rounded-[3rem] shadow-2xl mx-auto border-8 border-white dark:border-black/50" />
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de Edição */}
+            <Dialog open={!!editingPost} onOpenChange={(open) => !open && setEditingPost(null)}>
+                <DialogContent className="max-w-2xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="bg-primary/5 p-8 border-b border-primary/10">
+                        <DialogHeader>
+                            <DialogTitle className="text-2xl font-black">Editar sua publicação</DialogTitle>
+                            <DialogDescription className="font-medium">O que você gostaria de mudar na sua mensagem?</DialogDescription>
+                        </DialogHeader>
+                    </div>
+                    <div className="p-8 space-y-6">
+                        <Textarea
+                            className="min-h-[200px] rounded-3xl border-2 border-zinc-100 focus:border-primary p-6 text-lg font-medium resize-none shadow-inner bg-zinc-50/50"
+                            value={editContent}
+                            onChange={(e) => setEditContent(e.target.value)}
+                        />
+                        <div className="flex gap-3">
+                            <Button
+                                variant="ghost"
+                                className="flex-1 h-12 rounded-2xl font-bold"
+                                onClick={() => setEditingPost(null)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                className="flex-[2] h-12 rounded-2xl font-black text-lg shadow-lg shadow-primary/20"
+                                onClick={handleSalvarEdicao}
+                                disabled={isSavingEdit}
+                            >
+                                {isSavingEdit ? <Loader2 className="w-5 h-5 animate-spin" /> : "Salvar Alterações"}
+                            </Button>
+                        </div>
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>
