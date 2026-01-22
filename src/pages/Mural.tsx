@@ -36,6 +36,7 @@ const Mural = () => {
   const [loading, setLoading] = useState(false);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const user = getUsuarioLogado();
 
@@ -72,8 +73,6 @@ const Mural = () => {
     if (!user) return;
     try {
       const data = await buscarPosts({ userId: user.id });
-      // Filtrar apenas os pendentes (embora o userId filter retorne todos do usuário, 
-      // o Mural geralmente só mostra os aprovados para o público)
       setMeusPostsPendentes(data.filter((p: Post) => p.status === 'pendente'));
     } catch (error) {
       console.error("Erro ao carregar seus posts:", error);
@@ -98,7 +97,6 @@ const Mural = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!user) {
       setShowLogin(true);
       return;
@@ -133,15 +131,12 @@ const Mural = () => {
           description: "Nossa equipe irá revisar sua publicação em breve."
         });
         setOpen(false);
-        // Reset form
         setTitulo("");
         setConteudo("");
         setImagemFile(null);
         setImagemPreview("");
         setBairro("");
         setLogradouro("");
-
-        // Recarregar pendentes
         carregarMeusPostsPendentes();
       } else {
         toast.error("Erro ao enviar aviso. Tente novamente.");
@@ -173,31 +168,18 @@ const Mural = () => {
       <Header />
 
       <main className="flex-grow">
-        {/* Premium Hero Section */}
         <section className="relative pt-12 pb-20 overflow-hidden bg-background">
           <div className="absolute top-0 right-0 -mr-24 -mt-24 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]" />
-
           <div className="container mx-auto px-4 relative z-10">
-            {/* Navegação */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-12">
               <div className="flex gap-2">
-                <Button
-                  onClick={() => navigate(-1)}
-                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Voltar
+                <Button onClick={() => navigate(-1)} className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6">
+                  <ArrowLeft className="w-4 h-4" /> Voltar
                 </Button>
-                <Button
-                  onClick={() => navigate('/')}
-                  className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6"
-                >
-                  <Home className="w-4 h-4" />
-                  Início
+                <Button onClick={() => navigate('/')} className="gap-2 bg-green-500 hover:bg-green-600 text-white rounded-lg px-6">
+                  <Home className="w-4 h-4" /> Início
                 </Button>
               </div>
-
             </div>
 
             <div className="max-w-4xl mx-auto text-center space-y-6 mb-12">
@@ -209,7 +191,7 @@ const Mural = () => {
                 <span className="gradient-text">Nossa Cidade</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground font-medium max-w-2xl mx-auto">
-                Avisos, utilidade pública e notícias da comunidade. Participe e mantenha todos informados sobre o que acontece em Guaíra-SP.
+                Avisos, utilidade pública e notícias da comunidade de Guaíra-SP.
               </p>
             </div>
 
@@ -228,53 +210,45 @@ const Mural = () => {
                         <MessageSquare className="w-6 h-6 text-primary" />
                         Novo Aviso no Mural
                       </DialogTitle>
-                      <DialogDescription className="font-medium text-primary/70">
-                        Seu aviso será analisado por nossa equipe antes de ser publicado.
-                      </DialogDescription>
                     </DialogHeader>
                   </div>
 
                   <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label className="font-bold text-gray-700">O que você quer anunciar? *</Label>
+                        <Label className="font-bold">O que você quer anunciar? *</Label>
                         <Input
                           placeholder="Título curto e direto"
                           value={titulo}
                           onChange={(e) => setTitulo(e.target.value)}
-                          className="py-6 rounded-xl border-2 focus:border-primary transition-all"
+                          className="py-6 rounded-xl border-2"
                           required
                         />
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="font-bold text-gray-700">Descrição detalhada *</Label>
+                        <Label className="font-bold">Descrição detalhada *</Label>
                         <Textarea
-                          placeholder="Escreva aqui as informações do seu aviso..."
+                          placeholder="Escreva aqui as informações..."
                           rows={4}
                           value={conteudo}
                           onChange={(e) => setConteudo(e.target.value)}
-                          className="rounded-xl border-2 focus:border-primary transition-all p-4"
+                          className="rounded-xl border-2 p-4"
                           required
                         />
                       </div>
-
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="font-bold text-gray-700">Qual o Bairro? *</Label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <Input
-                              placeholder="Ex: Miguel Fabiano"
-                              value={bairro}
-                              onChange={(e) => setBairro(e.target.value)}
-                              className="pl-10 py-6 rounded-xl border-2"
-                              required
-                            />
-                          </div>
+                          <Label className="font-bold">Bairro *</Label>
+                          <Input
+                            placeholder="Ex: Miguel Fabiano"
+                            value={bairro}
+                            onChange={(e) => setBairro(e.target.value)}
+                            className="py-6 rounded-xl border-2"
+                            required
+                          />
                         </div>
                         <div className="space-y-2">
-                          <Label className="font-bold text-gray-700">Rua (Opcional)</Label>
+                          <Label className="font-bold">Rua (Opcional)</Label>
                           <Input
                             placeholder="Ex: Rua 10, nº 123"
                             value={logradouro}
@@ -283,68 +257,24 @@ const Mural = () => {
                           />
                         </div>
                       </div>
-
                       <div className="space-y-2">
-                        <Label className="font-bold text-gray-700">Adicionar Foto (Recomendado)</Label>
-                        <div className="flex items-center gap-4">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => document.getElementById('mural-image-upload')?.click()}
-                            className="gap-2 py-8 px-6 rounded-2xl border-2 border-dashed border-gray-200 hover:border-primary transition-colors flex-grow md:flex-grow-0"
-                          >
-                            <ImagePlus className="w-5 h-5" />
-                            Escolher Arquivo
-                          </Button>
-                          <input
-                            id="mural-image-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageChange}
-                            className="hidden"
-                          />
-                          {imagemPreview && (
-                            <div className="relative group">
-                              <img src={imagemPreview} alt="Preview" className="w-24 h-24 object-cover rounded-2xl border-2 border-primary/20 shadow-lg" />
-                              <Button
-                                type="button"
-                                variant="destructive"
-                                size="icon"
-                                className="absolute -top-2 -right-2 w-7 h-7 rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform"
-                                onClick={() => { setImagemFile(null); setImagemPreview(""); }}
-                              >
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          )}
-                        </div>
+                        <Label className="font-bold">Foto (Opcional)</Label>
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="py-2"
+                        />
+                        {imagemPreview && (
+                          <img src={imagemPreview} className="w-24 h-24 object-cover rounded-xl mt-2 border" />
+                        )}
                       </div>
                     </div>
-
-                    <DialogFooter className="pt-4">
-                      {!user && (
-                        <p className="text-sm text-red-500 font-bold mb-4 w-full">
-                          Você precisa estar logado para publicar.
-                        </p>
-                      )}
-                      <div className="flex w-full gap-3">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="flex-1 rounded-xl h-12 font-bold"
-                          onClick={() => setOpen(false)}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button
-                          type="submit"
-                          className="flex-1 rounded-xl h-12 font-bold shadow-lg shadow-primary/20 gap-2"
-                          disabled={loading || !user}
-                        >
-                          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                          Enviar para Análise
-                        </Button>
-                      </div>
+                    <DialogFooter>
+                      <Button type="submit" className="w-full rounded-xl h-12 font-bold" disabled={loading}>
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        Enviar Aviso
+                      </Button>
                     </DialogFooter>
                   </form>
                 </DialogContent>
@@ -354,42 +284,21 @@ const Mural = () => {
         </section>
 
         <section className="container mx-auto px-4 py-8 max-w-5xl space-y-12">
-          {/* Seus Posts Pendentes */}
           {meusPostsPendentes.length > 0 && (
             <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-orange-100 rounded-xl">
-                  <Clock className="w-6 h-6 text-orange-600" />
-                </div>
-                <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Publicações em <span className="text-orange-500">Análise</span></h2>
+              <div className="flex items-center gap-3">
+                <Clock className="w-6 h-6 text-orange-500" />
+                <h2 className="text-2xl font-black">Em Análise</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                 {meusPostsPendentes.map((post) => (
-                  <Card key={post.id} className="bg-[#FFF9F2] dark:bg-[#1E1A15] border-2 border-[#FFE4CC] dark:border-[#3D2B1F] rounded-3xl overflow-hidden group hover:border-orange-300 dark:hover:border-orange-800 transition-all shadow-sm">
-                    <div className="p-6 flex flex-col md:flex-row gap-5">
-                      {post.imagens && post.imagens.length > 0 && (
-                        <div className="relative shrink-0">
-                          <img
-                            src={post.imagens[0]}
-                            alt={post.titulo}
-                            className="w-full md:w-28 h-28 object-cover rounded-2xl opacity-80 group-hover:opacity-100 transition-opacity"
-                          />
-                          <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl" />
-                        </div>
-                      )}
-                      <div className="flex-1 space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-900/50 font-bold px-3 py-1">
-                            <Clock className="w-3 h-3 mr-1 animate-pulse" />
-                            Aguardando...
-                          </Badge>
-                        </div>
-                        <h3 className="text-lg font-black text-gray-800 dark:text-gray-100 leading-tight">{post.titulo}</h3>
-                        <div className="flex items-center gap-1.5 text-xs text-orange-700/70 dark:text-orange-400/60 font-bold uppercase tracking-widest">
-                          <MapPin className="w-3 h-3" />
-                          {post.bairro}
-                        </div>
-                      </div>
+                  <Card key={post.id} className="bg-orange-50/50 border-orange-100 rounded-3xl p-6 flex gap-4">
+                    {post.imagens && post.imagens.length > 0 && (
+                      <img src={post.imagens[0]} className="w-20 h-20 object-cover rounded-2xl" />
+                    )}
+                    <div>
+                      <Badge className="bg-orange-500 text-white mb-2">Aguardando</Badge>
+                      <h3 className="font-bold leading-tight">{post.titulo}</h3>
                     </div>
                   </Card>
                 ))}
@@ -397,78 +306,81 @@ const Mural = () => {
             </div>
           )}
 
-          {/* Feed do Mural */}
           <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center justify-between border-b pb-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-xl">
-                  <TrendingUp className="w-7 h-7 text-primary" />
-                </div>
-                <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Últimos <span className="text-primary">Avisos</span></h2>
+                <TrendingUp className="w-7 h-7 text-primary" />
+                <h2 className="text-3xl font-black">Últimos Avisos</h2>
               </div>
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold hidden sm:flex">
-                {posts.length} avisos ativos
-              </Badge>
+              <Badge variant="outline">{posts.length} ativos</Badge>
             </div>
 
             {loadingPosts ? (
-              <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
-                <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
-                <p className="text-muted-foreground font-bold">Lendo o mural...</p>
+              <div className="py-24 text-center">
+                <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
+                <p className="font-bold text-muted-foreground">Carregando feed...</p>
               </div>
             ) : posts.length === 0 ? (
-              <div className="py-24 text-center bg-white/5 dark:bg-white/[0.02] backdrop-blur-sm rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-zinc-800 flex flex-col items-center gap-6">
-                <div className="p-6 bg-primary/5 dark:bg-primary/10 rounded-full">
-                  <MessageSquare className="w-16 h-16 text-primary/40" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-3xl font-black text-foreground">O mural está vazio</h3>
-                  <p className="text-muted-foreground dark:text-zinc-400 font-medium max-w-sm mx-auto">Seja o primeiro a publicar um aviso útil para a comunidade de Guaíra!</p>
-                </div>
+              <div className="py-24 text-center bg-zinc-50 rounded-[3rem] border-2 border-dashed">
+                <MessageSquare className="w-16 h-16 text-zinc-300 mx-auto mb-4" />
+                <h3 className="text-xl font-bold">Mural Vazio</h3>
               </div>
             ) : (
-              <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+              <div className="max-w-2xl mx-auto space-y-6">
                 {posts.map((post) => (
-                  <Card key={post.id} className="break-inside-avoid-column bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-zinc-800/50 hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 group rounded-[2rem] mb-8">
+                  <Card key={post.id} className="bg-white dark:bg-[#1A1A1A] border-none shadow-sm hover:shadow-md transition-all overflow-hidden rounded-[2rem]">
+                    <div className="px-6 pt-6 pb-4 flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-black text-sm shrink-0">
+                        {(post.autor_nome || "U").charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-zinc-900 dark:text-zinc-100 truncate">
+                            {post.autor_nome}
+                          </h3>
+                          <Badge className="bg-green-500/10 text-green-600 text-[10px] h-5 border-none">
+                            Verificado
+                          </Badge>
+                          <span className="text-zinc-400 text-xs">•</span>
+                          <span className="text-zinc-400 text-[10px] font-bold">{formatarData(post.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] font-black text-primary/70 uppercase transform translate-y-[-2px]">
+                          <MapPin className="w-3 h-3" />
+                          {post.bairro}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="px-6 pb-4">
+                      <h4 className="text-xl font-black text-zinc-900 dark:text-zinc-50 leading-tight mb-3">
+                        {post.titulo}
+                      </h4>
+                      <p className="text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
+                        {post.conteudo}
+                      </p>
+                    </div>
+
                     {post.imagens && post.imagens.length > 0 && (
-                      <div className="relative overflow-hidden h-56">
-                        <img
-                          src={post.imagens[0]}
-                          alt={post.titulo}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+                      <div className="px-6 pb-6">
+                        <div
+                          className="relative overflow-hidden rounded-[2rem] border bg-zinc-50 cursor-pointer"
+                          onClick={() => setSelectedImage(post.imagens![0])}
+                        >
+                          <img src={post.imagens[0]} className="w-full h-auto max-h-[500px] object-cover" />
+                        </div>
                       </div>
                     )}
 
-                    <div className="p-8 space-y-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-primary/10 dark:bg-primary/20 rounded-lg">
-                              <MapPin className="w-3.5 h-3.5 text-primary" />
-                            </div>
-                            <span className="text-[10px] font-black text-muted-foreground dark:text-zinc-500 uppercase tracking-[0.2em]">{post.bairro}</span>
-                          </div>
-                        </div>
-                        <h3 className="text-2xl font-black text-foreground group-hover:text-primary transition-colors leading-tight">{post.titulo}</h3>
-                        <p className="text-muted-foreground dark:text-zinc-400 font-medium leading-relaxed whitespace-pre-wrap">{post.conteudo}</p>
+                    <div className="px-6 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t flex items-center justify-between">
+                      <div className="flex gap-6">
+                        <button className="flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors">
+                          <MessageSquare className="w-5 h-5" />
+                          <span className="text-xs font-bold">Apoiar</span>
+                        </button>
                       </div>
-
-                      <div className="pt-6 border-t border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 dark:from-primary/80 dark:to-primary/40 flex items-center justify-center text-white font-black text-xs shadow-md">
-                            {(post.autor_nome || "U").charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="text-sm font-black text-foreground dark:text-zinc-200 line-clamp-1">{post.autor_nome || "Usuário"}</p>
-                            <p className="text-[10px] font-bold text-muted-foreground dark:text-zinc-500 uppercase tracking-widest">{formatarData(post.created_at)}</p>
-                          </div>
-                        </div>
-                        <div className="p-1.5 bg-green-500/10 rounded-full">
-                          <CheckCircle2 className="w-4 h-4 text-green-500" />
-                        </div>
-                      </div>
+                      <Button variant="ghost" size="sm" className="rounded-xl text-zinc-400 gap-2 font-bold hover:text-primary">
+                        <Send className="w-4 h-4" /> Compactilhar
+                      </Button>
                     </div>
                   </Card>
                 ))}
@@ -478,6 +390,24 @@ const Mural = () => {
         </section>
 
         <LoginDialog open={showLogin} onOpenChange={setShowLogin} />
+
+        <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+          <DialogContent className="max-w-4xl p-0 border-none bg-transparent shadow-none overflow-hidden">
+            <div className="relative w-full h-full flex items-center justify-center">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 z-50 text-white bg-black/50 hover:bg-black/70 rounded-full"
+                onClick={() => setSelectedImage(null)}
+              >
+                <X className="w-6 h-6" />
+              </Button>
+              {selectedImage && (
+                <img src={selectedImage} className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl" />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
 
       <Footer />
