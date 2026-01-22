@@ -300,6 +300,29 @@ export default function Admin() {
       await carregarDados();
     }
   };
+  const handleExcluirPost = async (post: Post) => {
+    if (!window.confirm(`Excluir permanentemente o post "${post.titulo}"?`)) return;
+    const res = await fetch(`/api/posts?id=${post.id}`, { method: 'DELETE' });
+    if (res.ok) {
+      await fetch('/api/admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          admin_id: adminData.id,
+          acao: "excluir_post",
+          entidade_tipo: "post",
+          entidade_id: post.id,
+          detalhes: `Post "${post.titulo}" excluído pelo administrador`
+        })
+      });
+      toast.success("Post excluído permanentemente");
+      setShowPostDetalhesDialog(false);
+      await carregarDados();
+    } else {
+      toast.error("Erro ao excluir post");
+    }
+  };
+
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center bg-background">
@@ -593,6 +616,14 @@ export default function Admin() {
                         >
                           <Eye className="w-4 h-4" /> Detalhes
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl h-9 px-3 border-rose-100 text-rose-500 hover:bg-rose-50 hover:text-rose-600 dark:border-rose-900/30 dark:hover:bg-rose-950/20"
+                          onClick={() => handleExcluirPost(post)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                       <div className="flex gap-2">
                         {post.status === 'pendente' && (
@@ -812,6 +843,11 @@ export default function Admin() {
                   <Button variant="ghost" className="flex-1 rounded-2xl h-12 font-bold" onClick={() => setShowPostDetalhesDialog(false)}>
                     Fechar
                   </Button>
+                  {postSelecionado.status === 'aprovado' && (
+                    <Button variant="outline" className="rounded-2xl h-12 px-6 border-rose-200 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-bold" onClick={() => handleExcluirPost(postSelecionado)}>
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
+                  )}
                   {postSelecionado.status === 'pendente' && (
                     <Button className="flex-1 rounded-2xl h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/20" onClick={async () => {
                       const res = await fetch(`/api/posts?id=${postSelecionado.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'aprovado', data_aprovacao: new Date().toISOString(), admin_aprovador_id: adminData.id }) });

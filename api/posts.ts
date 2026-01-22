@@ -105,7 +105,21 @@ export default async function handler(req: any, res: any) {
             return res.status(201).json({ ...novoPost, id: result.insertedId.toString() });
         }
 
-        res.setHeader('Allow', ['GET', 'POST']);
+        // --- EXCLUIR POST (DELETE) ---
+        if (req.method === 'DELETE') {
+            const { id } = req.query;
+            if (!id) return res.status(400).json({ message: "ID do post é obrigatório" });
+
+            const result = await db.collection("posts").deleteOne({ _id: new ObjectId(id as string) });
+
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: "Post não encontrado" });
+            }
+
+            return res.status(200).json({ message: "Post excluído com sucesso" });
+        }
+
+        res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
         return res.status(405).end(`Method ${req.method} Not Allowed`);
 
     } catch (error: any) {
