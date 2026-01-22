@@ -13,20 +13,19 @@ import { ImagePlus, PlusCircle, Send, Loader2, X, Clock, CheckCircle2, MapPin, A
 import { toast } from "sonner";
 import { LoginDialog } from "@/components/LoginDialog";
 import { useNavigate } from "react-router-dom";
+import { getUsuarioLogado, buscarPosts, criarPost, uploadImagem } from "@/lib/supabase";
 
 interface Post {
   id: string;
   titulo: string;
   conteudo: string;
-  imagem_url?: string;
-  aprovado: boolean;
+  imagens?: string[];
+  status: 'pendente' | 'aprovado' | 'rejeitado';
   bairro: string;
   logradouro?: string;
   user_id: string;
+  autor_nome: string;
   created_at: string;
-  users: {
-    nome: string;
-  };
 }
 
 const Mural = () => {
@@ -38,7 +37,7 @@ const Mural = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
 
-  const user = null; // getUsuarioLogado();
+  const user = getUsuarioLogado();
 
   // Campos do formulário
   const [titulo, setTitulo] = useState("");
@@ -51,23 +50,34 @@ const Mural = () => {
   // Carregar posts ao montar
   useEffect(() => {
     carregarPosts();
-  }, []); // Apenas na montagem
-
-  // Observer para posts pendentes se o usuário estiver logado
-  useEffect(() => {
     if (user) {
       carregarMeusPostsPendentes();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const carregarPosts = async () => {
     setLoadingPosts(true);
-    // Dados serão carregados de uma fonte externa futuramente
-    setLoadingPosts(false);
+    try {
+      const data = await buscarPosts({ limite: 50 });
+      setPosts(data);
+    } catch (error) {
+      console.error("Erro ao carregar posts:", error);
+      toast.error("Não foi possível carregar os posts.");
+    } finally {
+      setLoadingPosts(false);
+    }
   };
 
   const carregarMeusPostsPendentes = async () => {
-    // Dados serão carregados de uma fonte externa futuramente
+    if (!user) return;
+    try {
+      const data = await buscarPosts({ userId: user.id });
+      // Filtrar apenas os pendentes (embora o userId filter retorne todos do usuário, 
+      // o Mural geralmente só mostra os aprovados para o público)
+      setMeusPostsPendentes(data.filter((p: Post) => p.status === 'pendente'));
+    } catch (error) {
+      console.error("Erro ao carregar seus posts:", error);
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,17 +98,74 @@ const Mural = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.info("Funcionalidade em desenvolvimento");
+
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let imagemUrl = "";
+      if (imagemFile) {
+        const uploadedUrl = await uploadImagem('posts-images', imagemFile);
+        if (uploadedUrl) {
+          imagemUrl = uploadedUrl;
+        }
+      }
+
+      const novoPost = {
+        titulo,
+        conteudo,
+        autor_nome: user.nome || user.email,
+        autor_bairro: bairro,
+        autor_email: user.email,
+        user_id: user.id,
+        bairro,
+        logradouro,
+        imagens: imagemUrl ? [imagemUrl] : [],
+      };
+
+      const result = await criarPost(novoPost);
+
+      if (result) {
+        toast.success("Aviso enviado para análise!", {
+          description: "Nossa equipe irá revisar sua publicação em breve."
+        });
+        setOpen(false);
+        // Reset form
+        setTitulo("");
+        setConteudo("");
+        setImagemFile(null);
+        setImagemPreview("");
+        setBairro("");
+        setLogradouro("");
+
+        // Recarregar pendentes
+        carregarMeusPostsPendentes();
+      } else {
+        toast.error("Erro ao enviar aviso. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro ao criar post:", error);
+      toast.error("Ocorreu um erro inesperado.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatarData = (data: string) => {
-    return new Date(data).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      return new Date(data).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return "Data indisponível";
+    }
   };
 
   return (
@@ -300,9 +367,9 @@ const Mural = () => {
                 {meusPostsPendentes.map((post) => (
                   <Card key={post.id} className="bg-orange-50/50 border-orange-100 rounded-3xl overflow-hidden group hover:border-orange-300 transition-all">
                     <div className="p-6 flex flex-col md:flex-row gap-4">
-                      {post.imagem_url && (
+                      {post.imagens && post.imagens.length > 0 && (
                         <img
-                          src={post.imagem_url}
+                          src={post.imagens[0]}
                           alt={post.titulo}
                           className="w-full md:w-24 h-24 object-cover rounded-2xl opacity-60"
                         />
@@ -350,10 +417,10 @@ const Mural = () => {
               <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
                 {posts.map((post) => (
                   <Card key={post.id} className="break-inside-avoid-column bg-card border border-border/50 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 group rounded-[2rem]">
-                    {post.imagem_url && (
+                    {post.imagens && post.imagens.length > 0 && (
                       <div className="relative overflow-hidden h-56">
                         <img
-                          src={post.imagem_url}
+                          src={post.imagens[0]}
                           alt={post.titulo}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
@@ -378,10 +445,10 @@ const Mural = () => {
                       <div className="pt-6 border-t border-border/10 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-black text-xs shadow-lg">
-                            {post.users.nome.charAt(0).toUpperCase()}
+                            {(post.autor_nome || "U").charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-black text-foreground line-clamp-1">{post.users.nome}</p>
+                            <p className="text-sm font-black text-foreground line-clamp-1">{post.autor_nome || "Usuário"}</p>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{formatarData(post.created_at)}</p>
                           </div>
                         </div>

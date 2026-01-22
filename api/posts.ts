@@ -37,7 +37,10 @@ export default async function handler(req: any, res: any) {
             if (empresaId) {
                 query.empresa_id = empresaId;
             }
-            if (admin !== 'true' && !empresaId) {
+            if (req.query.userId) {
+                query.user_id = req.query.userId;
+            }
+            if (admin !== 'true' && !empresaId && !req.query.userId) {
                 query.status = 'aprovado';
             }
 
@@ -47,7 +50,12 @@ export default async function handler(req: any, res: any) {
                 .limit(parseInt(limite as string) || 50)
                 .toArray();
 
-            return res.status(200).json(posts);
+            const formattedPosts = posts.map(post => ({
+                ...post,
+                id: post._id.toString()
+            }));
+
+            return res.status(200).json(formattedPosts);
         }
 
         // --- MÉTODOS DE ATUALIZAÇÃO (PATCH) ---

@@ -436,9 +436,14 @@ export async function incrementarVisualizacoesEmpresa(id: string) {
 // FUNÇÕES DE API - POSTS
 // ============================================
 
-export async function buscarPosts(limite = 50) {
+export async function buscarPosts(filtros: { limite?: number, userId?: string, admin?: boolean } = {}) {
   try {
-    const res = await fetch(`/api/posts?limite=${limite}`);
+    const params = new URLSearchParams();
+    if (filtros.limite) params.append('limite', filtros.limite.toString());
+    if (filtros.userId) params.append('userId', filtros.userId);
+    if (filtros.admin) params.append('admin', 'true');
+
+    const res = await fetch(`/api/posts?${params.toString()}`);
     if (!res.ok) return [];
     return await res.json();
   } catch (error) {
@@ -448,11 +453,15 @@ export async function buscarPosts(limite = 50) {
 }
 
 export async function criarPost(post: {
+  titulo?: string
   autor_nome: string
   autor_bairro: string
   autor_email?: string
   conteudo: string
   imagens?: string[]
+  user_id?: string
+  bairro?: string
+  logradouro?: string
 }) {
   try {
     const res = await fetch('/api/posts', {
