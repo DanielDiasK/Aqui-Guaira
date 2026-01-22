@@ -365,19 +365,30 @@ const Mural = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {meusPostsPendentes.map((post) => (
-                  <Card key={post.id} className="bg-orange-50/50 border-orange-100 rounded-3xl overflow-hidden group hover:border-orange-300 transition-all">
-                    <div className="p-6 flex flex-col md:flex-row gap-4">
+                  <Card key={post.id} className="bg-[#FFF9F2] dark:bg-[#1E1A15] border-2 border-[#FFE4CC] dark:border-[#3D2B1F] rounded-3xl overflow-hidden group hover:border-orange-300 dark:hover:border-orange-800 transition-all shadow-sm">
+                    <div className="p-6 flex flex-col md:flex-row gap-5">
                       {post.imagens && post.imagens.length > 0 && (
-                        <img
-                          src={post.imagens[0]}
-                          alt={post.titulo}
-                          className="w-full md:w-24 h-24 object-cover rounded-2xl opacity-60"
-                        />
+                        <div className="relative shrink-0">
+                          <img
+                            src={post.imagens[0]}
+                            alt={post.titulo}
+                            className="w-full md:w-28 h-28 object-cover rounded-2xl opacity-80 group-hover:opacity-100 transition-opacity"
+                          />
+                          <div className="absolute inset-0 ring-1 ring-inset ring-black/5 rounded-2xl" />
+                        </div>
                       )}
-                      <div className="flex-1">
-                        <Badge variant="outline" className="bg-white text-orange-600 border-orange-200 mb-2 font-bold animate-pulse">Aguardando...</Badge>
-                        <h3 className="font-black text-gray-800 leading-tight">{post.titulo}</h3>
-                        <p className="text-xs text-orange-700/70 font-bold mt-1 uppercase tracking-widest">{post.bairro}</p>
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 border-orange-200 dark:border-orange-900/50 font-bold px-3 py-1">
+                            <Clock className="w-3 h-3 mr-1 animate-pulse" />
+                            Aguardando...
+                          </Badge>
+                        </div>
+                        <h3 className="text-lg font-black text-gray-800 dark:text-gray-100 leading-tight">{post.titulo}</h3>
+                        <div className="flex items-center gap-1.5 text-xs text-orange-700/70 dark:text-orange-400/60 font-bold uppercase tracking-widest">
+                          <MapPin className="w-3 h-3" />
+                          {post.bairro}
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -406,17 +417,19 @@ const Mural = () => {
                 <p className="text-muted-foreground font-bold">Lendo o mural...</p>
               </div>
             ) : posts.length === 0 ? (
-              <div className="py-24 text-center bg-muted/20 rounded-[2.5rem] border-2 border-dashed border-border/50 flex flex-col items-center gap-4">
-                <MessageSquare className="w-20 h-20 text-muted-foreground/30" />
+              <div className="py-24 text-center bg-white/5 dark:bg-white/[0.02] backdrop-blur-sm rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-zinc-800 flex flex-col items-center gap-6">
+                <div className="p-6 bg-primary/5 dark:bg-primary/10 rounded-full">
+                  <MessageSquare className="w-16 h-16 text-primary/40" />
+                </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-black text-foreground">O mural está vazio</h3>
-                  <p className="text-muted-foreground font-medium">Seja o primeiro a publicar um aviso útil para a cidade!</p>
+                  <h3 className="text-3xl font-black text-foreground">O mural está vazio</h3>
+                  <p className="text-muted-foreground dark:text-zinc-400 font-medium max-w-sm mx-auto">Seja o primeiro a publicar um aviso útil para a comunidade de Guaíra!</p>
                 </div>
               </div>
             ) : (
               <div className="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
                 {posts.map((post) => (
-                  <Card key={post.id} className="break-inside-avoid-column bg-card border border-border/50 hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 group rounded-[2rem]">
+                  <Card key={post.id} className="break-inside-avoid-column bg-white dark:bg-[#1A1A1A] border border-gray-100 dark:border-zinc-800/50 hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 overflow-hidden shadow-sm hover:shadow-xl p-0 group rounded-[2rem] mb-8">
                     {post.imagens && post.imagens.length > 0 && (
                       <div className="relative overflow-hidden h-56">
                         <img
@@ -424,35 +437,37 @@ const Mural = () => {
                           alt={post.titulo}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
                       </div>
                     )}
 
                     <div className="p-8 space-y-6">
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-primary/10 rounded-lg">
-                              <MapPin className="w-4 h-4 text-primary" />
+                            <div className="p-1.5 bg-primary/10 dark:bg-primary/20 rounded-lg">
+                              <MapPin className="w-3.5 h-3.5 text-primary" />
                             </div>
-                            <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">{post.bairro}</span>
+                            <span className="text-[10px] font-black text-muted-foreground dark:text-zinc-500 uppercase tracking-[0.2em]">{post.bairro}</span>
                           </div>
                         </div>
                         <h3 className="text-2xl font-black text-foreground group-hover:text-primary transition-colors leading-tight">{post.titulo}</h3>
-                        <p className="text-muted-foreground font-medium leading-relaxed whitespace-pre-wrap">{post.conteudo}</p>
+                        <p className="text-muted-foreground dark:text-zinc-400 font-medium leading-relaxed whitespace-pre-wrap">{post.conteudo}</p>
                       </div>
 
-                      <div className="pt-6 border-t border-border/10 flex items-center justify-between">
+                      <div className="pt-6 border-t border-gray-100 dark:border-zinc-800/50 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-black text-xs shadow-lg">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 dark:from-primary/80 dark:to-primary/40 flex items-center justify-center text-white font-black text-xs shadow-md">
                             {(post.autor_nome || "U").charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-sm font-black text-foreground line-clamp-1">{post.autor_nome || "Usuário"}</p>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{formatarData(post.created_at)}</p>
+                            <p className="text-sm font-black text-foreground dark:text-zinc-200 line-clamp-1">{post.autor_nome || "Usuário"}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground dark:text-zinc-500 uppercase tracking-widest">{formatarData(post.created_at)}</p>
                           </div>
                         </div>
-                        <CheckCircle2 className="w-5 h-5 text-green-500" />
+                        <div className="p-1.5 bg-green-500/10 rounded-full">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                        </div>
                       </div>
                     </div>
                   </Card>
