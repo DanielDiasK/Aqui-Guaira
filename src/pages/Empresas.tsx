@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Building2, RefreshCcw, LocateFixed, Phone, Mail, Globe, Clipboard, ExternalLink, Heart, Check, Loader2, ArrowLeft, Home, Search, Sparkles } from "lucide-react";
+import { MapPin, Building2, RefreshCcw, LocateFixed, Phone, Mail, Globe, Clipboard, ExternalLink, Heart, Check, Loader2, ArrowLeft, Home, Search, Sparkles, Utensils, ShoppingCart, Stethoscope, Shirt, Wrench, Car, Monitor, Book, Trophy, PartyPopper, PawPrint, Briefcase, DollarSign, Tv, Key, Package, Factory, Landmark } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 import { LoginDialog } from "@/components/LoginDialog";
@@ -279,6 +279,32 @@ const Empresas = () => {
     }
   };
 
+  const getCategoryIcon = (emoji: string) => {
+    switch (emoji) {
+      case "🍽️": return <Utensils className="h-4 w-4" />;
+      case "🛒": return <ShoppingCart className="h-4 w-4" />;
+      case "⚕️": return <Stethoscope className="h-4 w-4" />;
+      case "💅": return <Sparkles className="h-4 w-4" />;
+      case "👗": return <Shirt className="h-4 w-4" />;
+      case "🏠": return <Home className="h-4 w-4" />;
+      case "🔧": return <Wrench className="h-4 w-4" />;
+      case "🚗": return <Car className="h-4 w-4" />;
+      case "💻": return <Monitor className="h-4 w-4" />;
+      case "📚": return <Book className="h-4 w-4" />;
+      case "⚽": return <Trophy className="h-4 w-4" />;
+      case "🎉": return <PartyPopper className="h-4 w-4" />;
+      case "🐾": return <PawPrint className="h-4 w-4" />;
+      case "💼": return <Briefcase className="h-4 w-4" />;
+      case "💰": return <DollarSign className="h-4 w-4" />;
+      case "📺": return <Tv className="h-4 w-4" />;
+      case "🔑": return <Key className="h-4 w-4" />;
+      case "📦": return <Package className="h-4 w-4" />;
+      case "🏭": return <Factory className="h-4 w-4" />;
+      case "🏛️": return <Landmark className="h-4 w-4" />;
+      default: return <Building2 className="h-4 w-4" />;
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -333,9 +359,8 @@ const Empresas = () => {
         ) : (
           <>
             {/* Filtros de Busca e Identificação */}
-            <Card className="bg-card border-none shadow-xl rounded-[2.5rem] p-8 mb-12 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-2 h-full bg-primary/20" />
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            <Card className="bg-card border-none shadow-2xl rounded-[3rem] p-6 md:p-10 mb-12 relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10 relative z-10">
                 {/* Busca Rápida */}
                 <div className="space-y-3 lg:col-span-1">
                   <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">O que você procura?</label>
@@ -356,20 +381,33 @@ const Empresas = () => {
                   <Select value={categoria} onValueChange={setCategoria}>
                     <SelectTrigger className="py-7 rounded-2xl border-border font-bold bg-muted/20 text-lg">
                       <div className="flex items-center gap-2">
-                        <Building2 className="w-5 h-5 text-primary/60" />
+                        <span className="text-primary/60">
+                          {categoria === "todas"
+                            ? <Building2 className="w-5 h-5" />
+                            : getCategoryIcon(categoriasData.categorias.find(c => c.nome === categoria)?.icone || "")
+                          }
+                        </span>
                         <SelectValue placeholder="Todas as Categorias" />
                       </div>
                     </SelectTrigger>
                     <SelectContent className="rounded-2xl border-border shadow-2xl">
-                      <SelectItem value="todas" className="font-bold">Todas as Categorias</SelectItem>
-                      {categorias.map(cat => (
-                        <SelectItem key={cat} value={cat} className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <span>{categoriasData.categorias.find(c => c.nome === cat)?.icone || "🏢"}</span>
-                            <span>{cat}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="todas" className="font-bold">
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-primary/60" />
+                          <span>Todas as Categorias</span>
+                        </div>
+                      </SelectItem>
+                      {categorias.map(cat => {
+                        const emoji = categoriasData.categorias.find(c => c.nome === cat)?.icone || "";
+                        return (
+                          <SelectItem key={cat} value={cat} className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <span className="text-primary/60">{getCategoryIcon(emoji)}</span>
+                              <span>{cat}</span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
