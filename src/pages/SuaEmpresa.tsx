@@ -57,12 +57,17 @@ const SuaEmpresa = () => {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState<string>("");
   const [subcategoriasSelecionadas, setSubcategoriasSelecionadas] = useState<string[]>([]);
 
-  // Carregar categorias do Supabase
+  // Verificar se já está logado
   useEffect(() => {
+    const auth = localStorage.getItem('empresa_auth');
+    if (auth) {
+      navigate('/dashboard');
+    }
+
     buscarCategorias().then(cats => {
       setCategorias(cats.map(c => c.nome));
     });
-  }, []);
+  }, [navigate]);
 
   const cadastroForm = useForm<z.infer<typeof cadastroSchema>>({
     resolver: zodResolver(cadastroSchema),

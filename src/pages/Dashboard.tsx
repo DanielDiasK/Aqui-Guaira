@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+// Header and Footer clones removed for a cleaner Sidebar logic
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
@@ -80,10 +79,7 @@ const Dashboard = () => {
   const [facebook, setFacebook] = useState("");
   const [linkGoogleMaps, setLinkGoogleMaps] = useState("");
 
-  useEffect(() => {
-    verificarAutenticacao();
-    carregarCategorias();
-  }, []);
+
 
   const carregarCategorias = async () => {
     const cats = await buscarCategorias();
@@ -103,6 +99,10 @@ const Dashboard = () => {
       setLoadingPosts(false);
     }
   };
+
+  useEffect(() => {
+    verificarAutenticacao();
+  }, []);
 
   const verificarAutenticacao = async () => {
     const auth = localStorage.getItem('empresa_auth');
@@ -140,8 +140,9 @@ const Dashboard = () => {
       setFacebook(data.facebook || "");
       setLinkGoogleMaps(data.link_google_maps || "");
 
-      // Carregar posts da empresa
+      // Carregar posts e categorias
       carregarPosts(empresaId);
+      carregarCategorias();
     } catch (error) {
       console.error('Erro ao carregar empresa:', error);
       toast("Erro ao carregar dados", { description: "Tente novamente" });
@@ -273,82 +274,107 @@ const Dashboard = () => {
   if (!empresa) return null;
 
   const navItems = [
-    { id: "dashboard", label: "Início", icon: LayoutDashboard },
+    { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
     { id: "perfil", label: "Meu Perfil", icon: User },
-    { id: "mural", label: "Meus Posts", icon: FileText, badge: posts.filter(p => p.status === 'pendente').length },
-    { id: "imagens", label: "Fotos e Logo", icon: ImageIcon },
+    { id: "mural", label: "Meus Posts", icon: FileText },
+    { id: "imagens", label: "Logo e Banner", icon: ImageIcon },
     { id: "config", label: "Configurações", icon: Settings },
   ];
 
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full">
+      <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+        <div className="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center p-2 shadow-sm border border-zinc-100 dark:border-zinc-700">
+          <img src="/images/logo.png" alt="Aqui Guaíra" className="w-full h-full object-contain" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-zinc-900 dark:text-zinc-100 leading-none">Painel Empresa</span>
+          <span className="text-[10px] uppercase tracking-wider text-primary font-bold mt-1">Aqui Guaíra</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-2">
+        {navItems.map((item) => (
+          <button
+            key={item.id}
+            onClick={() => { setActiveTab(item.id); setEditando(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === item.id
+              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
+              : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+              }`}
+          >
+            <item.icon className={`w-5 h-5 ${activeTab === item.id ? "" : "group-hover:scale-110 transition-transform"}`} />
+            <span className="font-medium flex-1 text-left">{item.label}</span>
+            <ChevronRight className={`w-4 h-4 transition-transform opacity-30 ${activeTab === item.id ? "rotate-90 opacity-100" : ""}`} />
+          </button>
+        ))}
+      </nav>
+
+      <div className="p-4 border-t border-zinc-100 dark:border-zinc-800">
+        <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl flex items-center gap-3 mb-4">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs overflow-hidden">
+            {empresa?.logo ? <img src={empresa.logo} className="w-full h-full object-cover" /> : "E"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{empresa?.nome}</p>
+            <p className="text-[10px] text-zinc-500 truncate uppercase tracking-tighter">Conta {empresa?.destaque ? "Premium" : "Básica"}</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-3 rounded-xl"
+          onClick={handleLogout}
+        >
+          <LogOut className="w-5 h-5" />
+          <span className="font-medium">Sair da Conta</span>
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex h-screen bg-[#f8fafc] dark:bg-zinc-950 overflow-hidden">
-      {/* Sidebar - Identical to Admin */}
-      <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shadow-sm z-20">
-        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
-          <div className="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center p-2 shadow-sm border border-zinc-100 dark:border-zinc-700">
-            <img src="/images/logo.png" alt="Aqui Guaíra" className="w-full h-full object-contain" />
-          </div>
-          <div className="flex flex-col">
-            <span className="font-bold text-zinc-900 dark:text-zinc-100 leading-none">Aqui Guaíra</span>
-            <span className="text-[10px] uppercase tracking-wider text-primary font-bold mt-1">Painel Empresa</span>
-          </div>
-        </div>
-
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === item.id
-                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
-                : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
-                }`}
-            >
-              <item.icon className={`w-5 h-5 ${activeTab === item.id ? "" : "group-hover:scale-110 transition-transform"}`} />
-              <span className="font-medium flex-1 text-left">{item.label}</span>
-              {item.badge && item.badge > 0 && (
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeTab === item.id ? "bg-white text-primary" : "bg-red-500 text-white animate-bounce"}`}>
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800">
-          <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl flex items-center gap-3 mb-4">
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden">
-              {empresa.logo ? <img src={empresa.logo} className="w-full h-full object-cover" /> : empresa.nome[0]}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{empresa.nome}</p>
-              <p className="text-[10px] text-zinc-500 truncate uppercase tracking-tighter">{categoria || "Empresa"}</p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-3 rounded-xl"
-            onClick={handleLogout}
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Sair do Painel</span>
-          </Button>
-        </div>
+      {/* Sidebar Desktop */}
+      <aside className="hidden lg:flex w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex-col shadow-sm z-20">
+        <SidebarContent />
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-8 z-10">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+        {/* Top Header */}
+        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 lg:px-8 z-10 shrink-0">
+          <div className="flex items-center gap-4">
+            <div className="lg:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-xl">
+                    <Menu className="w-6 h-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="p-0 w-72">
+                  <SidebarContent />
+                </SheetContent>
+              </Sheet>
+            </div>
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 truncate">
               {navItems.find(i => i.id === activeTab)?.label}
             </h2>
           </div>
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" className="rounded-xl gap-2 font-bold" onClick={() => window.open(`/perfil-de-empresa?id=${empresa.id}`, '_blank')}>
-              <ExternalLink className="w-4 h-4" />
-              Ver Perfil Público
+
+          <div className="flex items-center gap-2 lg:gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex rounded-xl gap-2 font-bold text-xs"
+              onClick={() => window.open(`/perfil-de-empresa/${empresa?.slug}`, '_blank')}
+            >
+              <Eye className="w-4 h-4" /> Perfil Público
             </Button>
+            <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800 hidden sm:block mx-1"></div>
+            <div className="text-right hidden sm:block">
+              <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{new Date().toLocaleDateString()}</p>
+              <p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Painel do Parceiro</p>
+            </div>
           </div>
         </header>
 
