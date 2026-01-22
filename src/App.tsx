@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Mural from "./pages/Mural";
+import XFeed from "./pages/XFeed";
 import MeusPosts from "./pages/MeusPosts";
 import Empresas from "./pages/Empresas";
 import MeusLocais from "./pages/MeusLocais";
@@ -38,6 +39,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/mural" element={<Mural />} />
+            <Route path="/voz-da-cidade" element={<XFeed />} />
             <Route path="/mural/meus-posts" element={<MeusPosts />} />
             <Route path="/empresas" element={<Empresas />} />
             <Route path="/meus-locais" element={<MeusLocais />} />

@@ -3,7 +3,7 @@ import {
   Image, Info, ChevronDown, User, LogOut, Shield,
   ClipboardList, Menu, X, Search, ShoppingBag,
   Map, PawPrint, Pill, Stethoscope, AlertTriangle, GraduationCap,
-  ChevronLeft, ChevronRight, Sun, Moon, Monitor, Laptop
+  ChevronLeft, ChevronRight, Sun, Moon, Monitor, Laptop, Sparkles
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
@@ -43,6 +43,7 @@ const Header = () => {
   const mainNavItems = [
     { icon: Home, label: "Início", href: "/" },
     { icon: Info, label: "Sobre Guaíra", href: "/#sobre-guaira" },
+    { icon: Sparkles, label: "Voz da Cidade", href: "/voz-da-cidade" },
     { icon: Image, label: "Mural", href: "/mural" },
     { icon: Building2, label: "Empresas", href: "/empresas" },
     { icon: Heart, label: "Meus Locais", href: "/meus-locais" },
@@ -70,6 +71,10 @@ const Header = () => {
     const { pathname, hash } = location;
     if (pathname === "/mural") {
       setActive("Mural");
+      return;
+    }
+    if (pathname === "/voz-da-cidade") {
+      setActive("Voz da Cidade");
       return;
     }
     if (pathname === "/empresas") {

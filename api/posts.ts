@@ -29,7 +29,11 @@ export default async function handler(req: any, res: any) {
                     .find({ post_id: postId, status: 'aprovado' })
                     .sort({ created_at: 1 })
                     .toArray();
-                return res.status(200).json(comentarios);
+                const formattedComentarios = comentarios.map(c => ({
+                    ...c,
+                    id: c._id.toString()
+                }));
+                return res.status(200).json(formattedComentarios);
             }
 
             // Padrão: buscar posts

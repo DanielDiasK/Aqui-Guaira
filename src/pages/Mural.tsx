@@ -47,7 +47,7 @@ const Mural = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  
+
   // Estados para Social
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [comentarios, setComentarios] = useState<Record<string, Comentario[]>>({});
@@ -89,7 +89,7 @@ const Mural = () => {
     try {
       const data = await buscarPosts({ userId: user.id });
       setMeusPostsPendentes(data.filter((p: Post) => p.status === 'pendente'));
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -147,8 +147,8 @@ const Mural = () => {
   const formatarData = (data: string) => {
     try {
       const date = new Date(data);
-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + 
-             ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+        ' às ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     } catch (e) { return "Data indisponível"; }
   };
 
@@ -158,7 +158,7 @@ const Mural = () => {
     const isApoiado = userApoios[postId];
     const currentCount = apoios[postId] !== undefined ? apoios[postId] : (posts.find(p => p.id === postId)?.curtidas || 0);
     const newCount = isApoiado ? Math.max(0, currentCount - 1) : currentCount + 1;
-    
+
     setUserApoios(prev => ({ ...prev, [postId]: !isApoiado }));
     setApoios(prev => ({ ...prev, [postId]: newCount }));
 
@@ -168,14 +168,14 @@ const Mural = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ curtidas: newCount })
       });
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const carregarComentariosData = async (postId: string) => {
     try {
       const data = await buscarComentarios(postId);
       setComentarios(prev => ({ ...prev, [postId]: data }));
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const toggleComments = (postId: string) => {
@@ -213,7 +213,7 @@ const Mural = () => {
         toast.success("Post removido");
         carregarPosts();
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleExcluirComentario = async (postId: string, comentarioId: string) => {
@@ -224,18 +224,18 @@ const Mural = () => {
         toast.success("Comentário removido");
         carregarComentariosData(postId);
       }
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const handleApoiarComentario = async (comentario: Comentario) => {
     if (!user) { setShowLogin(true); return; }
     const isApoiado = comentarioApoios[comentario.id];
     const newCurtidas = (comentario.curtidas || 0) + (isApoiado ? -1 : 1);
-    
+
     setComentarioApoios(prev => ({ ...prev, [comentario.id]: !isApoiado }));
     setComentarios(prev => ({
       ...prev,
-      [comentario.post_id]: prev[comentario.post_id].map(c => 
+      [comentario.post_id]: prev[comentario.post_id].map(c =>
         c.id === comentario.id ? { ...c, curtidas: newCurtidas } : c
       )
     }));
@@ -246,7 +246,7 @@ const Mural = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ curtidas: newCurtidas })
       });
-    } catch (error) {}
+    } catch (error) { }
   };
 
   return (
@@ -289,6 +289,15 @@ const Mural = () => {
                     Publicar Agora
                   </Button>
                 </DialogTrigger>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-xl px-10 py-8 border-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-lg font-bold gap-3 ml-4"
+                  onClick={() => window.open('/voz-da-cidade', '_blank')}
+                >
+                  <Sparkles className="w-6 h-6 text-primary" />
+                  Voz da Cidade (X)
+                </Button>
                 <DialogContent className="max-w-2xl rounded-3xl p-0 overflow-hidden">
                   <div className="bg-primary/5 p-6 border-b border-primary/10">
                     <DialogHeader>
@@ -416,8 +425,8 @@ const Mural = () => {
 
                     <div className="px-8 py-5 bg-zinc-50/50 dark:bg-zinc-800/20 border-t border-zinc-100 dark:border-zinc-800 flex flex-wrap items-center justify-between gap-4">
                       <div className="flex gap-4">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           className={`rounded-2xl gap-2 font-bold px-6 py-6 transition-all ${userApoios[post.id] ? 'bg-rose-50 text-rose-500 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400' : 'text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-zinc-800 dark:text-zinc-400 dark:hover:text-rose-400'}`}
                           onClick={() => handleApoiar(post.id)}
                         >
@@ -431,7 +440,7 @@ const Mural = () => {
                       </div>
                       <Button variant="ghost" className="rounded-2xl text-zinc-400 gap-2 font-bold hover:text-indigo-500 dark:hover:bg-zinc-800 px-6 py-6" onClick={() => {
                         if (navigator.share) {
-                          navigator.share({ title: post.titulo, text: post.conteudo, url: window.location.href }).catch(() => {});
+                          navigator.share({ title: post.titulo, text: post.conteudo, url: window.location.href }).catch(() => { });
                         } else {
                           navigator.clipboard.writeText(window.location.href);
                           toast.info("Link copiado!");
@@ -448,8 +457,8 @@ const Mural = () => {
                           <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest pl-1">Comentários da Comunidade</p>
                           {(!comentarios[post.id] || comentarios[post.id].length === 0) ? (
                             <div className="p-12 text-center bg-white/50 dark:bg-black/20 rounded-[2rem] border-2 border-dashed border-zinc-200 dark:border-zinc-800">
-                               <MessageSquare className="w-8 h-8 text-zinc-200 dark:text-zinc-800 mx-auto mb-2" />
-                               <p className="text-sm text-zinc-400 font-medium">Nenhum comentário por aqui ainda.</p>
+                              <MessageSquare className="w-8 h-8 text-zinc-200 dark:text-zinc-800 mx-auto mb-2" />
+                              <p className="text-sm text-zinc-400 font-medium">Nenhum comentário por aqui ainda.</p>
                             </div>
                           ) : (
                             <div className="space-y-4">
@@ -466,8 +475,8 @@ const Mural = () => {
                                         <span className="text-[10px] font-black">{comment.curtidas || 0}</span>
                                       </button>
                                       {(user?.id && (user.id === comment.user_id || user.id === post.user_id)) && (
-                                        <button 
-                                          onClick={() => handleExcluirComentario(post.id, comment.id)} 
+                                        <button
+                                          onClick={() => handleExcluirComentario(post.id, comment.id)}
                                           className="p-2 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-all"
                                           title="Excluir comentário"
                                         >
