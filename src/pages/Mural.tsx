@@ -26,6 +26,8 @@ interface Post {
   user_id: string;
   autor_nome: string;
   created_at: string;
+  curtidas?: number;
+  tipo?: 'comunitario' | 'alerta' | 'utilidade';
 }
 
 const Mural = () => {
@@ -37,6 +39,9 @@ const Mural = () => {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
+  const [apoios, setApoios] = useState<Record<string, number>>({});
+  const [userApoios, setUserApoios] = useState<Record<string, boolean>>({});
 
   const user = getUsuarioLogado();
 
@@ -151,16 +156,40 @@ const Mural = () => {
 
   const formatarData = (data: string) => {
     try {
-      return new Date(data).toLocaleDateString('pt-BR', {
+      const date = new Date(data);
+      return date.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric',
+        year: 'numeric'
+      }) + ' às ' + date.toLocaleTimeString('pt-BR', {
         hour: '2-digit',
         minute: '2-digit'
       });
     } catch (e) {
       return "Data indisponível";
     }
+  };
+
+  const handleApoiar = async (postId: string) => {
+    if (userApoios[postId]) return;
+
+    setUserApoios(prev => ({ ...prev, [postId]: true }));
+    setApoios(prev => ({ ...prev, [postId]: (prev[postId] || 0) + 1 }));
+
+    try {
+      await fetch(`/api/posts?id=${postId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ curtidas: (apoios[postId] || 0) + 1 })
+      });
+      toast.success("Você apoiou esta publicação!");
+    } catch (error) {
+      console.error("Erro ao apoiar:", error);
+    }
+  };
+
+  const toggleComments = (postId: string) => {
+    setExpandedComments(prev => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   return (
@@ -309,10 +338,14 @@ const Mural = () => {
           <div className="space-y-8">
             <div className="flex items-center justify-between border-b pb-6">
               <div className="flex items-center gap-3">
-                <TrendingUp className="w-7 h-7 text-primary" />
-                <h2 className="text-3xl font-black">Últimos Avisos</h2>
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <MessageSquare className="w-7 h-7 text-primary" />
+                </div>
+                <h2 className="text-3xl font-black">Voz da População</h2>
               </div>
-              <Badge variant="outline">{posts.length} ativos</Badge>
+              <div className="flex items-center gap-4">
+                <Badge variant="outline" className="px-4 py-1.5 rounded-full border-2 font-bold">{posts.length} publicações</Badge>
+              </div>
             </div>
 
             {loadingPosts ? (
@@ -326,62 +359,100 @@ const Mural = () => {
                 <h3 className="text-xl font-bold">Mural Vazio</h3>
               </div>
             ) : (
-              <div className="max-w-2xl mx-auto space-y-6">
+              <div className="max-w-4xl mx-auto space-y-8">
                 {posts.map((post) => (
                   <Card key={post.id} className="bg-white dark:bg-[#1A1A1A] border-none shadow-sm hover:shadow-md transition-all overflow-hidden rounded-[2rem]">
-                    <div className="px-6 pt-6 pb-4 flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-black text-sm shrink-0">
+                    <div className="px-8 pt-8 pb-4 flex items-start gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-lg shrink-0 transform -rotate-3 group-hover:rotate-0 transition-transform">
                         {(post.autor_nome || "U").charAt(0).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-extrabold text-zinc-900 dark:text-zinc-100 truncate">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-100 truncate">
                             {post.autor_nome}
                           </h3>
-                          <Badge className="bg-green-500/10 text-green-600 text-[10px] h-5 border-none">
-                            Verificado
+                          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] h-5 border-none font-bold uppercase tracking-wider">
+                            Cidadão Ativo
                           </Badge>
-                          <span className="text-zinc-400 text-xs">•</span>
-                          <span className="text-zinc-400 text-[10px] font-bold">{formatarData(post.created_at)}</span>
+                          <span className="text-zinc-300">•</span>
+                          <span className="text-zinc-400 text-[11px] font-bold uppercase tracking-tighter">{formatarData(post.created_at)}</span>
                         </div>
-                        <div className="flex items-center gap-1 text-[10px] font-black text-primary/70 uppercase transform translate-y-[-2px]">
+                        <div className="flex items-center gap-1.5 text-[10px] font-black text-primary/80 uppercase tracking-[0.2em] mt-0.5">
                           <MapPin className="w-3 h-3" />
                           {post.bairro}
                         </div>
                       </div>
+                      <Button variant="ghost" size="icon" className="rounded-full text-zinc-300 hover:text-primary">
+                        <Sparkles className="w-5 h-5" />
+                      </Button>
                     </div>
 
-                    <div className="px-6 pb-4">
-                      <h4 className="text-xl font-black text-zinc-900 dark:text-zinc-50 leading-tight mb-3">
+                    <div className="px-8 pb-6">
+                      <h4 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 leading-tight mb-4 tracking-tight">
                         {post.titulo}
                       </h4>
-                      <p className="text-zinc-600 dark:text-zinc-400 font-medium leading-relaxed">
+                      <p className="text-zinc-600 dark:text-zinc-400 font-medium text-lg leading-relaxed whitespace-pre-wrap">
                         {post.conteudo}
                       </p>
                     </div>
 
                     {post.imagens && post.imagens.length > 0 && (
-                      <div className="px-6 pb-6">
+                      <div className="px-8 pb-8">
                         <div
-                          className="relative overflow-hidden rounded-[2rem] border bg-zinc-50 cursor-pointer"
+                          className="relative overflow-hidden rounded-[2.5rem] border-2 border-zinc-100 dark:border-zinc-800 bg-zinc-50 cursor-zoom-in group max-w-2xl"
                           onClick={() => setSelectedImage(post.imagens![0])}
                         >
-                          <img src={post.imagens[0]} className="w-full h-auto max-h-[500px] object-cover" />
+                          <img
+                            src={post.imagens[0]}
+                            className="w-full h-[320px] object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                         </div>
                       </div>
                     )}
 
-                    <div className="px-6 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t flex items-center justify-between">
-                      <div className="flex gap-6">
-                        <button className="flex items-center gap-2 text-zinc-400 hover:text-primary transition-colors">
+                    <div className="px-8 py-5 bg-zinc-50/50 dark:bg-zinc-900/40 border-t flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex gap-4">
+                        <Button
+                          variant="ghost"
+                          className={`rounded-2xl gap-2 font-bold px-6 py-6 transition-all ${userApoios[post.id] ? 'bg-rose-50 text-rose-500 hover:bg-rose-100' : 'text-zinc-400 hover:text-rose-500 hover:bg-rose-50'}`}
+                          onClick={() => handleApoiar(post.id)}
+                        >
+                          <TrendingUp className={`w-5 h-5 ${userApoios[post.id] ? 'animate-bounce' : ''}`} />
+                          <span className="text-sm">Apoiar {(apoios[post.id] || post.curtidas || 0) > 0 ? `(${apoios[post.id] || post.curtidas})` : ''}</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="rounded-2xl gap-2 text-zinc-400 hover:text-primary hover:bg-primary/5 font-bold px-6 py-6"
+                          onClick={() => toggleComments(post.id)}
+                        >
                           <MessageSquare className="w-5 h-5" />
-                          <span className="text-xs font-bold">Apoiar</span>
-                        </button>
+                          <span className="text-sm">Comentar</span>
+                        </Button>
                       </div>
-                      <Button variant="ghost" size="sm" className="rounded-xl text-zinc-400 gap-2 font-bold hover:text-primary">
-                        <Send className="w-4 h-4" /> Compactilhar
+                      <Button variant="ghost" className="rounded-2xl text-zinc-400 gap-2 font-bold hover:text-indigo-500 px-6 py-6">
+                        <Send className="w-5 h-5" />
+                        <span className="text-sm">Compartilhar</span>
                       </Button>
                     </div>
+
+                    {expandedComments[post.id] && (
+                      <div className="px-8 py-8 bg-zinc-50/30 dark:bg-zinc-900/20 border-t animate-in slide-in-from-top-4 duration-300">
+                        <div className="space-y-4 mb-4">
+                          <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest pl-1">Comentários da Comunidade</p>
+                          <div className="p-12 text-center bg-white/50 dark:bg-black/20 rounded-[2rem] border-2 border-dashed">
+                            <MessageSquare className="w-8 h-8 text-zinc-200 mx-auto mb-2" />
+                            <p className="text-sm text-zinc-400 font-medium">Os comentários estão sendo moderados.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Input placeholder="Escreva um comentário..." className="rounded-2xl h-12 bg-white dark:bg-zinc-800" />
+                          <Button className="rounded-2xl h-12 w-12 p-0 shrink-0">
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </Card>
                 ))}
               </div>
