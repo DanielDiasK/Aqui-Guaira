@@ -159,7 +159,7 @@ const SuaEmpresa = () => {
         imagens,
         logo: logoUrl,
         banner: imagens[0] || undefined, // ← Salva o banner explicitamente
-        status: 'aprovado' as const, // ← Mudei para 'aprovado' para aparecer na listagem
+        status: 'pendente' as const, // ← Alterado para 'pendente' para aguardar aprovação do admin
         verificado: false,
         destaque: false,
         responsavel_nome: data.razaoSocial,
