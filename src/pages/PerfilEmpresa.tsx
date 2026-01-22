@@ -145,7 +145,7 @@ const PerfilEmpresa = () => {
             <Header />
 
             <main className="flex-grow container mx-auto px-4 py-8">
-                <div className="max-w-5xl mx-auto space-y-6">
+                <div className="max-w-7xl mx-auto space-y-8">
                     {/* Botões de Ação Superiores */}
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
                         <div className="flex gap-3">
@@ -239,155 +239,136 @@ const PerfilEmpresa = () => {
                                 </div>
                             </div>
 
-                            {/* Grid de Conteúdo */}
-                            <div className="grid lg:grid-cols-3 gap-8">
-                                {/* Coluna Principal (Descrição e Galeria) */}
-                                <div className="lg:col-span-2 space-y-8">
-                                    <section className="space-y-4">
-                                        <h2 className="text-2xl font-black flex items-center gap-3">
-                                            <div className="p-2 bg-primary/10 rounded-xl">
-                                                <Building2 className="w-5 h-5 text-primary" />
-                                            </div>
-                                            Sobre a Empresa
-                                        </h2>
-                                        <p className="text-lg leading-relaxed text-muted-foreground font-medium">
-                                            {empresa.descricao}
-                                        </p>
+                            {/* Grid de Conteúdo - Flow Vertical para maior largura individual */}
+                            <div className="space-y-12">
+                                {/* Seção Sobre */}
+                                <section className="max-w-4xl space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                            <Building2 className="w-6 h-6" />
+                                        </div>
+                                        <h2 className="text-3xl font-black tracking-tight">Sobre a Empresa</h2>
+                                    </div>
+                                    <p className="text-xl leading-relaxed text-muted-foreground font-medium">
+                                        {empresa.descricao}
+                                    </p>
 
-                                        {empresa.subcategorias && empresa.subcategorias.length > 0 && (
-                                            <div className="flex flex-wrap gap-2 pt-4">
-                                                {empresa.subcategorias.map((sub, idx) => (
-                                                    <Badge key={idx} variant="secondary" className="px-4 py-1.5 rounded-full text-sm font-bold bg-muted/50 border border-border/50">
-                                                        {sub}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </section>
-
-                                    {/* Galeria de Fotos (se houver mais de uma) */}
-                                    {empresa.imagens && empresa.imagens.length > 1 && (
-                                        <section className="space-y-4">
-                                            <h2 className="text-2xl font-black flex items-center gap-3">
-                                                <div className="p-2 bg-primary/10 rounded-xl">
-                                                    <Check className="w-5 h-5 text-primary" />
-                                                </div>
-                                                Galeria de Fotos
-                                            </h2>
-                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                                {empresa.imagens.slice(1).map((img, idx) => (
-                                                    <div key={idx} className="aspect-square rounded-3xl overflow-hidden border-2 border-border/50 group cursor-pointer">
-                                                        <img
-                                                            src={img}
-                                                            alt={`${empresa.nome} - Foto ${idx + 2}`}
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </section>
+                                    {empresa.subcategorias && empresa.subcategorias.length > 0 && (
+                                        <div className="flex flex-wrap gap-3 pt-2">
+                                            {empresa.subcategorias.map((sub, idx) => (
+                                                <Badge key={idx} variant="secondary" className="px-5 py-2 rounded-2xl text-sm font-bold bg-muted/50 border border-border/50">
+                                                    {sub}
+                                                </Badge>
+                                            ))}
+                                        </div>
                                     )}
-                                </div>
+                                </section>
 
-                                {/* Coluna Lateral (Contato e Localização) */}
-                                <div className="space-y-6">
+                                {/* Canais de Contato e Localização - Lado a Lado (Full Width) */}
+                                <div className="grid md:grid-cols-2 gap-8">
                                     {/* Card de Contato */}
-                                    <Card className="border-2 border-border/50 bg-muted/20 rounded-[2.5rem] p-6 space-y-6">
-                                        <h2 className="text-xl font-black flex items-center gap-3">
-                                            <Phone className="w-5 h-5 text-primary" />
-                                            Canais de Contato
-                                        </h2>
+                                    <Card className="border-2 border-border/50 bg-muted/20 rounded-[3rem] p-8 space-y-8 shadow-sm">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                                <Phone className="w-6 h-6" />
+                                            </div>
+                                            <h2 className="text-2xl font-black tracking-tight">Canais de Contato</h2>
+                                        </div>
 
-                                        <div className="space-y-3">
+                                        <div className="grid gap-4">
                                             {empresa.whatsapp && (
-                                                <div className="group flex items-center justify-between p-4 rounded-3xl bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 transition-all">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 bg-green-500 rounded-xl">
-                                                            <Phone className="w-4 h-4 text-white" />
+                                                <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-green-500/10 border-2 border-green-500/20 hover:bg-green-500/20 transition-all shadow-sm">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="p-3 bg-green-500 rounded-2xl shadow-lg shadow-green-200">
+                                                            <Phone className="w-5 h-5 text-white" />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] uppercase font-black text-green-600 tracking-wider">WhatsApp</span>
-                                                            <span className="font-bold text-green-700">{empresa.whatsapp}</span>
+                                                            <span className="text-xs uppercase font-black text-green-600/70 tracking-widest leading-none mb-1">WhatsApp</span>
+                                                            <span className="font-black text-green-700 text-xl">{empresa.whatsapp}</span>
                                                         </div>
                                                     </div>
                                                     <Button
-                                                        size="sm"
-                                                        className="bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold shadow-md"
+                                                        size="lg"
+                                                        className="bg-green-500 hover:bg-green-600 text-white rounded-2xl font-bold shadow-lg px-8 py-6"
                                                         asChild
                                                     >
-                                                        <a href={`https://wa.me/${empresa.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer">Abrir</a>
+                                                        <a href={`https://wa.me/${empresa.whatsapp.replace(/[^\d]/g, '')}`} target="_blank" rel="noopener noreferrer">Conversar</a>
                                                     </Button>
                                                 </div>
                                             )}
 
-                                            {empresa.telefone && (
-                                                <div className="group flex items-center justify-between p-4 rounded-3xl bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 transition-all">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 bg-blue-500 rounded-xl">
-                                                            <Phone className="w-4 h-4 text-white" />
+                                            <div className="grid sm:grid-cols-2 gap-4">
+                                                {empresa.telefone && (
+                                                    <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-blue-500/10 border-2 border-blue-500/20 hover:bg-blue-500/20 transition-all shadow-sm">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-blue-500 rounded-xl">
+                                                                <Phone className="w-4 h-4 text-white" />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] uppercase font-black text-blue-600/70 tracking-widest leading-none mb-1">Telefone</span>
+                                                                <span className="font-bold text-blue-700 text-base">{empresa.telefone}</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] uppercase font-black text-blue-600 tracking-wider">Telefone</span>
-                                                            <span className="font-bold text-blue-700">{empresa.telefone}</span>
-                                                        </div>
+                                                        <button onClick={() => copiar(empresa.telefone)} className="p-2 rounded-xl hover:bg-white/50 transition-colors">
+                                                            {copiado === empresa.telefone ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5 text-muted-foreground" />}
+                                                        </button>
                                                     </div>
-                                                    <button onClick={() => copiar(empresa.telefone)} className="p-2 rounded-xl hover:bg-white/50 transition-colors">
-                                                        {copiado === empresa.telefone ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5 text-muted-foreground" />}
-                                                    </button>
-                                                </div>
-                                            )}
+                                                )}
 
-                                            {empresa.email && (
-                                                <div className="group flex items-center justify-between p-4 rounded-3xl bg-purple-500/10 border border-purple-500/20 hover:bg-purple-500/20 transition-all">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 bg-purple-500 rounded-xl">
-                                                            <Mail className="w-4 h-4 text-white" />
+                                                {empresa.email && (
+                                                    <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-purple-500/10 border-2 border-purple-500/20 hover:bg-purple-500/20 transition-all shadow-sm">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-purple-500 rounded-xl">
+                                                                <Mail className="w-4 h-4 text-white" />
+                                                            </div>
+                                                            <div className="flex flex-col">
+                                                                <span className="text-[10px] uppercase font-black text-purple-600/70 tracking-widest leading-none mb-1">E-mail</span>
+                                                                <span className="font-bold text-purple-700 text-sm truncate max-w-[100px]">{empresa.email}</span>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] uppercase font-black text-purple-600 tracking-wider">E-mail</span>
-                                                            <span className="font-bold text-purple-700 truncate max-w-[120px]">{empresa.email}</span>
-                                                        </div>
+                                                        <button onClick={() => copiar(empresa.email)} className="p-2 rounded-xl hover:bg-white/50 transition-colors">
+                                                            {copiado === empresa.email ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5 text-muted-foreground" />}
+                                                        </button>
                                                     </div>
-                                                    <button onClick={() => copiar(empresa.email)} className="p-2 rounded-xl hover:bg-white/50 transition-colors">
-                                                        {copiado === empresa.email ? <Check className="h-5 w-5 text-green-500" /> : <Clipboard className="h-5 w-5 text-muted-foreground" />}
-                                                    </button>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
 
                                             {empresa.site && (
-                                                <div className="group flex items-center justify-between p-4 rounded-3xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="p-2 bg-primary rounded-xl">
-                                                            <Globe className="w-4 h-4 text-white" />
+                                                <div className="group flex items-center justify-between p-5 rounded-[2rem] bg-primary/10 border-2 border-primary/20 hover:bg-primary/20 transition-all shadow-sm">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="p-3 bg-primary rounded-2xl shadow-lg shadow-primary/20">
+                                                            <Globe className="w-5 h-5 text-white" />
                                                         </div>
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] uppercase font-black text-primary tracking-wider">Website</span>
-                                                            <span className="font-bold font-primary truncate max-w-[120px]">{empresa.site}</span>
+                                                            <span className="text-xs uppercase font-black text-primary/70 tracking-widest leading-none mb-1">Website Oficial</span>
+                                                            <span className="font-black text-primary text-lg truncate max-w-[200px]">{empresa.site}</span>
                                                         </div>
                                                     </div>
                                                     <Button
                                                         variant="ghost"
-                                                        size="sm"
-                                                        className="bg-white/50 hover:bg-white text-primary rounded-xl font-bold border border-primary/20"
+                                                        size="lg"
+                                                        className="bg-white/50 hover:bg-white text-primary rounded-2xl font-bold border-2 border-primary/10 px-8"
                                                         asChild
                                                     >
-                                                        <a href={empresa.site.startsWith('http') ? empresa.site : `https://${empresa.site}`} target="_blank" rel="noopener noreferrer">Visitar</a>
+                                                        <a href={empresa.site.startsWith('http') ? empresa.site : `https://${empresa.site}`} target="_blank" rel="noopener noreferrer">Acessar</a>
                                                     </Button>
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Redes Sociais */}
-                                        <div className="flex gap-3 pt-2">
+                                        <div className="flex gap-4">
                                             {empresa.instagram && (
                                                 <a
                                                     href={empresa.instagram.startsWith('http') ? empresa.instagram : `https://instagram.com/${empresa.instagram.replace('@', '')}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                                                    className="flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-[2rem] bg-gradient-to-br from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white font-black shadow-xl hover:shadow-orange-200 transition-all hover:scale-[1.03] active:scale-95 group"
                                                 >
-                                                    <Instagram className="w-5 h-5" />
-                                                    Instagram
+                                                    <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                                                        <Instagram className="w-6 h-6" />
+                                                    </div>
+                                                    <span>Instagram</span>
                                                 </a>
                                             )}
                                             {empresa.facebook && (
@@ -395,31 +376,35 @@ const PerfilEmpresa = () => {
                                                     href={empresa.facebook.startsWith('http') ? empresa.facebook : `https://facebook.com/${empresa.facebook.replace('@', '')}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-blue-600 text-white font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                                                    className="flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-[2rem] bg-blue-600 text-white font-black shadow-xl hover:shadow-blue-200 transition-all hover:scale-[1.03] active:scale-95 group"
                                                 >
-                                                    <Facebook className="w-5 h-5" />
-                                                    Facebook
+                                                    <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-md group-hover:rotate-12 transition-transform">
+                                                        <Facebook className="w-6 h-6" />
+                                                    </div>
+                                                    <span>Facebook</span>
                                                 </a>
                                             )}
                                         </div>
                                     </Card>
 
                                     {/* Card de Localização */}
-                                    <Card className="border-2 border-border/50 bg-muted/20 rounded-[2.5rem] p-6 space-y-6 overflow-hidden">
-                                        <h2 className="text-xl font-black flex items-center gap-3">
-                                            <MapPin className="w-5 h-5 text-primary" />
-                                            Localização
-                                        </h2>
+                                    <Card className="border-2 border-border/50 bg-muted/20 rounded-[3rem] p-8 space-y-8 overflow-hidden shadow-sm flex flex-col">
+                                        <div className="flex items-center gap-4">
+                                            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                                <MapPin className="w-6 h-6" />
+                                            </div>
+                                            <h2 className="text-2xl font-black tracking-tight">Onde Estamos</h2>
+                                        </div>
 
-                                        <div className="space-y-4">
-                                            <div className="text-sm font-medium text-muted-foreground bg-white/50 p-4 rounded-2xl border border-border/50">
-                                                <p className="font-black text-foreground mb-1">{empresa.endereco}</p>
-                                                <p>{empresa.bairro}</p>
-                                                <p>{empresa.cidade} - {empresa.estado}</p>
+                                        <div className="flex-1 space-y-6">
+                                            <div className="text-lg font-medium text-muted-foreground bg-white/50 p-6 rounded-[2rem] border-2 border-border/30 shadow-inner">
+                                                <p className="font-black text-foreground text-xl mb-1">{empresa.endereco}</p>
+                                                <p className="opacity-80">{empresa.bairro}</p>
+                                                <p className="text-sm font-bold text-primary uppercase tracking-widest">{empresa.cidade} - {empresa.estado}</p>
                                             </div>
 
                                             {empresa.latitude && empresa.longitude && (
-                                                <div className="w-full h-48 rounded-2xl overflow-hidden border-2 border-border/50 relative">
+                                                <div className="w-full h-72 rounded-[2.5rem] overflow-hidden border-2 border-border/50 relative shadow-lg group">
                                                     <iframe
                                                         src={`https://www.google.com/maps?q=${empresa.latitude},${empresa.longitude}&hl=pt-BR&z=17&output=embed`}
                                                         width="100%"
@@ -428,24 +413,49 @@ const PerfilEmpresa = () => {
                                                         allowFullScreen
                                                         loading="lazy"
                                                         referrerPolicy="no-referrer-when-downgrade"
+                                                        className="grayscale-[0.2] contrast-[1.1] transition-all duration-500 group-hover:grayscale-0"
                                                     ></iframe>
                                                 </div>
                                             )}
 
                                             {empresa.link_google_maps && (
                                                 <Button
-                                                    className="w-full bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold py-6 shadow-xl"
+                                                    className="w-full bg-primary hover:bg-primary/90 text-white rounded-[2rem] font-black py-8 text-lg shadow-xl hover:shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95"
                                                     asChild
                                                 >
                                                     <a href={empresa.link_google_maps} target="_blank" rel="noopener noreferrer">
-                                                        <MapPin className="w-4 h-4 mr-2" />
-                                                        Traçar Rota no Maps
+                                                        <MapPin className="w-6 h-6 mr-3" />
+                                                        Traçar Rota no Google Maps
                                                     </a>
                                                 </Button>
                                             )}
                                         </div>
                                     </Card>
                                 </div>
+
+                                {/* Galeria de Fotos - Horizontal Grid */}
+                                {empresa.imagens && empresa.imagens.length > 1 && (
+                                    <section className="space-y-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                                <Check className="w-6 h-6" />
+                                            </div>
+                                            <h2 className="text-3xl font-black tracking-tight">Galeria de Fotos</h2>
+                                        </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                            {empresa.imagens.slice(1).map((img, idx) => (
+                                                <div key={idx} className="aspect-square rounded-[2rem] overflow-hidden border-2 border-border/50 group cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
+                                                    <img
+                                                        src={img}
+                                                        alt={`${empresa.nome} - Foto ${idx + 2}`}
+                                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
                             </div>
                         </div>
                     </Card>
