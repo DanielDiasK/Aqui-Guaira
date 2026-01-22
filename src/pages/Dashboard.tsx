@@ -156,7 +156,7 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('empresa_auth');
     toast("Logout realizado", { duration: 1500 });
-    navigate('/sua-empresa');
+    navigate('/');
   };
 
   const handleSalvar = async () => {
@@ -276,7 +276,6 @@ const Dashboard = () => {
   const navItems = [
     { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
     { id: "perfil", label: "Meu Perfil", icon: User },
-    { id: "mural", label: "Meus Posts", icon: FileText },
     { id: "imagens", label: "Logo e Banner", icon: ImageIcon },
     { id: "config", label: "Configurações", icon: Settings },
   ];
@@ -305,7 +304,6 @@ const Dashboard = () => {
           >
             <item.icon className={`w-5 h-5 ${activeTab === item.id ? "" : "group-hover:scale-110 transition-transform"}`} />
             <span className="font-medium flex-1 text-left">{item.label}</span>
-            <ChevronRight className={`w-4 h-4 transition-transform opacity-30 ${activeTab === item.id ? "rotate-90 opacity-100" : ""}`} />
           </button>
         ))}
       </nav>
@@ -384,9 +382,8 @@ const Dashboard = () => {
             {/* 1. DASHBOARD VIEW */}
             {activeTab === "dashboard" && (
               <div className="space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <StatCard label="Visualizações" value={empresa.visualizacoes || 0} sub="Visitas no perfil" icon={Eye} color="bg-emerald-500" />
-                  <StatCard label="Meus Posts" value={posts.length} sub={`${posts.filter(p => p.status === 'aprovado').length} publicados`} icon={FileText} color="bg-blue-500" />
                   <StatCard label="Status" value={empresa.status === 'aprovado' ? "Ativo" : "Pendente"} sub="Status da conta" icon={CheckCircle2} color="bg-amber-500" />
                   <StatCard label="Destaque" value={empresa.destaque ? "Sim" : "Não"} sub="Exposição premium" icon={Star} color="bg-purple-500" />
                 </div>
@@ -638,7 +635,7 @@ const Dashboard = () => {
 
 function StatCard({ label, value, sub, icon: Icon, color }: any) {
   return (
-    <Card className="p-6 border-zinc-200 dark:border-zinc-800 shadow-sm rounded-3xl hover:-translate-y-1 transition-transform duration-300">
+    <Card className="p-6 border-zinc-200 dark:border-zinc-800 shadow-sm rounded-3xl">
       <div className="flex items-center gap-4">
         <div className={`w-12 h-12 ${color} rounded-2xl flex items-center justify-center text-white shadow-lg shadow-${color.split('-')[1]}-500/20`}>
           <Icon className="w-6 h-6" />
