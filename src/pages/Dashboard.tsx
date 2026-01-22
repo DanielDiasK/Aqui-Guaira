@@ -11,6 +11,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Loader2,
+  LayoutDashboard,
+  User,
+  FileText,
+  Image as ImageIcon,
+  Settings,
+  ChevronRight,
+  Plus,
+  TrendingUp,
+  Activity,
+  History,
+  Star,
+  ExternalLink,
+  Search,
   Building2,
   LogOut,
   Eye,
@@ -21,11 +39,9 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  MapPin,
-  Phone,
-  Mail,
-  Globe,
-  Loader2
+  Menu,
+  Instagram,
+  Facebook
 } from "lucide-react";
 import {
   supabase,
@@ -33,19 +49,24 @@ import {
   buscarCategorias,
   buscarEmpresaPorId,
   atualizarEmpresa,
-  type Empresa
+  type Empresa,
+  type Post as PostType
 } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import categoriasData from "@/data/categorias-empresas.json";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [empresa, setEmpresa] = useState<Empresa | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [editando, setEditando] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [categorias, setCategorias] = useState<string[]>([]);
   const [subcategoriasSelecionadas, setSubcategoriasSelecionadas] = useState<string[]>([]);
+  const [posts, setPosts] = useState<PostType[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
 
   // Dados editáveis
   const [nome, setNome] = useState("");
@@ -67,6 +88,20 @@ const Dashboard = () => {
   const carregarCategorias = async () => {
     const cats = await buscarCategorias();
     setCategorias(cats.map(c => c.nome));
+  };
+
+  const carregarPosts = async (empresaId: string) => {
+    setLoadingPosts(true);
+    try {
+      const res = await fetch(`/api/posts?empresaId=${empresaId}`);
+      if (res.ok) {
+        setPosts(await res.json());
+      }
+    } catch (error) {
+      console.error('Erro ao carregar posts:', error);
+    } finally {
+      setLoadingPosts(false);
+    }
   };
 
   const verificarAutenticacao = async () => {
@@ -92,8 +127,6 @@ const Dashboard = () => {
       setDescricao(data.descricao);
       setSubcategoriasSelecionadas(data.subcategorias || []);
 
-      // No MongoDB já temos o nome da categoria no categoria_nome se for EmpresaCompleta,
-      // mas aqui estamos usando Empresa. Vamos tentar mapear pelo categoria_id
       if (data.categoria_id) {
         const cat = categoriasData.categorias.find(c => c.id === data.categoria_id);
         setCategoria(cat?.nome || "");
@@ -106,6 +139,9 @@ const Dashboard = () => {
       setInstagram(data.instagram || "");
       setFacebook(data.facebook || "");
       setLinkGoogleMaps(data.link_google_maps || "");
+
+      // Carregar posts da empresa
+      carregarPosts(empresaId);
     } catch (error) {
       console.error('Erro ao carregar empresa:', error);
       toast("Erro ao carregar dados", { description: "Tente novamente" });
@@ -225,484 +261,396 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <Header />
-        <main className="flex-grow flex items-center justify-center">
-          <div className="flex items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="text-muted-foreground">Carregando dashboard...</span>
-          </div>
-        </main>
-        <Footer />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="text-center animate-in fade-in duration-500">
+          <Building2 className="w-12 h-12 text-primary animate-pulse mx-auto mb-4" />
+          <p className="text-muted-foreground font-medium">Carregando seu painel...</p>
+        </div>
       </div>
     );
   }
 
-  if (!empresa) {
-    return null;
-  }
+  if (!empresa) return null;
+
+  const navItems = [
+    { id: "dashboard", label: "Início", icon: LayoutDashboard },
+    { id: "perfil", label: "Meu Perfil", icon: User },
+    { id: "mural", label: "Meus Posts", icon: FileText, badge: posts.filter(p => p.status === 'pendente').length },
+    { id: "imagens", label: "Fotos e Logo", icon: ImageIcon },
+    { id: "config", label: "Configurações", icon: Settings },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-grow container mx-auto px-4 py-8 space-y-6">
-        {/* Header do Dashboard */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
-              <Building2 className="h-8 w-8 text-primary" />
-              Dashboard
-            </h1>
-            <p className="text-sm text-muted-foreground">Gerencie as informações da sua empresa</p>
+    <div className="flex h-screen bg-[#f8fafc] dark:bg-zinc-950 overflow-hidden">
+      {/* Sidebar - Identical to Admin */}
+      <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col shadow-sm z-20">
+        <div className="p-6 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-3">
+          <div className="w-12 h-12 bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center p-2 shadow-sm border border-zinc-100 dark:border-zinc-700">
+            <img src="/images/logo.png" alt="Aqui Guaíra" className="w-full h-full object-contain" />
           </div>
-          <Button variant="outline" onClick={handleLogout} className="gap-2 w-full sm:w-auto">
-            <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+          <div className="flex flex-col">
+            <span className="font-bold text-zinc-900 dark:text-zinc-100 leading-none">Aqui Guaíra</span>
+            <span className="text-[10px] uppercase tracking-wider text-primary font-bold mt-1">Painel Empresa</span>
+          </div>
         </div>
 
-        {/* Status da Empresa */}
-        <Card className="border-2">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="space-y-1">
-                <CardTitle className="text-xl">{empresa.nome}</CardTitle>
-                <CardDescription className="flex items-center gap-2">
-                  <MapPin className="h-3 w-3" />
-                  {empresa.endereco}, {empresa.bairro}
-                </CardDescription>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {getStatusBadge(empresa.status)}
-                {empresa.verificado && <Badge variant="secondary">Verificado</Badge>}
-                {empresa.destaque && <Badge className="bg-yellow-500">Destaque</Badge>}
-              </div>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-2">
+          {navItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${activeTab === item.id
+                ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-[1.02]"
+                : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100"
+                }`}
+            >
+              <item.icon className={`w-5 h-5 ${activeTab === item.id ? "" : "group-hover:scale-110 transition-transform"}`} />
+              <span className="font-medium flex-1 text-left">{item.label}</span>
+              {item.badge && item.badge > 0 && (
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${activeTab === item.id ? "bg-white text-primary" : "bg-red-500 text-white animate-bounce"}`}>
+                  {item.badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs uppercase overflow-hidden">
+              {empresa.logo ? <img src={empresa.logo} className="w-full h-full object-cover" /> : empresa.nome[0]}
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Eye className="h-3 w-3" />
-                  Visualizações
-                </p>
-                <p className="text-2xl font-bold">{empresa.visualizacoes || 0}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Categoria</p>
-                <Badge variant="outline">{empresa.categoria_id || 'Não definida'}</Badge>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Cadastro</p>
-                <p className="text-sm">{new Date(empresa.created_at).toLocaleDateString('pt-BR')}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Atualização</p>
-                <p className="text-sm">{new Date(empresa.updated_at).toLocaleDateString('pt-BR')}</p>
-              </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">{empresa.nome}</p>
+              <p className="text-[10px] text-zinc-500 truncate uppercase tracking-tighter">{categoria || "Empresa"}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-3 rounded-xl"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Sair do Painel</span>
+          </Button>
+        </div>
+      </aside>
 
-        {/* Tabs de Gerenciamento */}
-        <Tabs defaultValue="info" className="space-y-6">
-          <TabsList className="grid w-full sm:w-auto grid-cols-2 sm:flex">
-            <TabsTrigger value="info">Informações</TabsTrigger>
-            <TabsTrigger value="imagens">Imagens</TabsTrigger>
-          </TabsList>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        <header className="h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-8 z-10">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              {navItems.find(i => i.id === activeTab)?.label}
+            </h2>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" className="rounded-xl gap-2 font-bold" onClick={() => window.open(`/perfil-de-empresa?id=${empresa.id}`, '_blank')}>
+              <ExternalLink className="w-4 h-4" />
+              Ver Perfil Público
+            </Button>
+          </div>
+        </header>
 
-          {/* Aba de Informações */}
-          <TabsContent value="info" className="space-y-6">
-            <Card className="border-2">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Dados da Empresa</CardTitle>
-                  {!editando ? (
-                    <Button variant="outline" size="sm" onClick={() => setEditando(true)} className="gap-2">
-                      <Edit className="h-4 w-4" />
-                      Editar
-                    </Button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => setEditando(false)} className="gap-2">
-                        <X className="h-4 w-4" />
-                        Cancelar
+        <ScrollArea className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+            {/* 1. DASHBOARD VIEW */}
+            {activeTab === "dashboard" && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <StatCard label="Visualizações" value={empresa.visualizacoes || 0} sub="Visitas no perfil" icon={Eye} color="bg-emerald-500" />
+                  <StatCard label="Meus Posts" value={posts.length} sub={`${posts.filter(p => p.status === 'aprovado').length} publicados`} icon={FileText} color="bg-blue-500" />
+                  <StatCard label="Status" value={empresa.status === 'aprovado' ? "Ativo" : "Pendente"} sub="Status da conta" icon={CheckCircle2} color="bg-amber-500" />
+                  <StatCard label="Destaque" value={empresa.destaque ? "Sim" : "Não"} sub="Exposição premium" icon={Star} color="bg-purple-500" />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Info Card */}
+                  <Card className="lg:col-span-2 shadow-sm border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden px-8 py-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h3 className="text-xl font-bold">Bem-vindo, {empresa.nome}!</h3>
+                        <p className="text-sm text-muted-foreground">Este é o seu novo painel de controle.</p>
+                      </div>
+                      <div className="p-3 bg-primary/10 rounded-2xl">
+                        <TrendingUp className="w-6 h-6 text-primary" />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-700">
+                        <p className="text-xs font-bold uppercase text-zinc-400 mb-2">Dica do Dia</p>
+                        <p className="text-sm">Mantenha suas fotos atualizadas para atrair mais clientes!</p>
+                      </div>
+                      <div className="p-6 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-700">
+                        <p className="text-xs font-bold uppercase text-zinc-400 mb-2">Novo no Mural</p>
+                        <p className="text-sm">Você pode publicar avisos e promoções direto no Mural da cidade.</p>
+                      </div>
+                    </div>
+                  </Card>
+
+                  {/* Sidebar stats/links */}
+                  <div className="space-y-6">
+                    <Card className="shadow-sm border-zinc-200 dark:border-zinc-800 rounded-3xl p-6">
+                      <h4 className="font-bold mb-4 flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-primary" />
+                        Atalhos Rápidos
+                      </h4>
+                      <div className="space-y-2">
+                        <Button variant="ghost" className="w-full justify-start rounded-xl text-sm" onClick={() => setActiveTab("perfil")}>Editar Informações</Button>
+                        <Button variant="ghost" className="w-full justify-start rounded-xl text-sm" onClick={() => setActiveTab("imagens")}>Trocar Fotos</Button>
+                        <Button variant="ghost" className="w-full justify-start rounded-xl text-sm font-bold text-primary" onClick={() => navigate('/mural')}>Publicar no Mural</Button>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. PERFIL VIEW (Unified Edit) */}
+            {activeTab === "perfil" && (
+              <div className="space-y-6">
+                <Card className="rounded-3xl shadow-sm border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                  <header className="p-6 border-b dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold">Dados Principais</h3>
+                      <p className="text-xs text-muted-foreground">Informações que aparecem na busca e perfil.</p>
+                    </div>
+                    {!editando ? (
+                      <Button onClick={() => setEditando(true)} className="rounded-xl gap-2 h-10">
+                        <Edit className="w-4 h-4" /> Editar
                       </Button>
-                      <Button variant="default" size="sm" onClick={handleSalvar} disabled={salvando} className="gap-2">
-                        {salvando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                        Salvar
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Nome */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Nome da Empresa</Label>
-                  {editando ? (
-                    <Input
-                      value={nome}
-                      onChange={(e) => setNome(e.target.value)}
-                      placeholder="Nome da empresa"
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{nome}</p>
-                  )}
-                </div>
-
-                {/* Descrição */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Descrição</Label>
-                  {editando ? (
-                    <Textarea
-                      value={descricao}
-                      onChange={(e) => setDescricao(e.target.value)}
-                      rows={5}
-                      className="resize-none"
-                    />
-                  ) : (
-                    <p className="text-sm text-muted-foreground leading-relaxed">{descricao}</p>
-                  )}
-                </div>
-
-                {/* Categoria */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Categoria</Label>
-                  {editando ? (
-                    <Select value={categoria} onValueChange={(v) => {
-                      setCategoria(v);
-                      setSubcategoriasSelecionadas([]);
-                    }}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma categoria" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[300px]">
-                        {categoriasData.categorias.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.nome}>
-                            {cat.icone} {cat.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{categoria || 'Não definida'}</p>
-                  )}
-                </div>
-
-                {/* Subcategorias */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium">Subcategorias (até 3)</Label>
-                  {editando && categoria ? (
-                    <div className="space-y-3">
-                      <div className="grid md:grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/30 max-h-[400px] overflow-y-auto">
-                        {categoriasData.categorias
-                          .find(c => c.nome === categoria)
-                          ?.subcategorias.map((sub) => {
-                            const isSelected = subcategoriasSelecionadas.includes(sub);
-                            const canAdd = subcategoriasSelecionadas.length < 3;
-
-                            return (
-                              <div
-                                key={sub}
-                                onClick={() => {
-                                  if (isSelected) {
-                                    setSubcategoriasSelecionadas(subcategoriasSelecionadas.filter(s => s !== sub));
-                                  } else if (canAdd) {
-                                    setSubcategoriasSelecionadas([...subcategoriasSelecionadas, sub]);
-                                  }
-                                }}
-                                className={`p-3 rounded-md border-2 cursor-pointer transition-all text-sm ${isSelected
-                                    ? 'border-primary bg-primary/10 text-primary font-medium'
-                                    : canAdd
-                                      ? 'border-border hover:border-primary/50 hover:bg-accent/50'
-                                      : 'border-border/50 opacity-50 cursor-not-allowed'
-                                  }`}
-                              >
-                                {sub}
-                                {isSelected && <span className="ml-2 text-primary">✓</span>}
-                              </div>
-                            );
-                          })}
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button variant="ghost" onClick={() => setEditando(false)} className="rounded-xl h-10">Cancelar</Button>
+                        <Button onClick={handleSalvar} disabled={salvando} className="rounded-xl h-10 gap-2">
+                          {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Salvar Alterações
+                        </Button>
                       </div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline">
-                          {subcategoriasSelecionadas.length} de 3 selecionadas
-                        </Badge>
-                        {subcategoriasSelecionadas.map(sub => (
-                          <Badge key={sub} variant="default" className="gap-1">
-                            {sub}
-                            <X
-                              className="h-3 w-3 cursor-pointer"
-                              onClick={() => setSubcategoriasSelecionadas(subcategoriasSelecionadas.filter(s => s !== sub))}
-                            />
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {subcategoriasSelecionadas.length > 0 ? (
-                        subcategoriasSelecionadas.map(sub => (
-                          <Badge key={sub} variant="secondary">{sub}</Badge>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Nenhuma subcategoria selecionada</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {/* Contatos */}
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-primary" />
-                      Telefone
-                    </label>
-                    {editando ? (
-                      <Input value={telefone} onChange={(e) => setTelefone(e.target.value)} />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{telefone || "Não informado"}</p>
                     )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-primary" />
-                      WhatsApp
-                    </label>
-                    {editando ? (
-                      <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{whatsapp || "Não informado"}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-primary" />
-                      Email
-                    </label>
-                    {editando ? (
-                      <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{email || "Não informado"}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-primary" />
-                      Site
-                    </label>
-                    {editando ? (
-                      <Input value={site} onChange={(e) => setSite(e.target.value)} placeholder="https://" />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{site || "Não informado"}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Redes Sociais */}
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Instagram</label>
-                    {editando ? (
-                      <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="@usuario" />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{instagram || "Não informado"}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Facebook</label>
-                    {editando ? (
-                      <Input value={facebook} onChange={(e) => setFacebook(e.target.value)} placeholder="@pagina" />
-                    ) : (
-                      <p className="text-sm text-muted-foreground">{facebook || "Não informado"}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Google Maps */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    Link Google Maps
-                  </label>
-                  {editando ? (
-                    <Input value={linkGoogleMaps} onChange={(e) => setLinkGoogleMaps(e.target.value)} placeholder="https://maps.google.com/..." />
-                  ) : (
-                    <p className="text-sm text-muted-foreground">{linkGoogleMaps || "Não informado"}</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Aba de Imagens */}
-          <TabsContent value="imagens" className="space-y-6">
-            {/* Logo */}
-            <Card className="border-2">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Logo da Empresa</CardTitle>
-                <CardDescription>Imagem que representa sua marca</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {empresa.logo ? (
-                  <div className="flex flex-col sm:flex-row items-center gap-6">
-                    <div className="relative group">
-                      <img
-                        src={empresa.logo}
-                        alt="Logo da empresa"
-                        className="w-32 h-32 object-cover rounded-lg border-2 border-primary/20"
-                      />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                        <Badge variant="secondary">Logo Atual</Badge>
-                      </div>
-                    </div>
-                    <div className="space-y-3 flex-1 text-center sm:text-left">
-                      <p className="text-sm text-muted-foreground">Logo configurada com sucesso</p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          console.log('📁 Input onChange:', e.target.files);
-                          if (e.target.files?.[0]) {
-                            handleUploadLogo(e.target.files[0]);
-                          }
-                        }}
-                        className="hidden"
-                        id="upload-logo"
-                      />
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => document.getElementById('upload-logo')?.click()}
-                      >
-                        Alterar Logo
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed rounded-lg p-8 text-center space-y-4 hover:border-primary/60 transition-colors">
-                    <Building2 className="h-12 w-12 text-primary mx-auto" />
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Adicionar logo</p>
-                      <p className="text-xs text-muted-foreground">JPG, PNG até 5MB (recomendado: 400x400px)</p>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        console.log('📁 Input onChange (sem logo):', e.target.files);
-                        if (e.target.files?.[0]) {
-                          handleUploadLogo(e.target.files[0]);
-                        }
-                      }}
-                      className="hidden"
-                      id="upload-logo"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => document.getElementById('upload-logo')?.click()}
-                    >
-                      Selecionar Logo
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Banner */}
-            <Card className="border-2">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg">Banner da Empresa</CardTitle>
-                <CardDescription>Imagem de destaque que aparece no topo do seu perfil</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {empresa.imagens && empresa.imagens.length > 0 ? (
-                  <>
-                    {/* Banner Atual */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm font-medium">Banner Atual</Label>
-                        <Badge variant="secondary">Ativo</Badge>
-                      </div>
-                      <div className="relative group rounded-xl overflow-hidden border-2 border-primary/20">
-                        <img
-                          src={empresa.imagens[0]}
-                          alt="Banner da empresa"
-                          className="w-full h-64 object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                            <span className="text-white text-sm font-medium">Banner de Destaque</span>
-                          </div>
+                  </header>
+                  <CardContent className="p-8 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-black uppercase text-zinc-400 tracking-widest pl-1">Nome Fantasia</Label>
+                          {editando ? <Input value={nome} onChange={e => setNome(e.target.value)} className="rounded-xl h-12" /> : <p className="text-lg font-bold p-1">{nome}</p>}
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-black uppercase text-zinc-400 tracking-widest pl-1">Categoria Principal</Label>
+                          {editando ? (
+                            <Select value={categoria} onValueChange={setCategoria}>
+                              <SelectTrigger className="rounded-xl h-12 text-foreground font-medium border-border">
+                                <SelectValue placeholder="Selecione a categoria" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-2xl shadow-2xl border-border/50">
+                                {categoriasData.categorias.map(cat => (
+                                  <SelectItem key={cat.id} value={cat.nome} className="rounded-lg">{cat.icone} {cat.nome}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : <p className="font-semibold p-1">{categoria || "Não definida"}</p>}
                         </div>
                       </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-black uppercase text-zinc-400 tracking-widest pl-1">Sobre o Negócio</Label>
+                        {editando ? <Textarea value={descricao} onChange={e => setDescricao(e.target.value)} className="rounded-xl min-h-[140px] resize-none" /> : <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed p-1">{descricao}</p>}
+                      </div>
                     </div>
 
-                    {/* Botão Trocar Banner */}
-                    <div className="border-2 border-dashed rounded-lg p-4 text-center space-y-3 hover:border-primary/60 hover:bg-accent/30 transition-all cursor-pointer"
-                      onClick={() => document.getElementById('upload-imagem')?.click()}
-                    >
-                      <Upload className="h-8 w-8 text-primary mx-auto" />
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Trocar Banner</p>
-                        <p className="text-xs text-muted-foreground">
-                          Clique para selecionar uma nova imagem
-                        </p>
+                    <div className="border-t dark:border-zinc-800 pt-8 space-y-6">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-zinc-400 uppercase text-[10px] tracking-widest pl-1">Subcategorias (Máximo 3)</h4>
+                        <Badge variant="outline" className="text-[10px] uppercase font-black tracking-tighter">
+                          {subcategoriasSelecionadas.length} de 3
+                        </Badge>
                       </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => e.target.files?.[0] && handleUploadImagem(e.target.files[0])}
-                        className="hidden"
-                        id="upload-imagem"
-                      />
+
+                      {editando ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {categoriasData.categorias
+                            .find(c => c.nome === categoria)
+                            ?.subcategorias.map(sub => {
+                              const isSelected = subcategoriasSelecionadas.includes(sub);
+                              return (
+                                <button
+                                  key={sub}
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      setSubcategoriasSelecionadas(subcategoriasSelecionadas.filter(s => s !== sub));
+                                    } else if (subcategoriasSelecionadas.length < 3) {
+                                      setSubcategoriasSelecionadas([...subcategoriasSelecionadas, sub]);
+                                    }
+                                  }}
+                                  className={`px-4 py-2.5 rounded-xl text-xs font-medium border-2 transition-all ${isSelected
+                                    ? "border-primary bg-primary/5 text-primary shadow-sm"
+                                    : "border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 text-muted-foreground"
+                                    }`}
+                                >
+                                  {sub}
+                                </button>
+                              );
+                            })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {subcategoriasSelecionadas.length > 0 ? (
+                            subcategoriasSelecionadas.map(sub => (
+                              <Badge key={sub} variant="secondary" className="rounded-lg px-3 py-1 text-[11px] font-bold">
+                                {sub}
+                              </Badge>
+                            ))
+                          ) : (
+                            <p className="text-sm text-zinc-500 italic pl-1">Nenhuma subcategoria selecionada.</p>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  </>
+
+                    <div className="border-t dark:border-zinc-800 pt-8">
+                      <h4 className="font-bold mb-6 text-zinc-400 uppercase text-[10px] tracking-widest pl-1">Contatos e Redes Sociais</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <ContactField icon={Phone} label="Telefone" value={telefone} editing={editando} onChange={setTelefone} />
+                        <ContactField icon={Phone} label="WhatsApp" value={whatsapp} editing={editando} onChange={setWhatsapp} isWa />
+                        <ContactField icon={Mail} label="E-mail" value={email} editing={editando} onChange={setEmail} />
+                        <ContactField icon={Instagram} label="Instagram" value={instagram} editing={editando} onChange={setInstagram} placeholder="@sua-empresa" />
+                        <ContactField icon={Facebook} label="Facebook" value={facebook} editing={editando} onChange={setFacebook} placeholder="facebook.com/empresa" />
+                        <ContactField icon={Globe} label="Site Oficial" value={site} editing={editando} onChange={setSite} placeholder="https://..." />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* 3. IMAGENS VIEW */}
+            {activeTab === "imagens" && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <Card className="rounded-[32px] overflow-hidden shadow-sm border-zinc-200 dark:border-zinc-800 flex flex-col">
+                  <header className="p-6 border-b dark:border-zinc-800 flex items-center justify-between">
+                    <h3 className="font-bold">Logo do Perfil</h3>
+                    <Button variant="ghost" size="sm" onClick={() => document.getElementById('upload-logo')?.click()}>Alterar</Button>
+                  </header>
+                  <CardContent className="flex-1 flex flex-col items-center justify-center p-12">
+                    <div className="w-48 h-48 rounded-[48px] bg-zinc-50 dark:bg-zinc-800 border-4 border-white dark:border-zinc-900 shadow-2xl overflow-hidden mb-6 flex items-center justify-center">
+                      {empresa.logo ? <img src={empresa.logo} className="w-full h-full object-cover" /> : <Building2 className="w-16 h-16 text-zinc-200" />}
+                    </div>
+                    <input type="file" id="upload-logo" className="hidden" accept="image/*" onChange={e => { if (e.target.files?.[0]) handleUploadLogo(e.target.files[0]) }} />
+                    <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest text-center">Recomendado: Quadrado 400x400px</p>
+                  </CardContent>
+                </Card>
+
+                <Card className="rounded-[32px] overflow-hidden shadow-sm border-zinc-200 dark:border-zinc-800 flex flex-col">
+                  <header className="p-6 border-b dark:border-zinc-800 flex items-center justify-between">
+                    <h3 className="font-bold">Banner de Destaque</h3>
+                    <Button variant="ghost" size="sm" onClick={() => document.getElementById('upload-banner')?.click()}>Alterar</Button>
+                  </header>
+                  <CardContent className="p-6 space-y-4">
+                    <div className="aspect-[3/1] rounded-2xl bg-zinc-50 dark:bg-zinc-800 border-2 overflow-hidden flex items-center justify-center group relative">
+                      {empresa.imagens?.[0] ? <img src={empresa.imagens[0]} className="w-full h-full object-cover" /> : <ImageIcon className="w-12 h-12 text-zinc-200" />}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="secondary" onClick={() => document.getElementById('upload-banner')?.click()}>Substituir Imagem</Button>
+                      </div>
+                    </div>
+                    <input type="file" id="upload-banner" className="hidden" accept="image/*" onChange={e => { if (e.target.files?.[0]) handleUploadImagem(e.target.files[0]) }} />
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest text-center">Aparece no topo do seu perfil público</p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* 4. MURAL VIEW */}
+            {activeTab === "mural" && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Meus Posts no Mural</h3>
+                    <p className="text-sm text-zinc-500">Avisos e comunicados que você publicou.</p>
+                  </div>
+                  <Button size="lg" className="rounded-xl gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => navigate('/mural')}>
+                    <Plus className="w-5 h-5" /> Novo Post
+                  </Button>
+                </div>
+
+                {loadingPosts ? (
+                  <div className="py-20 text-center"><Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" /></div>
+                ) : posts.length === 0 ? (
+                  <Card className="border-dashed py-20 text-center rounded-[32px]">
+                    <p className="text-zinc-500">Você ainda não publicou nada no mural.</p>
+                  </Card>
                 ) : (
-                  /* Sem Banner - Upload Inicial */
-                  <div className="border-2 border-dashed rounded-xl p-12 text-center space-y-4 hover:border-primary/60 hover:bg-accent/20 transition-all">
-                    <div className="space-y-3">
-                      <Upload className="h-16 w-16 text-primary mx-auto" />
-                      <div className="space-y-2">
-                        <p className="text-lg font-semibold">Adicione o banner da sua empresa</p>
-                        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                          Mostre seu estabelecimento! Esta imagem aparecerá como destaque no seu perfil.
-                        </p>
-                      </div>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => e.target.files?.[0] && handleUploadImagem(e.target.files[0])}
-                      className="hidden"
-                      id="upload-imagem"
-                    />
-                    <Button
-                      variant="default"
-                      size="lg"
-                      onClick={() => document.getElementById('upload-imagem')?.click()}
-                      className="gap-2"
-                    >
-                      <Upload className="h-5 w-5" />
-                      Adicionar Banner
-                    </Button>
-                    <p className="text-xs text-muted-foreground">JPG, PNG até 5MB (recomendado: 1200x400px)</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {posts.map(post => (
+                      <Card key={post.id} className="rounded-3xl overflow-hidden shadow-sm border-zinc-200 dark:border-zinc-800">
+                        <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-800 overflow-hidden">
+                          {post.imagens?.[0] ? <img src={post.imagens[0]} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-300"><FileText className="w-10 h-10" /></div>}
+                        </div>
+                        <div className="p-6">
+                          <div className="flex items-center justify-between mb-3">
+                            <Badge variant={post.status === 'aprovado' ? "default" : post.status === 'pendente' ? "secondary" : "destructive"}>
+                              {post.status.toUpperCase()}
+                            </Badge>
+                            <span className="text-[10px] font-bold text-zinc-400">{new Date(post.created_at).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-sm font-medium leading-relaxed line-clamp-3">{post.conteudo}</p>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </div>
+            )}
+
+          </div>
+        </ScrollArea>
       </main>
-      <Footer />
     </div>
   );
 };
+
+// --- HELPER COMPONENTS (Identical pattern to Admin for consistency) ---
+
+function StatCard({ label, value, sub, icon: Icon, color }: any) {
+  return (
+    <Card className="p-6 border-zinc-200 dark:border-zinc-800 shadow-sm rounded-3xl hover:-translate-y-1 transition-transform duration-300">
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 ${color} rounded-2xl flex items-center justify-center text-white shadow-lg shadow-${color.split('-')[1]}-500/20`}>
+          <Icon className="w-6 h-6" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-black uppercase text-zinc-400 tracking-widest pl-0.5 mb-1">{label}</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-black text-zinc-900 dark:text-zinc-100">{value}</span>
+            <span className="text-[10px] font-bold text-zinc-500 truncate">{sub}</span>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ContactField({ icon: Icon, label, value, editing, onChange, placeholder, isWa }: any) {
+  return (
+    <div className="space-y-1.5 p-4 bg-zinc-50/50 dark:bg-zinc-800/20 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+      <div className="flex items-center gap-2 mb-2 text-zinc-400">
+        <Icon className="w-3.5 h-3.5" />
+        <Label className="text-[10px] font-black uppercase tracking-widest">{label}</Label>
+      </div>
+      {editing ? (
+        <Input
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="h-10 rounded-xl bg-white dark:bg-zinc-900"
+        />
+      ) : (
+        <p className="text-sm font-bold truncate flex items-center gap-2">
+          {value || "Não informado"}
+          {isWa && value && <Badge className="bg-emerald-500 text-[8px] h-4">Zap</Badge>}
+        </p>
+      )}
+    </div>
+  )
+}
 
 export default Dashboard;

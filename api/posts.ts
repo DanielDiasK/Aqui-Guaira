@@ -21,7 +21,7 @@ export default async function handler(req: any, res: any) {
 
         // --- BUSCAR POSTS (GET) ---
         if (req.method === 'GET') {
-            const { action, postId, limite, admin } = req.query;
+            const { action, postId, limite, admin, empresaId } = req.query;
 
             if (action === 'comentarios') {
                 if (!postId) return res.status(400).json({ message: "postId é obrigatório" });
@@ -34,7 +34,10 @@ export default async function handler(req: any, res: any) {
 
             // Padrão: buscar posts
             let query: any = {};
-            if (admin !== 'true') {
+            if (empresaId) {
+                query.empresa_id = empresaId;
+            }
+            if (admin !== 'true' && !empresaId) {
                 query.status = 'aprovado';
             }
 
