@@ -98,15 +98,18 @@ interface Post {
   id: string;
   titulo: string;
   conteudo: string;
-  imagem?: string;
-  aprovado: boolean;
-  data_criacao: string;
+  imagens?: string[];
+  status: string; // 'pendente', 'aprovado', 'rejeitado'
+  created_at: string;
   data_aprovacao?: string;
   motivo_rejeicao?: string;
-  empresa_id: string;
-  user_id: string;
+  empresa_id?: string;
+  user_id?: string;
   bairro?: string;
   logradouro?: string;
+  autor_nome?: string;
+  autor_email?: string;
+  autor_bairro?: string;
   empresas?: { nome: string };
   users?: { nome: string; email: string };
 }
@@ -141,6 +144,7 @@ export default function Admin() {
   const [showBloqueioDialog, setShowBloqueioDialog] = useState(false);
   const [showRejeicaoDialog, setShowRejeicaoDialog] = useState(false);
   const [showDetalhesDialog, setShowDetalhesDialog] = useState(false);
+  const [showPostDetalhesDialog, setShowPostDetalhesDialog] = useState(false);
 
   // Filtros Empresas
   const [filtroNome, setFiltroNome] = useState("");
@@ -306,7 +310,14 @@ export default function Admin() {
     </div>
   );
 
-  const formatarData = (data: string) => new Date(data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const formatarData = (data: string) => {
+    if (!data) return "N/D";
+    try {
+      return new Date(data).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch (e) {
+      return "Data inválida";
+    }
+  };
 
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -549,45 +560,60 @@ export default function Admin() {
                 ) : posts.map((post) => (
                   <Card key={post.id} className="rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all border-zinc-200 dark:border-zinc-800 flex flex-col">
                     <div className="relative aspect-video bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-800">
-                      {post.imagem ? (
-                        <img src={post.imagem} className="w-full h-full object-cover" />
+                      {post.imagens && post.imagens.length > 0 ? (
+                        <img src={post.imagens[0]} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-zinc-300">
                           <FileText className="w-12 h-12" />
                         </div>
                       )}
                       <div className="absolute top-4 right-4">
-                        <PostStatusBadge aprovado={post.aprovado} pendente={!post.aprovado && !post.motivo_rejeicao} />
+                        <PostStatusBadge status={post.status} />
                       </div>
                     </div>
                     <CardHeader className="p-6">
-                      <CardTitle className="text-lg mb-1 leading-tight">{post.titulo}</CardTitle>
-                      <CardDescription className="text-xs font-bold uppercase tracking-widest text-primary">
-                        {post.empresas?.nome || 'Anônimo'} • {formatarData(post.data_criacao).split(',')[0]}
-                      </CardDescription>
+                      <div className="flex items-center justify-between mb-2">
+                        <CardDescription className="text-xs font-bold uppercase tracking-widest text-primary">
+                          {post.autor_nome || post.empresas?.nome || 'Anônimo'}
+                        </CardDescription>
+                        <span className="text-[10px] text-zinc-400 font-medium">{formatarData(post.created_at).split(',')[0]}</span>
+                      </div>
+                      <CardTitle className="text-lg mb-1 leading-tight line-clamp-1">{post.titulo}</CardTitle>
                     </CardHeader>
-                    <CardContent className="px-6 pb-6 flex-1">
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-3 leading-relaxed">{post.conteudo}</p>
+                    <CardContent className="px-6 pb-4 flex-1">
+                      <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">{post.conteudo}</p>
                     </CardContent>
-                    <div className="p-4 bg-zinc-50/80 dark:bg-zinc-800/80 border-t dark:border-zinc-800 flex gap-2">
-                      {!post.aprovado && !post.motivo_rejeicao && (
-                        <>
-                          <Button className="flex-1 bg-emerald-500 hover:bg-emerald-600 rounded-xl gap-2 h-10 shadow-lg shadow-emerald-500/20" onClick={async () => {
-                            const res = await fetch(`/api/posts?id=${post.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aprovado: true, data_aprovacao: new Date().toISOString(), admin_aprovador_id: adminData.id }) });
-                            if (res.ok) { toast.success("Post aprovado!"); await carregarDados(); }
-                          }}>
-                            <CheckCircle2 className="w-4 h-4" /> Aprovar
-                          </Button>
-                          <Button variant="outline" className="flex-1 border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl h-10" onClick={() => { setPostSelecionado(post); setShowRejeicaoDialog(true); }}>
-                            Rejeitar
-                          </Button>
-                        </>
-                      )}
-                      {(post.aprovado || post.motivo_rejeicao) && (
-                        <Button variant="ghost" className="w-full rounded-xl text-zinc-400 cursor-default">
-                          {post.aprovado ? "Post já publicado ✅" : "Post rejeitado ❌"}
+                    <div className="p-4 bg-zinc-50/80 dark:bg-zinc-800/80 border-t dark:border-zinc-800 space-y-2">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 rounded-xl h-9 gap-2 font-bold"
+                          onClick={() => { setPostSelecionado(post); setShowPostDetalhesDialog(true); }}
+                        >
+                          <Eye className="w-4 h-4" /> Detalhes
                         </Button>
-                      )}
+                      </div>
+                      <div className="flex gap-2">
+                        {post.status === 'pendente' && (
+                          <>
+                            <Button className="flex-1 bg-emerald-500 hover:bg-emerald-600 rounded-xl gap-2 h-10 shadow-lg shadow-emerald-500/20" onClick={async () => {
+                              const res = await fetch(`/api/posts?id=${post.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'aprovado', data_aprovacao: new Date().toISOString(), admin_aprovador_id: adminData.id }) });
+                              if (res.ok) { toast.success("Post aprovado!"); await carregarDados(); }
+                            }}>
+                              <CheckCircle2 className="w-4 h-4" /> Aprovar
+                            </Button>
+                            <Button variant="outline" className="flex-1 border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl h-10" onClick={() => { setPostSelecionado(post); setShowRejeicaoDialog(true); }}>
+                              Rejeitar
+                            </Button>
+                          </>
+                        )}
+                        {post.status !== 'pendente' && (
+                          <Button variant="ghost" className="w-full rounded-xl text-zinc-400 cursor-default h-10 text-xs font-bold bg-zinc-100 dark:bg-zinc-800/50">
+                            {post.status === 'aprovado' ? "Post já publicado ✅" : "Post rejeitado ❌"}
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 ))}
@@ -717,10 +743,87 @@ export default function Admin() {
           />
           <DialogFooter>
             <Button variant="destructive" onClick={async () => {
-              const res = await fetch(`/api/posts?id=${postSelecionado?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ aprovado: false, motivo_rejeicao: motivoRejeicao }) });
+              const res = await fetch(`/api/posts?id=${postSelecionado?.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'rejeitado', motivo_rejeicao: motivoRejeicao }) });
               if (res.ok) { toast.success("Post rejeitado"); setShowRejeicaoDialog(false); await carregarDados(); }
             }}>Rejeitar Post</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Post Detalhes Dialog */}
+      <Dialog open={showPostDetalhesDialog} onOpenChange={setShowPostDetalhesDialog}>
+        <DialogContent className="max-w-2xl rounded-[40px] p-0 overflow-hidden border-none shadow-2xl">
+          {postSelecionado && (
+            <div className="flex flex-col">
+              <div className="h-64 relative bg-zinc-100 dark:bg-zinc-900">
+                {postSelecionado.imagens && postSelecionado.imagens.length > 0 ? (
+                  <img src={postSelecionado.imagens[0]} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-300">
+                    <FileText className="w-20 h-20" />
+                  </div>
+                )}
+                <div className="absolute top-6 left-6">
+                  <PostStatusBadge status={postSelecionado.status} />
+                </div>
+              </div>
+
+              <div className="p-10 space-y-6">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary">
+                    <History className="w-3 h-3" />
+                    Enviado em {formatarData(postSelecionado.created_at)}
+                  </div>
+                  <h2 className="text-3xl font-black text-zinc-900 dark:text-zinc-100 leading-tight">
+                    {postSelecionado.titulo}
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                    <p className="text-[9px] font-black uppercase text-zinc-400 mb-1 tracking-widest">Autor</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{postSelecionado.autor_nome || postSelecionado.users?.nome || 'Não identificado'}</p>
+                    <p className="text-[10px] text-zinc-500">{postSelecionado.autor_email || postSelecionado.users?.email || 'Sem e-mail'}</p>
+                  </div>
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                    <p className="text-[9px] font-black uppercase text-zinc-400 mb-1 tracking-widest">Localização</p>
+                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{postSelecionado.bairro || 'Guaíra'}</p>
+                    <p className="text-[10px] text-zinc-500">{postSelecionado.logradouro || 'Endereço não informado'}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[9px] font-black uppercase text-zinc-400 tracking-widest pl-1">Conteúdo da Mensagem</p>
+                  <div className="p-6 bg-zinc-50 dark:bg-zinc-900 rounded-3xl border border-zinc-100 dark:border-zinc-800">
+                    <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300 whitespace-pre-wrap">
+                      {postSelecionado.conteudo}
+                    </p>
+                  </div>
+                </div>
+
+                {postSelecionado.motivo_rejeicao && (
+                  <div className="p-4 bg-rose-50 dark:bg-rose-950/20 rounded-2xl border border-rose-100 dark:border-rose-900/50">
+                    <p className="text-[9px] font-black uppercase text-rose-500 mb-1">Motivo da Rejeição</p>
+                    <p className="text-xs text-rose-700 dark:text-rose-400 font-medium">{postSelecionado.motivo_rejeicao}</p>
+                  </div>
+                )}
+
+                <div className="pt-4 flex gap-3">
+                  <Button variant="ghost" className="flex-1 rounded-2xl h-12 font-bold" onClick={() => setShowPostDetalhesDialog(false)}>
+                    Fechar
+                  </Button>
+                  {postSelecionado.status === 'pendente' && (
+                    <Button className="flex-1 rounded-2xl h-12 bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow-lg shadow-emerald-500/20" onClick={async () => {
+                      const res = await fetch(`/api/posts?id=${postSelecionado.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'aprovado', data_aprovacao: new Date().toISOString(), admin_aprovador_id: adminData.id }) });
+                      if (res.ok) { toast.success("Post aprovado!"); await carregarDados(); setShowPostDetalhesDialog(false); }
+                    }}>
+                      Aprovar Agora
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -933,9 +1036,9 @@ function StatusBadge({ status, ativa }: any) {
   return <Badge className="bg-emerald-500 border-none shadow-sm gap-1"><CheckCircle2 className="w-3 h-3" /> Ativa</Badge>;
 }
 
-function PostStatusBadge({ aprovado, pendente }: any) {
-  if (aprovado) return <Badge className="bg-emerald-500 border-none shadow-lg"><CheckCircle2 className="w-3 h-3 mr-1" /> Público</Badge>;
-  if (pendente) return <Badge className="bg-amber-500 border-none shadow-lg"><Clock className="w-3 h-3 mr-1" /> Moderando</Badge>;
+function PostStatusBadge({ status }: { status: string }) {
+  if (status === 'aprovado') return <Badge className="bg-emerald-500 border-none shadow-lg"><CheckCircle2 className="w-3 h-3 mr-1" /> Público</Badge>;
+  if (status === 'pendente') return <Badge className="bg-amber-500 border-none shadow-lg"><Clock className="w-3 h-3 mr-1" /> Moderando</Badge>;
   return <Badge variant="destructive" className="border-none shadow-lg"><XCircle className="w-3 h-3 mr-1" /> Recusado</Badge>;
 }
 
