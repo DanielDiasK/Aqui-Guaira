@@ -40,7 +40,10 @@ import {
   XCircle,
   Menu,
   Instagram,
-  Facebook
+  Facebook,
+  Briefcase,
+  Trash2,
+  Calendar
 } from "lucide-react";
 import {
   supabase,
@@ -48,8 +51,13 @@ import {
   buscarCategorias,
   buscarEmpresaPorId,
   atualizarEmpresa,
+  buscarVagas,
+  criarVaga,
+  atualizarVaga,
+  removerVaga,
   type Empresa,
-  type Post as PostType
+  type Post as PostType,
+  type Vaga
 } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -66,6 +74,9 @@ const Dashboard = () => {
   const [subcategoriasSelecionadas, setSubcategoriasSelecionadas] = useState<string[]>([]);
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loadingPosts, setLoadingPosts] = useState(false);
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [loadingVagas, setLoadingVagas] = useState(false);
+  const [vagaEmEdicao, setVagaEmEdicao] = useState<Partial<Vaga> | null>(null);
 
   // Dados editáveis
   const [nome, setNome] = useState("");
@@ -140,9 +151,11 @@ const Dashboard = () => {
       setFacebook(data.facebook || "");
       setLinkGoogleMaps(data.link_google_maps || "");
 
-      // Carregar posts e categorias
+      // Carregar posts, categorias e vagas
       carregarPosts(empresaId);
       carregarCategorias();
+      const jobList = await buscarVagas(empresaId);
+      setVagas(jobList);
     } catch (error) {
       console.error('Erro ao carregar empresa:', error);
       toast("Erro ao carregar dados", { description: "Tente novamente" });
@@ -276,6 +289,7 @@ const Dashboard = () => {
   const navItems = [
     { id: "dashboard", label: "Visão Geral", icon: LayoutDashboard },
     { id: "perfil", label: "Meu Perfil", icon: User },
+    { id: "vagas", label: "Vagas de Emprego", icon: Briefcase },
     { id: "imagens", label: "Logo e Banner", icon: ImageIcon },
     { id: "config", label: "Configurações", icon: Settings },
   ];
@@ -546,7 +560,168 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* 3. IMAGENS VIEW */}
+            {/* 3. VAGAS VIEW */}
+            {activeTab === "vagas" && (
+              <div className="space-y-6">
+                <header className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">Gerenciar Vagas</h3>
+                    <p className="text-sm text-muted-foreground">Publique oportunidades da sua empresa.</p>
+                  </div>
+                  {!vagaEmEdicao && (
+                    <Button onClick={() => setVagaEmEdicao({ titulo: '', descricao: '', quantidade: 1, tipo: 'CLT', status: 'aberta' })} className="rounded-xl gap-2 font-bold h-11 px-6 shadow-lg shadow-primary/20">
+                      <Plus className="w-5 h-5" /> Nova Vaga
+                    </Button>
+                  )}
+                </header>
+
+                {vagaEmEdicao ? (
+                  <Card className="rounded-[32px] overflow-hidden border-2 border-primary/20 shadow-xl animate-in zoom-in-95 duration-200">
+                    <header className="p-6 border-b dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex items-center justify-between">
+                      <h4 className="font-bold flex items-center gap-2">
+                        <Briefcase className="w-5 h-5 text-primary" />
+                        {vagaEmEdicao.id ? "Editar Vaga" : "Cadastrar Nova Vaga"}
+                      </h4>
+                      <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setVagaEmEdicao(null)}><X className="w-5 h-5" /></Button>
+                    </header>
+                    <CardContent className="p-8 space-y-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label>Título da Vaga</Label>
+                          <Input value={vagaEmEdicao.titulo} onChange={e => setVagaEmEdicao({ ...vagaEmEdicao, titulo: e.target.value })} placeholder="Ex: Vendedor, Auxiliar Admin..." className="rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Tipo de Contrato</Label>
+                          <Select value={vagaEmEdicao.tipo} onValueChange={(v: any) => setVagaEmEdicao({ ...vagaEmEdicao, tipo: v })}>
+                            <SelectTrigger className="rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              <SelectItem value="CLT">CLT (Efetivo)</SelectItem>
+                              <SelectItem value="PJ">PJ (Contrato)</SelectItem>
+                              <SelectItem value="Estágio">Estágio</SelectItem>
+                              <SelectItem value="Freelance">Freelance</SelectItem>
+                              <SelectItem value="Outro">Outro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label>Quantidade</Label>
+                          <Input type="number" min="1" value={vagaEmEdicao.quantidade} onChange={e => setVagaEmEdicao({ ...vagaEmEdicao, quantidade: parseInt(e.target.value) })} className="rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Salário (Opcional)</Label>
+                          <Input value={vagaEmEdicao.salario || ""} onChange={e => setVagaEmEdicao({ ...vagaEmEdicao, salario: e.target.value })} placeholder="Ex: R$ 2.500,00" className="rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Status</Label>
+                          <Select value={vagaEmEdicao.status} onValueChange={(v: any) => setVagaEmEdicao({ ...vagaEmEdicao, status: v })}>
+                            <SelectTrigger className="rounded-xl">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl">
+                              <SelectItem value="aberta">Aberta (Visível)</SelectItem>
+                              <SelectItem value="cerrada">Encerrada (Oculta)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Descrição da Vaga</Label>
+                        <Textarea value={vagaEmEdicao.descricao} onChange={e => setVagaEmEdicao({ ...vagaEmEdicao, descricao: e.target.value })} placeholder="Descreva as tarefas e responsabilidades..." className="rounded-xl min-h-[120px]" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Requisitos e Benefícios (Opcional)</Label>
+                        <Textarea value={vagaEmEdicao.requisitos || ""} onChange={e => setVagaEmEdicao({ ...vagaEmEdicao, requisitos: e.target.value })} placeholder="Experiência, cursos, VR, VT..." className="rounded-xl min-h-[100px]" />
+                      </div>
+
+                      <div className="pt-4 flex justify-end gap-3">
+                        <Button variant="ghost" onClick={() => setVagaEmEdicao(null)} className="rounded-xl">Cancelar</Button>
+                        <Button onClick={async () => {
+                          if (!vagaEmEdicao.titulo || !vagaEmEdicao.descricao) {
+                            toast.error("Preencha título e descrição");
+                            return;
+                          }
+                          setSalvando(true);
+                          try {
+                            if (vagaEmEdicao.id) {
+                              await atualizarVaga(vagaEmEdicao.id, vagaEmEdicao);
+                              toast.success("Vaga atualizada");
+                            } else {
+                              await criarVaga({ ...vagaEmEdicao, empresa_id: empresa.id });
+                              toast.success("Vaga publicada!");
+                            }
+                            const updated = await buscarVagas(empresa.id);
+                            setVagas(updated);
+                            setVagaEmEdicao(null);
+                          } catch (e) {
+                            toast.error("Erro ao salvar vaga");
+                          } finally { setSalvando(false); }
+                        }} disabled={salvando} className="rounded-xl gap-2 h-11 px-8">
+                          {salvando && <Loader2 className="w-4 h-4 animate-spin" />}
+                          Salvar Vaga
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {loadingVagas ? (
+                      <div className="py-20 text-center"><Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" /></div>
+                    ) : vagas.length === 0 ? (
+                      <Card className="border-dashed py-20 text-center rounded-[32px] bg-zinc-50/50 dark:bg-zinc-900/50">
+                        <Briefcase className="w-12 h-12 text-zinc-300 mx-auto mb-4" />
+                        <h4 className="font-bold text-zinc-500">Nenhuma vaga publicada</h4>
+                        <p className="text-sm text-zinc-400">Comece publicando sua primeira oportunidade.</p>
+                      </Card>
+                    ) : (
+                      vagas.map(vaga => (
+                        <Card key={vaga.id} className="rounded-3xl shadow-sm border-zinc-200 dark:border-zinc-800 p-6 hover:border-primary/30 transition-colors group">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-start gap-4">
+                              <div className="p-3 bg-zinc-100 dark:bg-zinc-800 rounded-2xl group-hover:bg-primary/10 transition-colors">
+                                <Briefcase className="w-6 h-6 text-zinc-500 group-hover:text-primary transition-colors" />
+                              </div>
+                              <div>
+                                <h4 className="font-black text-lg leading-tight mb-1">{vaga.titulo}</h4>
+                                <div className="flex flex-wrap gap-2 items-center text-xs font-bold text-zinc-500">
+                                  <Badge variant="outline" className="rounded-lg">{vaga.tipo}</Badge>
+                                  <span className="flex items-center gap-1"><User className="w-3 h-3" /> {vaga.quantidade} vaga{vaga.quantidade > 1 ? 's' : ''}</span>
+                                  {vaga.salario && <span className="flex items-center gap-1">💸 {vaga.salario}</span>}
+                                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(vaga.created_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {vaga.status === 'aberta' ? (
+                                <Badge className="bg-emerald-500">Aberta</Badge>
+                              ) : (
+                                <Badge variant="secondary">Encerrada</Badge>
+                              )}
+                              <Button variant="ghost" size="icon" onClick={() => setVagaEmEdicao(vaga)} className="rounded-xl hover:text-primary"><Edit className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={async () => {
+                                if (confirm("Deseja realmente excluir esta vaga?")) {
+                                  await removerVaga(vaga.id);
+                                  toast.success("Vaga removida");
+                                  setVagas(vagas.filter(v => v.id !== vaga.id));
+                                }
+                              }} className="rounded-xl hover:text-red-500"><Trash2 className="w-4 h-4" /></Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 4. IMAGENS VIEW */}
             {activeTab === "imagens" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <Card className="rounded-[32px] overflow-hidden shadow-sm border-zinc-200 dark:border-zinc-800 flex flex-col">
@@ -582,45 +757,11 @@ const Dashboard = () => {
               </div>
             )}
 
-            {/* 4. MURAL VIEW */}
-            {activeTab === "mural" && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">Meus Posts no Mural</h3>
-                    <p className="text-sm text-zinc-500">Avisos e comunicados que você publicou.</p>
-                  </div>
-                  <Button size="lg" className="rounded-xl gap-2 font-bold shadow-lg shadow-primary/20" onClick={() => navigate('/mural')}>
-                    <Plus className="w-5 h-5" /> Novo Post
-                  </Button>
-                </div>
-
-                {loadingPosts ? (
-                  <div className="py-20 text-center"><Loader2 className="w-10 h-10 animate-spin text-primary mx-auto" /></div>
-                ) : posts.length === 0 ? (
-                  <Card className="border-dashed py-20 text-center rounded-[32px]">
-                    <p className="text-zinc-500">Você ainda não publicou nada no mural.</p>
-                  </Card>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                    {posts.map(post => (
-                      <Card key={post.id} className="rounded-3xl overflow-hidden shadow-sm border-zinc-200 dark:border-zinc-800">
-                        <div className="aspect-video bg-zinc-100 dark:bg-zinc-800 border-b dark:border-zinc-800 overflow-hidden">
-                          {post.imagens?.[0] ? <img src={post.imagens[0]} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-zinc-300"><FileText className="w-10 h-10" /></div>}
-                        </div>
-                        <div className="p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <Badge variant={post.status === 'aprovado' ? "default" : post.status === 'pendente' ? "secondary" : "destructive"}>
-                              {post.status.toUpperCase()}
-                            </Badge>
-                            <span className="text-[10px] font-bold text-zinc-400">{new Date(post.created_at).toLocaleDateString()}</span>
-                          </div>
-                          <p className="text-sm font-medium leading-relaxed line-clamp-3">{post.conteudo}</p>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                )}
+            {/* 5. MURAL VIEW (Placeholder for now as user didn't ask to fix mural specifically, but it was there) */}
+            {activeTab === "config" && (
+              <div className="py-20 text-center">
+                <Settings className="w-16 h-16 text-zinc-200 mx-auto mb-4" />
+                <h3 className="text-xl font-bold italic text-zinc-400">Configurações em breve...</h3>
               </div>
             )}
 

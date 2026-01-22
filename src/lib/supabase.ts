@@ -146,6 +146,20 @@ export interface LocalTuristico {
   updated_at: string
 }
 
+export interface Vaga {
+  id: string;
+  empresa_id: string;
+  titulo: string;
+  descricao: string;
+  requisitos?: string;
+  quantidade: number;
+  salario?: string;
+  tipo: 'CLT' | 'PJ' | 'Estágio' | 'Freelance' | 'Outro';
+  status: 'aberta' | 'cerrada';
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Favorito {
   id: string
   tipo: 'empresa' | 'local' | 'post'
@@ -640,6 +654,64 @@ export async function buscarHistorico(limite = 20) {
   } catch (error) {
     console.error('Erro ao buscar histórico (MongoDB):', error);
     return [];
+  }
+}
+
+// ============================================
+// FUNÇÕES DE API - VAGAS
+// ============================================
+
+export async function buscarVagas(empresaId?: string) {
+  try {
+    const params = new URLSearchParams();
+    if (empresaId) params.append('empresa_id', empresaId);
+    const res = await fetch(`/api/vagas?${params.toString()}`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao buscar vagas:', error);
+    return [];
+  }
+}
+
+export async function criarVaga(vaga: Partial<Vaga>) {
+  try {
+    const res = await fetch('/api/vagas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(vaga)
+    });
+    if (!res.ok) throw new Error('Falha ao criar vaga');
+    return await res.json();
+  } catch (error) {
+    console.error('Erro ao criar vaga:', error);
+    return null;
+  }
+}
+
+export async function atualizarVaga(id: string, dados: Partial<Vaga>) {
+  try {
+    const res = await fetch(`/api/vagas?id=${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Erro ao atualizar vaga:', error);
+    return false;
+  }
+}
+
+export async function removerVaga(id: string) {
+  try {
+    const res = await fetch(`/api/vagas?id=${id}`, {
+      method: 'DELETE'
+    });
+    return res.ok;
+  } catch (error) {
+    console.error('Erro ao remover vaga:', error);
+    return false;
   }
 }
 

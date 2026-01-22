@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Building2, Phone, Mail, Globe, Clipboard, Check, Loader2, ArrowLeft, Home, Heart, Instagram, Facebook } from "lucide-react";
+import { MapPin, Building2, Phone, Mail, Globe, Clipboard, Check, Loader2, ArrowLeft, Home, Heart, Instagram, Facebook, Briefcase } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { LoginDialog } from "@/components/LoginDialog";
 import {
@@ -14,8 +14,12 @@ import {
     removerFavoritoUsuario,
     buscarFavoritosUsuario,
     incrementarVisualizacoesEmpresa,
+    buscarVagas,
+    buscarEmpresaPorSlug,
+    buscarEmpresaPorId,
     getUsuarioLogado,
-    type EmpresaCompleta
+    type EmpresaCompleta,
+    type Vaga
 } from "@/lib/supabase";
 
 const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -33,6 +37,7 @@ const haversineKm = (lat1: number, lon1: number, lat2: number, lon2: number) => 
 
 const PerfilEmpresa = () => {
     const navigate = useNavigate();
+    const { slug } = useParams();
     const [searchParams] = useSearchParams();
     const [loading, setLoading] = useState(true);
     const [empresa, setEmpresa] = useState<EmpresaCompleta | null>(null);
@@ -40,11 +45,12 @@ const PerfilEmpresa = () => {
     const [showLogin, setShowLogin] = useState(false);
     const [copiado, setCopiado] = useState<string | null>(null);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [vagas, setVagas] = useState<Vaga[]>([]);
 
     const empresaId = searchParams.get('id');
 
     useEffect(() => {
-        if (!empresaId) {
+        if (!empresaId && !slug) {
             navigate('/empresas');
             return;
         }
@@ -52,15 +58,25 @@ const PerfilEmpresa = () => {
         const carregarDados = async () => {
             setLoading(true);
             try {
-                const empresas = await buscarEmpresas();
-                const found = empresas.find(e => e.id === empresaId);
+                let found: EmpresaCompleta | null = null;
+
+                if (slug) {
+                    found = await buscarEmpresaPorSlug(slug);
+                } else if (empresaId) {
+                    found = await buscarEmpresaPorId(empresaId);
+                }
 
                 if (found) {
-                    setEmpresa(found as EmpresaCompleta);
-                    incrementarVisualizacoesEmpresa(empresaId);
+                    setEmpresa(found);
+                    incrementarVisualizacoesEmpresa(found.id);
 
-                    const favoritosData = await buscarFavoritosUsuario('empresa');
-                    setFavoritos(new Set(favoritosData.map(f => f.item_id)));
+                    const [favoritosData, vagasData] = await Promise.all([
+                        buscarFavoritosUsuario('empresa'),
+                        buscarVagas(found.id)
+                    ]);
+
+                    setFavoritos(new Set(favoritosData.map((f: any) => f.item_id)));
+                    setVagas(vagasData.filter((v: Vaga) => v.status === 'aberta'));
                 } else {
                     toast.error("Empresa não encontrada");
                     navigate('/empresas');
@@ -432,6 +448,46 @@ const PerfilEmpresa = () => {
                                         </div>
                                     </Card>
                                 </div>
+
+                                {/* Vagas de Emprego */}
+                                {vagas.length > 0 && (
+                                    <section className="space-y-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                                                <Briefcase className="w-6 h-6" />
+                                            </div>
+                                            <h2 className="text-3xl font-black tracking-tight">Oportunidades de Emprego</h2>
+                                        </div>
+                                        <div className="grid md:grid-cols-2 gap-6">
+                                            {vagas.map(vaga => (
+                                                <Card key={vaga.id} className="rounded-[2.5rem] border-2 border-border/50 p-8 hover:border-primary/30 transition-all hover:scale-[1.02]">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <Badge className="bg-primary/20 text-primary border-none mb-2">{vaga.tipo}</Badge>
+                                                            <h3 className="text-2xl font-black">{vaga.titulo}</h3>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-xs font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Vagas</p>
+                                                            <p className="text-2xl font-black text-primary">{vaga.quantidade}</p>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-muted-foreground font-medium mb-6 line-clamp-3">{vaga.descricao}</p>
+                                                    {vaga.salario && (
+                                                        <div className="p-4 bg-primary/5 rounded-2xl mb-6">
+                                                            <p className="text-xs font-bold uppercase text-primary/60 tracking-widest mb-1">Remuneração</p>
+                                                            <p className="text-xl font-black text-primary">{vaga.salario}</p>
+                                                        </div>
+                                                    )}
+                                                    <Button className="w-full rounded-2xl bg-primary hover:bg-primary/90 font-bold py-6 text-base" asChild>
+                                                        <a href={`https://wa.me/${empresa.whatsapp?.replace(/[^\d]/g, '')}?text=Olá! Vi a vaga de ${vaga.titulo} no Aqui Guaíra e gostaria de me candidatar.`} target="_blank" rel="noopener noreferrer">
+                                                            Candidatar-se via WhatsApp
+                                                        </a>
+                                                    </Button>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
 
                                 {/* Galeria de Fotos - Horizontal Grid */}
                                 {empresa.imagens && empresa.imagens.length > 1 && (
