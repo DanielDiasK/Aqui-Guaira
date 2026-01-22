@@ -129,7 +129,7 @@ const XFeed = () => {
         try {
             let imageUrls = [];
             if (composerImage) {
-                const url = await uploadImagem(composerImage, 'posts');
+                const url = await uploadImagem('posts-images', composerImage);
                 if (url) imageUrls.push(url);
             }
 
@@ -162,7 +162,7 @@ const XFeed = () => {
         try {
             let imageUrls = editingPost.imagens || [];
             if (editImageFile) {
-                const url = await uploadImagem(editImageFile, 'posts');
+                const url = await uploadImagem('posts-images', editImageFile);
                 if (url) imageUrls = [url]; // Substitui por enquanto ou poderia adicionar
             } else if (editImagePreview === null) {
                 imageUrls = []; // Removeu a imagem
@@ -313,7 +313,7 @@ const XFeed = () => {
                             </div>
                             <div className="flex-1 space-y-4">
                                 <textarea
-                                    className="w-full bg-transparent border-none text-xl focus:ring-0 placeholder:text-zinc-400 font-medium resize-none min-h-[100px] pt-1"
+                                    className="w-full bg-transparent border-none text-xl focus:outline-none focus:ring-0 placeholder:text-zinc-400 font-medium resize-none min-h-[100px] pt-1 transition-all"
                                     placeholder="O que está acontecendo no seu bairro?"
                                     value={postContent}
                                     onChange={(e) => setPostContent(e.target.value)}
@@ -459,7 +459,7 @@ const XFeed = () => {
                                                         onChange={(e) => setNovoComentario(prev => ({ ...prev, [post.id]: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleComment(post.id)}
                                                         placeholder="Sua resposta para a comunidade..."
-                                                        className="rounded-2xl h-11 bg-zinc-50 dark:bg-zinc-900 border-none px-5 text-sm font-medium"
+                                                        className="rounded-2xl h-11 bg-zinc-50 dark:bg-zinc-900 border-none px-5 text-sm font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/20 transition-all"
                                                     />
                                                     <Button onClick={() => handleComment(post.id)} size="icon" className="h-11 w-11 rounded-2xl shrink-0"><Send className="w-4 h-4" /></Button>
                                                 </div>
@@ -533,7 +533,7 @@ const XFeed = () => {
                     </div>
                     <div className="p-8 space-y-6">
                         <Textarea
-                            className="min-h-[150px] rounded-[2rem] border-2 border-zinc-100 dark:border-zinc-800 focus:border-primary p-6 text-lg font-medium resize-none shadow-inner bg-zinc-50 dark:bg-zinc-900"
+                            className="min-h-[150px] rounded-[2rem] border-2 border-zinc-100 dark:border-zinc-800 focus:border-primary focus:outline-none focus:ring-0 p-6 text-lg font-medium resize-none shadow-inner bg-zinc-50 dark:bg-zinc-900 transition-all"
                             value={editContent}
                             onChange={(e) => setEditContent(e.target.value)}
                         />
@@ -574,7 +574,7 @@ const XFeed = () => {
                         <DialogTitle className="text-xl font-black">Editar Resposta</DialogTitle>
                     </DialogHeader>
                     <Textarea
-                        className="min-h-[120px] rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 focus:border-primary p-4 font-medium resize-none mb-6"
+                        className="min-h-[120px] rounded-2xl border-2 border-zinc-100 dark:border-zinc-800 focus:border-primary focus:outline-none focus:ring-0 p-4 font-medium resize-none mb-6 transition-all"
                         value={editCommentContent}
                         onChange={(e) => setEditCommentContent(e.target.value)}
                     />
