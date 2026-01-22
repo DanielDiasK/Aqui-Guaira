@@ -60,7 +60,7 @@ const CategoriesSection = () => {
   }, []);
 
   const handleClickEmpresa = (empresaId: string) => {
-    navigate(`/empresas?id=${empresaId}`);
+    navigate(`/perfil-de-empresa?id=${empresaId}`);
   };
 
   return (

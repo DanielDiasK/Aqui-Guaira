@@ -95,11 +95,7 @@ const Empresas = () => {
     const searchTerm = searchParams.get('search');
 
     if (empresaId && empresas.length > 0) {
-      const empresa = empresas.find(e => e.id === empresaId);
-      if (empresa) {
-        setSelecionada(empresa);
-        incrementarVisualizacoesEmpresa(empresaId);
-      }
+      navigate(`/perfil-de-empresa?id=${empresaId}`, { replace: true });
     } else {
       // Se não tem ID na URL, limpar selecionada
       setSelecionada(null);
@@ -222,7 +218,7 @@ const Empresas = () => {
   }, [empresasFiltradas, page]);
 
   const abrirDetalhes = (emp: EmpresaCompleta) => {
-    navigate(`/empresas?id=${emp.id}`);
+    navigate(`/perfil-de-empresa?id=${emp.id}`);
   };
 
   const copiar = (texto?: string) => {
@@ -337,48 +333,95 @@ const Empresas = () => {
         ) : (
           <>
             {/* Filtros */}
-            <Card className="bg-card border border-border/50 shadow-xl rounded-[2.5rem] p-8">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="space-y-2">
+            {/* Categorias em Ícones - Estilo Moderno */}
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-black text-foreground tracking-tight">Categorias <span className="text-primary">Principais</span></h2>
+                  <p className="text-sm text-muted-foreground font-medium">Selecione uma categoria para filtrar o guia</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setCategoria("todas"); setBusca(""); setBairro("todos"); }}
+                  className="text-primary font-bold hover:bg-primary/5"
+                >
+                  Limpar Filtros
+                </Button>
+              </div>
+
+              <div className="flex overflow-x-auto no-scrollbar gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <button
+                  onClick={() => setCategoria("todas")}
+                  className={`flex-shrink-0 flex flex-col items-center gap-3 p-6 rounded-[2rem] transition-all duration-300 min-w-[120px] border-2 ${categoria === "todas" ? 'bg-primary border-primary shadow-xl scale-105' : 'bg-card border-border/50 hover:border-primary/30 hover:bg-primary/5'}`}
+                >
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${categoria === "todas" ? 'bg-white/20' : 'bg-primary/10'}`}>
+                    📍
+                  </div>
+                  <span className={`text-sm font-bold ${categoria === "todas" ? 'text-white' : 'text-foreground'}`}>Atividades</span>
+                </button>
+                {categorias.map(cat => {
+                  const catData = categoriasData.categorias.find(c => c.nome === cat);
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setCategoria(cat)}
+                      className={`flex-shrink-0 flex flex-col items-center gap-3 p-6 rounded-[2rem] transition-all duration-300 min-w-[120px] border-2 ${categoria === cat ? 'bg-primary border-primary shadow-xl scale-105' : 'bg-card border-border/50 hover:border-primary/30 hover:bg-primary/5'}`}
+                    >
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl ${categoria === cat ? 'bg-white/20' : 'bg-primary/10'}`}>
+                        {catData?.icone || "🏢"}
+                      </div>
+                      <span className={`text-sm font-bold ${categoria === cat ? 'text-white' : 'text-foreground'}`}>{cat}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Filtros Secundários e Busca */}
+            <Card className="bg-card border-none shadow-xl rounded-[2.5rem] p-8 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-3">
                   <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Busca Rápida</label>
                   <div className="relative group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-hover:text-primary transition-colors w-4 h-4" />
-                    <Input placeholder="Ex: Farmácia" value={busca} onChange={e => setBusca(e.target.value)} className="pl-10 py-5 rounded-xl border-border/50 focus:border-primary transition-all bg-muted/20 font-bold" />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-hover:text-primary transition-colors w-5 h-5" />
+                    <Input
+                      placeholder="Nome, serviço ou produto..."
+                      value={busca}
+                      onChange={e => setBusca(e.target.value)}
+                      className="pl-12 py-7 rounded-2xl border-border/50 focus:border-primary transition-all bg-muted/20 font-bold text-lg"
+                    />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Categoria</label>
-                  <Select value={categoria} onValueChange={setCategoria}>
-                    <SelectTrigger className="py-5 rounded-xl border-border/50 font-bold bg-muted/20"><SelectValue placeholder="Categoria" /></SelectTrigger>
-                    <SelectContent className="max-h-[400px] rounded-xl font-medium">
-                      <SelectItem value="todas">Todas as Categorias</SelectItem>
-                      {categorias.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
+
+                <div className="space-y-3">
                   <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1">Bairro</label>
                   <Select value={bairro} onValueChange={setBairro}>
-                    <SelectTrigger className="py-5 rounded-xl border-border/50 font-bold bg-muted/20"><SelectValue placeholder="Bairro" /></SelectTrigger>
-                    <SelectContent className="rounded-xl font-medium">
-                      <SelectItem value="todos">Todos os Bairros</SelectItem>
-                      {bairros.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+                    <SelectTrigger className="py-7 rounded-2xl border-border/50 font-bold bg-muted/20 text-lg"><SelectValue placeholder="Todos os Bairros" /></SelectTrigger>
+                    <SelectContent className="rounded-2xl border-border/50 shadow-2xl">
+                      <SelectItem value="todos" className="font-bold">Todos os Bairros</SelectItem>
+                      {bairros.map(b => <SelectItem key={b} value={b} className="font-medium">{b}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1 flex items-center gap-2">Distância {userLocation ? <Badge className="bg-primary/20 text-primary border-none">{maxDistance} km</Badge> : null}</label>
-                  <div className="space-y-3">
-                    <Slider value={[maxDistance]} min={1} max={50} step={1} onValueChange={(v) => setMaxDistance(v[0])} disabled={!userLocation} />
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={requestLocation} disabled={loadingLoc} className="gap-2 rounded-lg font-bold border-border/50">
-                        {loadingLoc ? <RefreshCcw className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
-                        {userLocation ? "Atualizar Local" : "Ativar GPS"}
-                      </Button>
-                      {locError && <span className="text-[10px] text-destructive font-bold">{locError}</span>}
-                    </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest pl-1 flex items-center gap-2">
+                    Raio de Distância {userLocation && <Badge className="bg-primary/20 text-primary border-none">{maxDistance} km</Badge>}
+                  </label>
+                  <div className="pt-2 space-y-4">
+                    <Slider value={[maxDistance]} min={1} max={50} step={1} onValueChange={(v) => setMaxDistance(v[0])} disabled={!userLocation} className="py-2" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={requestLocation}
+                      disabled={loadingLoc}
+                      className={`gap-3 w-full py-6 rounded-xl font-bold border-2 transition-all ${userLocation ? 'border-primary/20 text-primary' : 'border-border/50 hover:border-primary'}`}
+                    >
+                      {loadingLoc ? <RefreshCcw className="h-5 w-5 animate-spin" /> : <LocateFixed className="h-5 w-5" />}
+                      {userLocation ? "Localização Ativa" : "Ativar GPS para Distância"}
+                    </Button>
+                    {locError && <p className="text-[10px] text-destructive font-bold text-center">{locError}</p>}
                   </div>
                 </div>
               </div>

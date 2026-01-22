@@ -11,6 +11,7 @@ import Mural from "./pages/Mural";
 import MeusPosts from "./pages/MeusPosts";
 import Empresas from "./pages/Empresas";
 import MeusLocais from "./pages/MeusLocais";
+import PerfilEmpresa from "./pages/PerfilEmpresa";
 import SuaEmpresa from "./pages/SuaEmpresa";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/mural/meus-posts" element={<MeusPosts />} />
             <Route path="/empresas" element={<Empresas />} />
             <Route path="/meus-locais" element={<MeusLocais />} />
+            <Route path="/perfil-de-empresa" element={<PerfilEmpresa />} />
             <Route path="/sua-empresa" element={<SuaEmpresa />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<AdminLogin />} />

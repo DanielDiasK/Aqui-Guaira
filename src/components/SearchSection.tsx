@@ -108,7 +108,7 @@ const SearchSection = () => {
   const handleSelectEmpresa = (empresaId: string) => {
     setShowDropdown(false);
     setSearchTerm("");
-    navigate(`/empresas?id=${empresaId}`);
+    navigate(`/perfil-de-empresa?id=${empresaId}`);
   };
 
   const handleMeusFavoritos = () => {
@@ -146,7 +146,7 @@ const SearchSection = () => {
                 <div key={emp.id} className="relative group">
                   <button
                     type="button"
-                    onClick={() => navigate(`/empresas?id=${emp.id}`)}
+                    onClick={() => navigate(`/perfil-de-empresa?id=${emp.id}`)}
                     className="w-full text-left relative rounded-[2.5rem] overflow-hidden border border-border/50 bg-card shadow-sm hover:shadow-2xl transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary hover:-translate-y-2"
                   >
                     {/* Imagem de Capa */}
@@ -162,7 +162,7 @@ const SearchSection = () => {
                           <Building2 className="h-20 w-20 text-primary/20" />
                         </div>
                       )}
-                      
+
                       {/* Badge de Destaque Premium */}
                       <div className="absolute top-4 left-4 z-20">
                         <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none shadow-xl gap-1.5 px-4 py-1.5 text-[10px] font-black uppercase tracking-widest">
@@ -205,7 +205,7 @@ const SearchSection = () => {
                       <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 min-h-[40px]">
                         {emp.descricao}
                       </p>
-                      
+
                       <div className="flex items-center justify-between pt-4 border-t border-border/50">
                         <div className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                           <div className="p-1 bg-primary/5 rounded-md">

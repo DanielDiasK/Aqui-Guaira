@@ -79,7 +79,7 @@ const EmpresasDestaque = () => {
             <Card
               key={empresa.id}
               className="group hover:shadow-xl transition-all duration-300 cursor-pointer relative overflow-hidden border-2 hover:border-primary/50"
-              onClick={() => navigate(`/empresas?id=${empresa.id}`)}
+              onClick={() => navigate(`/perfil-de-empresa?id=${empresa.id}`)}
             >
               {/* Badge de Destaque */}
               <div className="absolute top-3 right-3 z-10">
