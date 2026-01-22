@@ -215,15 +215,6 @@ const XFeed = () => {
                         </div>
 
                         <NavItem icon={<Home className="w-7 h-7" />} label="Início" active />
-                        <NavItem icon={<Search className="w-7 h-7" />} label="Explorar" />
-                        <NavItem icon={<Bell className="w-7 h-7" />} label="Notificações" />
-                        <NavItem icon={<Mail className="w-7 h-7" />} label="Mensagens" />
-                        <NavItem icon={<Bookmark className="w-7 h-7" />} label="Salvos" />
-                        <NavItem icon={<User className="w-7 h-7" />} label="Perfil" />
-                        <NavItem icon={<MoreHorizontal className="w-7 h-7" />} label="Mais" />
-
-                        <Button className="w-full h-14 rounded-full font-black text-xl mt-4 hidden lg:block shadow-lg shadow-primary/20">Postar</Button>
-                        <Button className="w-fit p-3 rounded-full font-black text-lg mt-4 lg:hidden"><Plus className="w-6 h-6" /></Button>
                     </div>
 
                     <div className="mt-auto w-full lg:flex items-center gap-3 p-3 hover:bg-zinc-200/50 dark:hover:bg-zinc-900/50 rounded-full cursor-pointer transition-all">
@@ -240,10 +231,17 @@ const XFeed = () => {
                 {/* FEED CENTRAL */}
                 <main className="flex-1 max-w-[600px] border-r border-zinc-100 dark:border-zinc-800 h-screen overflow-y-auto no-scrollbar">
                     <div className="sticky top-0 z-20 bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-zinc-100 dark:border-zinc-800">
-                        <h1 className="p-4 text-xl font-black">Página Inicial</h1>
-                        <div className="flex w-full">
-                            <TabItem label="Para você" active={activeTab === "for-you"} onClick={() => setActiveTab("for-you")} />
-                            <TabItem label="Seguindo" active={activeTab === "following"} onClick={() => setActiveTab("following")} />
+                        <div className="flex items-center gap-4 p-4">
+                            <button onClick={() => navigate(-1)} className="md:hidden p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-full transition-colors">
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
+                            <h1 className="text-xl font-black">Voz da Cidade</h1>
+                        </div>
+                        <div className="px-5 pb-3">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                                <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-primary/70">Feed em Tempo Real</h2>
+                            </div>
                         </div>
                     </div>
 
@@ -261,12 +259,16 @@ const XFeed = () => {
                             />
                             <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800 pt-3">
                                 <div className="flex gap-1 text-primary">
-                                    <div className="p-2 hover:bg-primary/10 rounded-full cursor-pointer transition-colors"><ImageIcon className="w-5 h-5" /></div>
-                                    <div className="p-2 hover:bg-primary/10 rounded-full cursor-pointer transition-colors"><MapPin className="w-5 h-5" /></div>
-                                    <div className="p-2 hover:bg-primary/10 rounded-full cursor-pointer transition-colors"><Smile className="w-5 h-5" /></div>
+                                    <div className="p-2.5 hover:bg-primary/10 rounded-full cursor-pointer transition-all hover:scale-110 active:scale-95"><ImageIcon className="w-5 h-5" /></div>
+                                    <div className="p-2.5 hover:bg-primary/10 rounded-full cursor-pointer transition-all hover:scale-110 active:scale-95"><MapPin className="w-5 h-5" /></div>
+                                    <div className="p-2.5 hover:bg-primary/10 rounded-full cursor-pointer transition-all hover:scale-110 active:scale-95"><Smile className="w-5 h-5" /></div>
                                 </div>
-                                <Button disabled={!postContent.trim() || isPosting} onClick={handlePost} className="rounded-full px-6 font-black h-9">
-                                    {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Postar"}
+                                <Button
+                                    disabled={!postContent.trim() || isPosting}
+                                    onClick={handlePost}
+                                    className="rounded-full px-6 font-black h-10 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all active:scale-95"
+                                >
+                                    {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Publicar"}
                                 </Button>
                             </div>
                         </div>
@@ -302,16 +304,20 @@ const XFeed = () => {
                                                     </div>
                                                 )}
 
-                                                <div className="flex justify-between max-w-sm text-zinc-500 -ml-2">
-                                                    <ToolbarItem icon={<MessageCircle className="w-5 h-5" />} label={post.id} color="hover:text-primary" bg="hover:bg-primary/10" onClick={() => toggleComments(post.id)} />
-                                                    <ToolbarItem icon={<Repeat2 className="w-5 h-5" />} label="2" color="hover:text-green-500" bg="hover:bg-green-500/10" />
+                                                <div className="flex justify-start gap-16 text-zinc-500 mt-2">
                                                     <ToolbarItem
-                                                        icon={<Heart className={`w-5 h-5 ${userApoios[post.id] ? "fill-rose-500 text-rose-500" : ""}`} />}
+                                                        icon={<MessageCircle className="w-5 h-5" />}
+                                                        label={comentarios[post.id]?.length || 0}
+                                                        color="hover:text-primary"
+                                                        bg="hover:bg-primary/10"
+                                                        onClick={() => toggleComments(post.id)}
+                                                    />
+                                                    <ToolbarItem
+                                                        icon={<Heart className={`w-5 h-5 ${userApoios[post.id] ? "fill-rose-500 text-rose-500 shadow-rose-200" : ""}`} />}
                                                         label={post.curtidas || 0}
                                                         color="hover:text-rose-500" bg="hover:bg-rose-500/10"
                                                         onClick={() => handleApoiar(post.id, post.curtidas || 0)}
                                                     />
-                                                    <ToolbarItem icon={<Share className="w-5 h-5" />} label="" color="hover:text-primary" bg="hover:bg-primary/10" />
                                                 </div>
 
                                                 {/* COMENTÁRIOS EXPANSIVEIS */}
@@ -382,11 +388,10 @@ const XFeed = () => {
                         ))}
                     </div>
 
-                    <div className="bg-zinc-50 dark:bg-zinc-900 rounded-[2rem] p-4">
-                        <h2 className="text-xl font-black mb-4">Quem seguir</h2>
-                        <FollowItem name="Prefeitura de Guaíra" handle="guairaoficial" />
-                        <FollowItem name="Guaíra Online" handle="guaira_noticias" />
-                        <FollowItem name="Voz do Bairro" handle="vozbairro" />
+                    <div className="px-4 text-[13px] text-zinc-500 flex flex-wrap gap-x-3 gap-y-1">
+                        <span className="hover:underline cursor-pointer">Termos de Serviço</span>
+                        <span className="hover:underline cursor-pointer">Política de Privacidade</span>
+                        <span>© 2026 Voice Guaíra Inc.</span>
                     </div>
                 </aside>
 
@@ -422,17 +427,6 @@ const ToolbarItem = ({ icon, label, color, bg, onClick }: { icon: any, label: an
     <div onClick={(e) => { e.stopPropagation(); onClick?.(); }} className={`flex items-center gap-1 group cursor-pointer transition-all px-2 py-1 rounded-full ${bg}`}>
         <div className={`p-1.5 rounded-full transition-all ${color}`}>{icon}</div>
         <span className={`text-xs transition-all ${color}`}>{typeof label === 'string' && label.length > 10 ? 'Res.' : label}</span>
-    </div>
-);
-
-const FollowItem = ({ name, handle }: { name: string, handle: string }) => (
-    <div className="flex items-center gap-3 py-2">
-        <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 shrink-0" />
-        <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm truncate">{name}</p>
-            <p className="text-xs text-zinc-500 truncate">@{handle}</p>
-        </div>
-        <Button size="sm" className="rounded-full px-4 font-black h-8 bg-black dark:bg-white text-white dark:text-black">Seguir</Button>
     </div>
 );
 
