@@ -3,7 +3,7 @@ import {
   Image, Info, ChevronDown, User, LogOut, Shield,
   ClipboardList, Menu, X, Search, ShoppingBag,
   Map, PawPrint, Pill, Stethoscope, AlertTriangle, GraduationCap,
-  ChevronLeft, ChevronRight, Sun, Moon, Monitor, Laptop, Sparkles
+  ChevronLeft, ChevronRight, Sun, Moon, Monitor, Laptop, Sparkles, Briefcase
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
@@ -53,6 +53,7 @@ const Header = () => {
   const quickLinks = [
     { label: "Painel da Cidade", sub: "Acesse", icon: Building2, path: "/painel-cidade", textColor: "text-blue-600" },
     { label: "Serviços por Bairro", sub: "Veja", icon: Map, path: "/servicos-por-bairro", textColor: "text-purple-600" },
+    { label: "Vagas de Emprego", sub: "Confira", icon: Briefcase, path: "/vagas", textColor: "text-sky-600" },
     { label: "Achados e Perdidos", sub: "Consulte", icon: Search, path: "/achados-perdidos", textColor: "text-orange-600" },
     { label: "Pets e Adoção", sub: "Ajude", icon: PawPrint, path: "/pets-perdidos", textColor: "text-pink-600" },
     { label: "Farmácia Plantão", sub: "Veja", icon: Pill, path: "/farmacia-plantao", textColor: "text-red-600" },
@@ -169,13 +170,13 @@ const Header = () => {
   return (
     <header className="bg-background border-b border-border sticky top-0 z-[1000] shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
+        <div className="flex items-center justify-between py-4 gap-6">
           <div className="flex items-center gap-3">
             <div className="bg-primary rounded-lg p-2">
               <Building2 className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Aqui Guaíra</h1>
+              <h1 className="text-xl font-bold text-foreground whitespace-nowrap">Aqui Guaíra</h1>
               <p className="text-xs text-muted-foreground">Portal da Cidade</p>
             </div>
           </div>

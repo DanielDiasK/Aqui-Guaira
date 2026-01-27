@@ -25,6 +25,7 @@ import AchadosPerdidos from "./pages/AchadosPerdidos";
 import PetsPerdidos from "./pages/PetsPerdidos";
 import PainelCidade from "./pages/PainelCidade";
 import EscolasCreches from "./pages/EscolasCreches";
+import Vagas from "./pages/Vagas";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/pets-perdidos" element={<PetsPerdidos />} />
             <Route path="/painel-cidade" element={<PainelCidade />} />
             <Route path="/escolas-creches" element={<EscolasCreches />} />
+            <Route path="/vagas" element={<Vagas />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
